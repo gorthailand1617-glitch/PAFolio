@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PAFolio — ระบบบริหารจัดการและรายงานผลการพัฒนางานตามข้อตกลง (ว.PA) ระดับพรีเมียม รองรับทุกวิทยฐานะและเชื่อมต่อ Google Drive">
+  <title>PAFolio — Executive Portfolio & Evaluation System (ว.PA)</title>
+
+  <!-- Google Fonts: Prompt & Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- JSZip & FileSaver CDN for PA Folder Template Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Prompt', 'sans-serif'],
+            body: ['Sarabun', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+              950: '#042f2e',
+            },
+            accent: {
+              gold: '#f59e0b',
+              goldLight: '#fef3c7',
+              navy: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
+
+  <!-- ================= TOP UTILITY / SWITCHER BAR ================= -->
+  <div class="bg-slate-900 text-slate-300 py-1.5 px-4 text-xs border-b border-slate-800 no-print">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      
+      <div class="flex items-center gap-3">
+        <!-- Teacher Profile Switcher -->
+        <div id="teacher-switcher-container"></div>
+        <!-- Academic Year Switcher -->
+        <div id="year-switcher-container"></div>
+        
+        <!-- Profile Editor Trigger -->
+        <button onclick="openProfileEditorModal()" title="แก้ไขข้อมูลโปรไฟล์ครู รูปภาพ และประเด็นท้าทายหน้าบ้าน" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 transition shadow-sm">
+          <i class="fa-solid fa-user-pen text-teal-400"></i> แก้ไขข้อมูล
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Theme Switcher Button -->
+        <button onclick="openThemeModal()" title="เปลี่ยนธีมสีและสไตล์หน้าเว็บและสไลด์ (11 ธีมพรีเมียม)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/90 hover:bg-indigo-900 text-indigo-200 border border-indigo-500/40 transition shadow-sm">
+          <i class="fa-solid fa-palette text-indigo-400"></i> ธีม: <span class="current-theme-name-label font-bold">มรกต</span>
+        </button>
+
+        <!-- Folder Template Download Button -->
+        <button onclick="openFolderTemplateModal()" title="ดาวน์โหลดโครงสร้างโฟลเดอร์ ว.PA (.ZIP) สำหรับนำไปตั้งชื่อปีและอัปโหลดขึ้น Google Drive" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition shadow-sm">
+          <i class="fa-solid fa-folder-arrow-down text-amber-400"></i> เทมเพลตโฟลเดอร์
+        </button>
+
+        <!-- Quick Sync Button -->
+        <button onclick="DriveSync.syncAndApply(currentAcademicYear, true)" title="กดเพื่อดึงไฟล์ล่าสุดจาก Google Drive ทันที" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-teal-900/90 hover:bg-teal-800 text-teal-200 border border-teal-500/40 transition shadow-sm">
+          <i id="quick-sync-icon" class="fa-solid fa-arrows-rotate text-teal-400"></i> ซิงก์ไดรฟ์
+        </button>
+
+        <!-- Google Drive Sync Status Trigger -->
+        <button onclick="openDriveSyncModal()" id="drive-sync-badge" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i class="fa-brands fa-google-drive text-teal-400"></i> ตั้งค่าไดรฟ์
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MAIN NAVBAR ================= -->
+  <nav class="glass-nav sticky top-0 left-0 right-0 z-50 border-b border-slate-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
+        
+        <!-- Logo & Teacher Info -->
+        <a href="#hero" class="flex items-center gap-3.5 group">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-primary-800 via-primary-700 to-teal-500 flex items-center justify-center text-white font-heading font-bold text-xl shadow-md group-hover:scale-105 transition">
+            PA
+          </div>
+          <div>
+            <div class="font-heading font-bold text-slate-900 leading-tight group-hover:text-primary-700 transition teacher-name-label">
+              นายกรกฎ รัตนะโชติ
+            </div>
+            <div class="text-xs text-primary-700 font-medium flex items-center gap-1.5">
+              <span class="teacher-standing-label">ครูชำนาญการพิเศษ</span>
+              <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+              <span class="teacher-school-label">รร.เปรมติณสูลานนท์</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Desktop Menu Links -->
+        <div class="hidden lg:flex items-center gap-1 text-sm font-medium text-slate-600">
+          <a href="#profile" class="px-3 py-2 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">ข้อมูลทั่วไป</a>
+          <a href="#competency-overview" class="px-3 py-2 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">สมรรถนะ</a>
+          <a href="#pa-indicators" class="px-3 py-2 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">15 ตัวชี้วัด PA</a>
+          <a href="#challenge" class="px-3 py-2 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">ประเด็นท้าทาย</a>
+          <a href="#gallery" class="px-3 py-2 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">ภาพกิจกรรม</a>
+          <a href="#certificate-vault" class="px-3 py-2 rounded-lg hover:text-amber-700 hover:bg-amber-50/80 text-amber-800 font-semibold transition flex items-center gap-1">
+            <i class="fa-solid fa-award text-amber-500"></i> คลังเกียรติบัตร
+          </a>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="hidden sm:flex items-center gap-2">
+          <!-- AI Assistant Trigger -->
+          <button onclick="openAIAssistant()" 
+                  class="px-3 py-2 rounded-xl bg-gradient-to-r from-teal-600 via-indigo-600 to-amber-500 hover:opacity-95 text-white text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-md hover:scale-[1.02]">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> AI ว.PA
+          </button>
+
+          <!-- Presentation Mode -->
+          <button id="btn-presentation-mode" onclick="PresentationDeck.open()" 
+                  class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-teal-300 border border-slate-700 text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-tv text-teal-400"></i> โหมดนำเสนอ
+          </button>
+
+          <!-- Video Studio Trigger -->
+          <button id="btn-video-studio" onclick="VideoStudioUI.open()" 
+                  class="px-3 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 hover:opacity-95 text-white text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-md hover:scale-[1.02]" title="สร้างวิดีโอนำเสนอผลงาน ว.PA อัตโนมัติ 8-10 นาที (Full HD 1080p พร้อมเสียงพากย์)">
+            <i class="fa-solid fa-video text-amber-200"></i> สตูดิโอวิดีโอ
+          </button>
+          
+          <!-- Export Excel, Word, PPTX Dropdown Group -->
+          <div class="flex items-center gap-1">
+            <button onclick="ExportEngine.exportToExcel()" 
+                    class="px-2.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold font-heading transition flex items-center gap-1 shadow-sm" title="ส่งออกตารางสรุป 15 ตัวชี้วัดเป็นไฟล์ Excel (.xlsx)">
+              <i class="fa-solid fa-file-excel text-emerald-600"></i> Excel
+            </button>
+            <button onclick="ExportEngine.exportToWord()" 
+                    class="px-2.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-semibold font-heading transition flex items-center gap-1 shadow-sm" title="ส่งออกเล่มรายงานเป็นไฟล์ Word (.doc)">
+              <i class="fa-solid fa-file-word text-blue-600"></i> Word
+            </button>
+            <button onclick="PresentationDeck.downloadPPTX()" 
+                    class="px-2.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold font-heading transition flex items-center gap-1 shadow-sm" title="ดาวน์โหลดสไลด์นำเสนอเป็นไฟล์ Microsoft PowerPoint (.PPTX / .PPT)">
+              <i class="fa-solid fa-file-powerpoint text-amber-600"></i> PPTX
+            </button>
+          </div>
+
+          <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="current-year-label">ปี 2568</span>
+          </span>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="lg:hidden flex items-center gap-2">
+          <button onclick="openThemeModal()" class="p-2 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs">
+            <i class="fa-solid fa-palette"></i>
+          </button>
+          <button id="mobile-menu-btn" class="p-2.5 rounded-xl bg-slate-100 text-slate-700 hover:text-primary-700 focus:outline-none">
+            <i class="fa-solid fa-bars-staggered text-lg"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-white/95 border-b border-slate-200 px-4 pt-2 pb-6 space-y-2 text-sm font-medium">
+      <a href="#profile" class="block px-3 py-2.5 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-teal-700">ข้อมูลทั่วไป</a>
+      <a href="#competency-overview" class="block px-3 py-2.5 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-teal-700">ภาพรวมสมรรถนะ</a>
+      <a href="#pa-indicators" class="block px-3 py-2.5 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-teal-700">15 ตัวชี้วัด PA</a>
+      <a href="#challenge" class="block px-3 py-2.5 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-teal-700">ประเด็นท้าทาย</a>
+      <a href="#gallery" class="block px-3 py-2.5 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-teal-700">หลักฐานเชิงประจักษ์</a>
+      <a href="#certificate-vault" class="block px-3 py-2.5 rounded-lg hover:bg-amber-50 text-amber-800 font-semibold">คลังเกียรติบัตร</a>
+      <a href="#committee-scoring" class="block px-3 py-2.5 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-teal-700">เกณฑ์ประเมิน</a>
+      <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+        <button onclick="togglePresentationMode()" class="w-full py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2">
+          <i class="fa-solid fa-tv text-teal-600"></i> โหมดนำเสนอ
+        </button>
+        <button onclick="VideoStudioUI.open()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md">
+          <i class="fa-solid fa-video"></i> สตูดิโอสร้างวิดีโอ (8-10 นาที)
+        </button>
+        <button onclick="PresentationDeck.downloadPPTX()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 shadow-md">
+          <i class="fa-solid fa-file-powerpoint"></i> ดาวน์โหลดสไลด์ (.PPTX / .PPT)
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= HERO SECTION ================= -->
+  <header id="hero" class="relative min-h-[600px] pt-28 pb-24 flex items-center justify-center overflow-hidden">
+    <!-- Background Image -->
+    <img src="https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920" 
+         alt="หน้าปกพอร์ตโฟลิโอ" 
+         class="absolute inset-0 w-full h-full object-cover object-center scale-105 transform">
+    <!-- Overlay Gradient -->
+    <div class="absolute inset-0 hero-gradient"></div>
+
+    <div class="relative max-w-5xl mx-auto px-6 text-center text-white z-10">
+      
+      <!-- Official Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium mb-6 shadow-sm">
+        <i class="fa-solid fa-award text-amber-300"></i>
+        <span>รายงานผลการพัฒนางานตามข้อตกลงในการพัฒนางาน (Performance Agreement : PA)</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold font-heading tracking-tight drop-shadow-lg">
+        รายงานผลการพัฒนางาน <span class="text-teal-300 current-year-label">ปีการศึกษา 2568</span>
+      </h1>
+      
+      <!-- Sub-headline -->
+      <p class="mt-5 text-base sm:text-xl text-slate-200 max-w-3xl mx-auto font-light leading-relaxed">
+        การประเมินประสิทธิภาพและประสิทธิผลการปฏิบัติงานตามมาตรฐานตำแหน่งครู <span class="font-medium text-white teacher-standing-label">วิทยฐานะชำนาญการพิเศษ</span><br class="hidden sm:inline">
+        <span class="teacher-dept-label">กลุ่มสาระการเรียนรู้การงานอาชีพ</span> <span class="teacher-school-label">โรงเรียนเปรมติณสูลานนท์</span>
+      </p>
+
+      <!-- Quick Action Buttons -->
+      <div class="mt-8 flex flex-wrap justify-center gap-4 text-sm font-heading hero-quick-actions">
+        <a href="#pa-indicators" class="px-6 py-3.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold shadow-lg shadow-teal-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+          <i class="fa-solid fa-list-check"></i> ตรวจสอบ 15 ตัวชี้วัด PA
+        </a>
+        <a href="#challenge" class="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium backdrop-blur-md border border-white/25 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+          <i class="fa-solid fa-lightbulb text-amber-300"></i> ประเด็นท้าทาย
+        </a>
+        <a href="#competency-overview" class="px-6 py-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white font-medium backdrop-blur-md border border-white/15 transition flex items-center gap-2">
+          <i class="fa-solid fa-chart-radar text-teal-300"></i> แดชบอร์ดสมรรถนะ
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= STATS BAR ================= -->
+  <section class="relative -mt-10 z-20 max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-6 sm:p-7 rounded-3xl shadow-xl border border-slate-100">
+      
+      <div class="flex items-center gap-4 p-3 border-r border-slate-100 last:border-0">
+        <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-2xl font-bold font-heading shadow-sm">
+          15
+        </div>
+        <div>
+          <div class="text-xs text-slate-500 font-medium">ตัวชี้วัดหลัก</div>
+          <div class="text-sm sm:text-base font-bold text-slate-900 font-heading">ครบถ้วน 3 ด้าน</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 p-3 border-r border-slate-100 last:border-0">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-bold font-heading shadow-sm">
+          3
+        </div>
+        <div>
+          <div class="text-xs text-slate-500 font-medium">ด้านการประเมิน</div>
+          <div class="text-sm sm:text-base font-bold text-slate-900 font-heading">จัดการ/ส่งเสริม/พัฒนา</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 p-3 border-r border-slate-100 last:border-0">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center text-2xl font-bold font-heading shadow-sm">
+          1
+        </div>
+        <div>
+          <div class="text-xs text-slate-500 font-medium">ประเด็นท้าทาย</div>
+          <div class="text-sm sm:text-base font-bold text-slate-900 font-heading current-year-label">ปี 2568</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 p-3">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-2xl shadow-sm">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500 font-medium">ระดับการปฏิบัติที่คาดหวัง</div>
+          <div class="text-sm sm:text-base font-bold text-emerald-700 font-heading expected-level-badge">ริเริ่ม พัฒนา</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= SECTION 1: PROFILE & GENERAL INFO ================= -->
+  <section id="profile" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <span class="text-xs font-bold text-primary-700 uppercase tracking-widest bg-primary-50 px-3 py-1 rounded-full border border-primary-200">
+        Curriculum Vitae & Profile
+      </span>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 font-heading">
+        ข้อมูลทั่วไปและประวัติผู้จัดทำข้อตกลง
+      </h2>
+      <div class="w-16 h-1 bg-teal-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Profile Card -->
+      <div class="lg:col-span-4 bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-slate-100 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-teal-800 to-slate-900"></div>
+        <div class="relative mt-10">
+          <img src="https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w600" 
+               alt="ภาพโปรไฟล์" 
+               class="w-40 h-40 mx-auto rounded-3xl object-cover ring-4 ring-white shadow-2xl teacher-avatar-img">
+          <span class="absolute bottom-1 right-1/2 translate-x-16 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full ring-2 ring-white shadow-md teacher-standing-label">
+            ชำนาญการพิเศษ
+          </span>
+        </div>
+
+        <h3 class="mt-6 text-2xl font-bold text-slate-900 font-heading teacher-name-label">นายกรกฎ รัตนะโชติ</h3>
+        <p class="text-sm text-slate-500 font-medium">ตำแหน่ง ครู วิทยฐานะ <span class="teacher-standing-label">ครูชำนาญการพิเศษ</span></p>
+        <p class="text-sm font-semibold text-teal-700 mt-1 teacher-school-label">โรงเรียนเปรมติณสูลานนท์</p>
+        <p class="text-xs text-slate-400 teacher-dept-label">กลุ่มสาระการเรียนรู้การงานอาชีพ</p>
+
+        <!-- Role Badges -->
+        <div class="mt-6 pt-6 border-t border-slate-100 text-left space-y-2 text-sm" id="teacher-roles-list"></div>
+      </div>
+
+      <!-- Detail Columns -->
+      <div class="lg:col-span-8 space-y-6">
+        
+        <!-- Teaching Load -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-slate-100">
+          <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-lg shadow-sm">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold text-slate-900 font-heading">ภาระงานสอนตามตารางสอน (<span class="current-year-label">ปีการศึกษา 2568</span>)</h4>
+                <p class="text-xs text-slate-500">รวมภาระงานสอนและกิจกรรมส่งเสริมการเรียนรู้ตามเกณฑ์ ก.ค.ศ.</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold px-3 py-1.5 rounded-xl bg-teal-100 text-teal-800 font-heading" id="total-teaching-hours">
+              รวม 22 คาบ/สัปดาห์
+            </span>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="font-bold text-slate-900 text-sm mb-2 font-heading flex items-center gap-2">
+              <i class="fa-solid fa-book-bookmark text-teal-600"></i> รายวิชาและภาระงานที่ได้รับมอบหมาย
+            </div>
+            <ul class="text-xs sm:text-sm text-slate-600 space-y-2" id="teaching-load-list"></ul>
+          </div>
+        </div>
+
+        <!-- Vision / Philosophy -->
+        <div class="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 text-teal-300 text-xs font-semibold uppercase tracking-wider mb-2">
+              <i class="fa-solid fa-quote-left"></i> วิสัยทัศน์และการขับเคลื่อนการจัดการเรียนรู้
+            </div>
+            <h4 class="text-xl sm:text-2xl font-bold font-heading mb-3 text-teal-100">
+              "มุ่งเน้นการสอนคิด (Thinking School) บูรณาการ Active Learning สร้างผู้เรียนให้มีทักษะการนำตนเองในศตวรรษที่ 21"
+            </h4>
+            <p class="text-sm text-slate-300 leading-relaxed font-light">
+              การพัฒนางานตามข้อตกลง PA มุ่งเน้นการออกแบบและสร้างสรรค์นวัตกรรมการสอนเพื่อพัฒนาสมรรถนะผู้เรียนอย่างเป็นรูปธรรม โดยมีระดับการปฏิบัติที่คาดหวังคือ <span class="text-amber-300 font-medium expected-level-badge">ริเริ่ม พัฒนา</span> ช่วยให้ผู้เรียนเกิดกระบวนการคิดวิเคราะห์ ลงมือปฏิบัติ และสะท้อนคิดอย่างมีวิจารณญาณ
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 1.5: COMPETENCY RADAR OVERVIEW ================= -->
+  <section id="competency-overview" class="bg-slate-100/80 py-20 border-y border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-bold text-teal-700 uppercase tracking-widest bg-teal-100 px-3 py-1 rounded-full">
+          Executive Competency Radar
+        </span>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 font-heading">
+          ภาพรวมสมรรถนะและการปฏิบัติงานตามเกณฑ์ ว.PA
+        </h2>
+        <p class="mt-2 text-sm text-slate-600">
+          การเปรียบเทียบระดับการปฏิบัติงานจริงเทียบกับเกณฑ์มาตรฐานวิทยฐานะ <span class="teacher-standing-label font-semibold text-teal-800">ครูชำนาญการพิเศษ</span>
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Radar Chart Card -->
+        <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-slate-200/80">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-heading font-bold text-base sm:text-lg text-slate-900">
+              แผนภูมิเรดาร์สมรรถนะรายด้าน (Competency Radar Chart)
+            </h3>
+            <span class="text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-lg border border-emerald-200">
+              <span class="current-year-label">ปี 2568</span>
+            </span>
+          </div>
+          <div class="relative h-[360px] w-full">
+            <canvas id="competencyRadarChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Competency Highlights -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 hover-lift">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center font-bold text-sm">1</div>
+              <div class="font-heading font-bold text-slate-900 text-sm">ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)</div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              พัฒนาหลักสูตรรายวิชา จัดการเรียนรู้เชิงรุก และวัดผลตามสภาพจริงด้วยเกณฑ์รูบริกส์
+            </p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 hover-lift">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-sm">2</div>
+              <div class="font-heading font-bold text-slate-900 text-sm">ด้านการส่งเสริมและสนับสนุน (4 ตัวชี้วัด)</div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              จัดทำสารสนเทศดิจิทัล ขับเคลื่อนระบบดูแลช่วยเหลือนักเรียน และงานบริหารวิชาการ
+            </p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 hover-lift">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm">3</div>
+              <div class="font-heading font-bold text-slate-900 text-sm">ด้านการพัฒนาตนเองและวิชาชีพ (3 ตัวชี้วัด)</div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              อบรมพัฒนาตนเองด้าน AI และการสอนคิด ขับเคลื่อน PLC ถอดบทเรียนและสร้างนวัตกรรม
+            </p>
+          </div>
+
+          <div class="bg-gradient-to-r from-teal-800 to-slate-900 p-5 rounded-2xl text-white shadow-md">
+            <div class="flex items-center justify-between">
+              <div class="font-heading font-bold text-sm text-teal-200">
+                <i class="fa-solid fa-bullseye text-amber-300 mr-1.5"></i> ระดับการปฏิบัติที่คาดหวัง
+              </div>
+              <span class="text-xs font-bold bg-teal-500/30 text-teal-300 px-2.5 py-0.5 rounded expected-level-badge">ริเริ่ม พัฒนา</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-1">
+              วิทยฐานะ <span class="teacher-standing-label">ครูชำนาญการพิเศษ</span> สอดรับตามระเบียบ ก.ค.ศ.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2: 15 PA INDICATORS ================= -->
+  <section id="pa-indicators" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <span class="text-xs font-bold text-teal-700 uppercase tracking-widest bg-teal-100 px-3 py-1 rounded-full">
+        15 Performance Indicators
+      </span>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 font-heading">
+        ผลการปฏิบัติงานตามมาตรฐานตำแหน่ง 15 ตัวชี้วัด
+      </h2>
+      <p class="mt-2 text-sm text-slate-600">
+        แสดงผลตามรอบ <span class="current-year-label font-semibold text-teal-800">ปีการศึกษา 2568</span> (คลิกเพื่อดูรายละเอียดและหลักฐานใน Google Drive)
+      </p>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 filter-buttons-container">
+      
+      <!-- Domain Tabs -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="filterDomain('all', this)" data-domain="all" class="domain-btn active px-4 py-2.5 rounded-xl font-heading text-xs sm:text-sm font-semibold transition bg-teal-700 text-white shadow-md">
+          ทั้งหมด (15 ตัวชี้วัด)
+        </button>
+        <button onclick="filterDomain('domain-1', this)" data-domain="domain-1" class="domain-btn px-4 py-2.5 rounded-xl font-heading text-xs sm:text-sm font-medium transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          ด้านที่ 1: การจัดการเรียนรู้ (8)
+        </button>
+        <button onclick="filterDomain('domain-2', this)" data-domain="domain-2" class="domain-btn px-4 py-2.5 rounded-xl font-heading text-xs sm:text-sm font-medium transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          ด้านที่ 2: การส่งเสริม & สนับสนุน (4)
+        </button>
+        <button onclick="filterDomain('domain-3', this)" data-domain="domain-3" class="domain-btn px-4 py-2.5 rounded-xl font-heading text-xs sm:text-sm font-medium transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          ด้านที่ 3: การพัฒนาตนเอง (3)
+        </button>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="relative w-full md:w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="indicator-search" oninput="handleIndicatorSearch(event)" 
+               placeholder="ค้นหาตัวชี้วัด หรือคำสำคัญ..." 
+               class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 shadow-sm">
+      </div>
+
+    </div>
+
+    <!-- Dynamic Indicators Container -->
+    <div id="indicators-container"></div>
+
+  </section>
+
+  <!-- ================= SECTION 3: CHALLENGE ISSUE ================= -->
+  <section id="challenge" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
+      
+      <div class="relative z-10">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold uppercase">
+            <i class="fa-solid fa-fire text-amber-300"></i> ข้อตกลงในการพัฒนางานที่เป็นประเด็นท้าทาย (<span class="current-year-label">ปี 2568</span>)
+          </div>
+          <button onclick="PresentationDeck.open('res-problem')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-bold font-heading shadow-md hover:scale-105 transition">
+            <i class="fa-solid fa-tv"></i> สไลด์ประเด็นท้าทาย (วิจัย 5 บท)
+          </button>
+        </div>
+        
+        <h2 class="text-2xl sm:text-4xl font-bold font-heading mb-3 leading-tight" id="challenge-topic-text">
+          รูปแบบการจัดการเรียนรู้ PREM Model ร่วมกับ Thinking Whiteboard
+        </h2>
+        
+        <p class="text-sm sm:text-base text-slate-300 max-w-4xl leading-relaxed font-light" id="challenge-subject-text">
+          รายวิชาการงานอาชีพ (ง33101) โรงเรียนเปรมติณสูลานนท์
+        </p>
+
+        <!-- Steps Container -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10" id="challenge-steps-container"></div>
+
+        <!-- Before/After SDL Chart & Outcomes -->
+        <div class="mt-10 pt-10 border-t border-white/15 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- SDL Chart -->
+          <div class="lg:col-span-7 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-heading font-bold text-sm sm:text-base text-white">
+                การเปรียบเทียบผลลัพธ์พัฒนาการผู้เรียน (Pre vs Post Test)
+              </h4>
+              <span class="text-xs bg-teal-400/20 text-teal-300 px-2.5 py-1 rounded-lg border border-teal-400/30">
+                ผลสัมฤทธิ์
+              </span>
+            </div>
+            <div class="relative h-[260px] w-full">
+              <canvas id="sdlComparisonChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Targets & Outcomes -->
+          <div class="lg:col-span-5 space-y-4">
+            
+            <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg mt-0.5">
+                  <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-white font-heading text-sm">ผลลัพธ์เชิงปริมาณ (Quantitative)</div>
+                  <div class="text-xs text-teal-300 font-semibold mt-0.5" id="metric-quant-actual">บรรลุเป้าหมาย 89.4%</div>
+                  <p class="text-xs text-slate-300 mt-1 leading-relaxed" id="metric-quant-detail">
+                    ผู้เรียนผ่านการประเมินทักษะและการเรียนรู้เกินเกณฑ์ที่กำหนด
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg mt-0.5">
+                  <i class="fa-solid fa-star"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-white font-heading text-sm">ผลลัพธ์เชิงคุณภาพ (Qualitative)</div>
+                  <div class="text-xs text-amber-300 font-semibold mt-0.5" id="metric-qual-actual">ระดับดีเยี่ยม</div>
+                  <p class="text-xs text-slate-300 mt-1 leading-relaxed" id="metric-qual-detail">
+                    ผู้เรียนมีทักษะการทำงานเป็นทีม และมีความคิดสร้างสรรค์
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4: ACTIVITY & EVIDENCE GALLERY ================= -->
+  <section id="gallery" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <span class="text-xs font-bold text-primary-700 uppercase tracking-widest bg-primary-50 px-3 py-1 rounded-full border border-primary-200">
+        Evidence & Gallery
+      </span>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 font-heading">
+        ภาพกิจกรรมและร่องรอยหลักฐานเชิงประจักษ์
+      </h2>
+      <p class="mt-2 text-sm text-slate-600">
+        ร่องรอยหลักฐานการปฏิบัติงานจริงครอบคลุมทั้ง 3 ด้าน (คลิกที่ภาพเพื่อดูภาพขยายขนาดใหญ่)
+      </p>
+      <div class="w-16 h-1 bg-teal-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-container"></div>
+
+  </section>
+
+  <!-- ================= SECTION 5: E-CERTIFICATE & AWARDS VAULT ================= -->
+  <section id="certificate-vault" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/80">
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <span class="text-xs font-bold text-amber-700 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
+        e-Certificate & Awards Vault
+      </span>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 font-heading">
+        คลังเกียรติบัตร โล่รางวัล และผลงานยกย่องเชิดชูเกียรติ
+      </h2>
+      <p class="mt-2 text-sm text-slate-600">
+        หลักฐานการพัฒนาตนเองและวิชาชีพ รางวัลยอดเยี่ยมระดับชาติ ระดับภาค และระดับเขตพื้นที่ (คลิกดูภาพขยาย HD)
+      </p>
+      <div class="w-16 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+      <!-- Category Tabs -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="CertificateVault.setCategory('all', this)" class="cert-filter-btn active px-3.5 py-2 rounded-xl text-xs font-heading font-semibold bg-teal-600 text-white shadow-md transition">
+          ทั้งหมด (<span id="cert-count-badge">6 รายการ</span>)
+        </button>
+        <button onclick="CertificateVault.setCategory('national', this)" class="cert-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          🏆 ระดับชาติ / นานาชาติ
+        </button>
+        <button onclick="CertificateVault.setCategory('regional', this)" class="cert-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          🥇 ระดับภาค
+        </button>
+        <button onclick="CertificateVault.setCategory('district', this)" class="cert-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          ⭐ ระดับเขตพื้นที่
+        </button>
+        <button onclick="CertificateVault.setCategory('school', this)" class="cert-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          🎖️ ระดับสถานศึกษา
+        </button>
+      </div>
+
+      <!-- Live Search -->
+      <div class="relative w-full md:w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" oninput="CertificateVault.setSearch(this.value)" 
+               placeholder="ค้นหาชื่อรางวัล หน่วยงาน หรือปี..." 
+               class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm">
+      </div>
+    </div>
+
+    <!-- Certificate Cards Grid -->
+    <div id="certificate-vault-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- ================= SECTION 6: COMMITTEE SCORING SIMULATION ================= -->
+  <section id="committee-scoring" class="bg-slate-900 text-white py-20 border-t border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-bold text-teal-300 uppercase tracking-widest bg-teal-500/20 px-3 py-1 rounded-full border border-teal-500/30">
+          Evaluation Committee Suite
+        </span>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-heading text-white">
+          ระบบจำลองการประเมินและคำนวณคะแนน ว.PA
+        </h2>
+        <p class="mt-2 text-sm text-slate-300">
+          สำหรับคณะกรรมการประเมินผลการพัฒนางานตามข้อตกลงในการพัฒนางาน (ว9/2564)
+        </p>
+      </div>
+
+      <div class="bg-slate-800/80 backdrop-blur-md rounded-3xl p-6 sm:p-10 border border-slate-700 shadow-2xl">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          
+          <!-- Domain 1 -->
+          <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-heading font-bold text-sm text-teal-300">1. ด้านการจัดการเรียนรู้</span>
+              <span id="val-domain-1" class="font-heading font-bold text-sm text-white">38 / 40</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">น้ำหนักคะแนน 40 คะแนน (8 ตัวชี้วัด)</p>
+            <input type="range" id="score-domain-1" min="0" max="40" value="38" oninput="calculateCommitteeScore()" 
+                   class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+          </div>
+
+          <!-- Domain 2 -->
+          <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-heading font-bold text-sm text-indigo-300">2. ด้านการส่งเสริม & สนับสนุน</span>
+              <span id="val-domain-2" class="font-heading font-bold text-sm text-white">19 / 20</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">น้ำหนักคะแนน 20 คะแนน (4 ตัวชี้วัด)</p>
+            <input type="range" id="score-domain-2" min="0" max="20" value="19" oninput="calculateCommitteeScore()" 
+                   class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+          </div>
+
+          <!-- Domain 3 -->
+          <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-heading font-bold text-sm text-amber-300">3. ด้านการพัฒนาตนเอง & วิชาชีพ</span>
+              <span id="val-domain-3" class="font-heading font-bold text-sm text-white">20 / 20</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">น้ำหนักคะแนน 20 คะแนน (3 ตัวชี้วัด)</p>
+            <input type="range" id="score-domain-3" min="0" max="20" value="20" oninput="calculateCommitteeScore()" 
+                   class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+          </div>
+
+          <!-- Challenge Issue -->
+          <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-heading font-bold text-sm text-emerald-300">4. ข้อตกลงประเด็นท้าทาย</span>
+              <span id="val-domain-4" class="font-heading font-bold text-sm text-white">19 / 20</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">น้ำหนักคะแนน 20 คะแนน</p>
+            <input type="range" id="score-challenge" min="0" max="20" value="19" oninput="calculateCommitteeScore()" 
+                   class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+          </div>
+
+        </div>
+
+        <!-- Total Result Box -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-teal-950 via-slate-900 to-teal-950 border border-teal-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <div class="text-xs text-slate-400 font-medium">สรุปผลคะแนนรวมการประเมิน (Total Score)</div>
+            <div class="text-3xl sm:text-4xl font-bold font-heading text-white mt-1" id="total-score-val">
+              96 / 100
+            </div>
+            <div class="text-xs mt-2" id="evaluation-verdict">
+              <span class="text-emerald-400 font-bold">
+                <i class="fa-solid fa-circle-check mr-1.5"></i> ผ่านเกณฑ์การประเมิน
+              </span>
+            </div>
+          </div>
+
+          <div class="text-center md:text-right">
+            <button onclick="printExecutiveSummary()" 
+                    class="px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold font-heading text-sm shadow-lg shadow-teal-500/30 transition">
+              <i class="fa-solid fa-file-export mr-1.5"></i> ออกรายงานสรุปผลคะแนน
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-slate-950 text-slate-400 py-14 border-t border-slate-800 text-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+      <div>
+        <div class="font-heading font-bold text-white text-lg">PAFolio · <span class="teacher-name-label">นายกรกฎ รัตนะโชติ</span></div>
+        <div class="text-xs text-slate-400 mt-1">
+          <span class="teacher-standing-label">ครูชำนาญการพิเศษ</span> · <span class="teacher-school-label">โรงเรียนเปรมติณสูลานนท์</span>
+        </div>
+      </div>
+      <div class="text-xs text-slate-400 leading-relaxed text-center md:text-right">
+        เอกสารและระบบสารสนเทศประกอบการประเมินผลการพัฒนางานตามข้อตกลง (ว.PA)<br class="hidden sm:inline">
+        ตามหลักเกณฑ์และวิธีการ ว9/2564 สำนักงานคณะกรรมการข้าราชการครูและบุคลากรทางการศึกษา (ก.ค.ศ.)
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL: GOOGLE DRIVE SYNC SETTINGS ================= -->
+  <div id="drive-sync-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeDriveSyncModal()">
+    <div class="relative max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeDriveSyncModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-2xl shadow-sm">
+          <i class="fa-brands fa-google-drive"></i>
+        </div>
+        <div>
+          <h3 class="font-heading font-bold text-slate-900 text-lg sm:text-xl">ตั้งค่าเชื่อมต่อ Google Drive</h3>
+          <p class="text-xs text-slate-500" id="drive-sync-status-text">เชื่อมต่อไฟล์และโฟลเดอร์ผลงานแบบ Real-time</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-700 mb-6">
+        <div>
+          <label class="block font-heading font-semibold text-slate-900 mb-1">Google Drive Folder ID (โฟลเดอร์หลักของครู):</label>
+          <input type="text" id="drive-folder-id-input" placeholder="เช่น 1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv" 
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 font-mono text-xs">
+          <span class="text-[11px] text-slate-400">คัดลอกจาก URL ของโฟลเดอร์ใน Google Drive (ส่วนท้ายหลัง /folders/...)</span>
+        </div>
+
+        <div>
+          <label class="block font-heading font-semibold text-slate-900 mb-1">Google Apps Script Web App URL:</label>
+          <input type="text" id="apps-script-url-input" placeholder="https://script.google.com/macros/s/.../exec" 
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 font-mono text-xs">
+          <span class="text-[11px] text-slate-400">URL ที่ได้จากการ Deploy สคริปต์ Code.gs จากโฟลเดอร์ google-apps-script</span>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-100 text-xs text-teal-900 space-y-1.5">
+          <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-lightbulb text-amber-500"></i> โค้ด Google Apps Script สำเร็จรูป</div>
+          <div>มีไฟล์ <code class="bg-teal-200/60 px-1 py-0.5 rounded font-mono">google-apps-script/Code.gs</code> พร้อมใช้งานอยู่ในโปรเจคนี้ นำไป Deploy บน Google Script ได้ทันทีภายใน 1 นาที</div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-950">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-amber-200/70 text-amber-800 flex items-center justify-center text-base flex-shrink-0">
+              <i class="fa-solid fa-folder-tree"></i>
+            </div>
+            <div>
+              <div class="font-bold text-amber-900 font-heading">ยังไม่มีโครงสร้างโฟลเดอร์ ว.PA ใน Google Drive?</div>
+              <div class="text-[11px] text-amber-800/90">ดาวน์โหลดเทมเพลตโฟลเดอร์ 15 ตัวชี้วัด + วิจัย 5 บท (.ZIP) แล้วลากขึ้นไดรฟ์ได้ทันที</div>
+            </div>
+          </div>
+          <button onclick="closeDriveSyncModal(); openFolderTemplateModal()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition shadow-sm flex-shrink-0 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-download"></i> ดาวน์โหลด ZIP
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button onclick="closeDriveSyncModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold font-heading">
+          ยกเลิก
+        </button>
+        <button onclick="saveDriveSyncSettings()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading shadow-md">
+          <i class="fa-solid fa-cloud-arrow-up mr-1"></i> บันทึกและซิงก์ข้อมูล
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: FOLDER TEMPLATE DOWNLOAD & GENERATOR ================= -->
+  <div id="folder-template-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeFolderTemplateModal()">
+    <div class="relative max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeFolderTemplateModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center gap-3.5 mb-5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center text-2xl shadow-md">
+          <i class="fa-solid fa-folder-tree"></i>
+        </div>
+        <div>
+          <h3 class="font-heading font-bold text-slate-900 text-lg sm:text-xl flex items-center gap-2">
+            ดาวน์โหลดเทมเพลตโฟลเดอร์ ว.PA <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold font-sans">มาตรฐาน ว9/2564</span>
+          </h3>
+          <p class="text-xs text-slate-500">สร้างโครงสร้างโฟลเดอร์สำเร็จรูปพร้อมนำไปเปลี่ยนชื่อปี แล้วลากอัปโหลดขึ้น Google Drive</p>
+        </div>
+      </div>
+
+      <!-- Config Inputs -->
+      <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 mb-5 space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block font-heading font-semibold text-slate-900 text-xs mb-1">
+              <i class="fa-solid fa-user-tie text-teal-600 mr-1"></i> ชื่อคุณครู (สำหรับตั้งชื่อโฟลเดอร์หลัก):
+            </label>
+            <input type="text" id="template-teacher-name-input" value="นายกรกฎ รัตนะโชติ" 
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-amber-500 text-xs font-semibold text-slate-800">
+          </div>
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 text-xs mb-1">
+              <i class="fa-solid fa-calendar-check text-amber-600 mr-1"></i> ปีการศึกษา (พ.ศ.):
+            </label>
+            <input type="text" id="template-year-input" value="2568" 
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-amber-500 text-xs font-bold text-slate-800 text-center">
+          </div>
+        </div>
+      </div>
+
+      <!-- Folder Structure Overview -->
+      <div class="mb-5">
+        <h4 class="font-heading font-bold text-slate-800 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-sitemap text-teal-600"></i> โครงสร้างโฟลเดอร์ที่ระบบจะสร้างให้อัตโนมัติ:
+        </h4>
+        <div class="bg-slate-900 text-slate-200 p-4 rounded-2xl font-mono text-[11px] leading-relaxed overflow-x-auto border border-slate-800 space-y-1">
+          <div class="text-amber-400 font-bold">📁 PAFolio - แฟ้มสะสมงาน ว.PA (ชื่อคุณครู)/</div>
+          <div class="text-teal-300 pl-4">├── 🖼️ 00_Assets_ภาพประจำตัวและโลโก้/ (โปรไฟล์, โลโก้, ปก, เกียรติบัตร)</div>
+          <div class="text-amber-300 pl-4">└── 📁 PA68 ผลการประเมิน ว.PA ปีการศึกษา 2568/</div>
+          <div class="text-slate-300 pl-8">├── 📸 รูปถ่ายครูและภาพกิจกรรมประจำปี 2568/</div>
+          <div class="text-emerald-300 pl-8">├── 📁 ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด 1.1 - 1.8)/</div>
+          <div class="text-cyan-300 pl-8">├── 📁 ด้านที่ 2 ด้านการส่งเสริมและสนับสนุน (4 ตัวชี้วัด 2.1 - 2.4)/</div>
+          <div class="text-indigo-300 pl-8">├── 📁 ด้านที่ 3 ด้านการพัฒนาตนเองและวิชาชีพ (3 ตัวชี้วัด 3.1 - 3.3)/</div>
+          <div class="text-purple-300 pl-8">├── 🎯 ส่วนที่ 2 ข้อตกลงประเด็นท้าทาย (นวัตกรรมและวิจัย 5 บท)/</div>
+          <div class="text-rose-300 pl-8">└── 📋 เอกสารแบบประเมิน ว.PA และ SAR (PA 1-ส, PA 2-ส, PA 3-ส, SAR)/</div>
+        </div>
+      </div>
+
+      <!-- 3-Step Guide -->
+      <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 mb-6 text-xs text-teal-950 space-y-1.5">
+        <div class="font-bold font-heading flex items-center gap-1.5 text-teal-900">
+          <i class="fa-solid fa-circle-check text-teal-600"></i> วิธีการนำไปใช้งาน (3 ขั้นตอนง่ายๆ):
+        </div>
+        <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-1">
+          <li>กดปุ่ม <strong>"ดาวน์โหลดโครงสร้างโฟลเดอร์ (.ZIP)"</strong> ด้านล่าง แล้วทำการแตกไฟล์ (Extract) บนเครื่อง</li>
+          <li>เปิด <a href="https://drive.google.com" target="_blank" class="text-teal-700 underline font-semibold hover:text-teal-900">Google Drive</a> แล้วลากโฟลเดอร์หลักขึ้นไดรฟ์ จากนั้นตั้งค่าสิทธิ์โฟลเดอร์เป็น <em>"ทุกคนที่มีลิงก์มีสิทธิ์อ่าน"</em></li>
+          <li>คัดลอก Folder ID จาก URL ใน Google Drive แล้วนำมาใส่ในเมนู <strong>"ตั้งค่า Google Drive"</strong> บนเว็บ PAFolio</li>
+        </ol>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row justify-end gap-2.5">
+        <button onclick="closeFolderTemplateModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold font-heading transition order-2 sm:order-1">
+          ปิดหน้าต่าง
+        </button>
+        <button id="btn-download-template-zip" onclick="handleDownloadFolderTemplate()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold font-heading shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 order-1 sm:order-2">
+          <i class="fa-solid fa-file-zipper text-sm"></i> <span>ดาวน์โหลดโครงสร้างโฟลเดอร์ (.ZIP)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD NEW YEAR ================= -->
+  <div id="new-year-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeNewYearModal()">
+    <div class="relative max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeNewYearModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h3 class="font-heading font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-calendar-plus text-teal-600"></i> เพิ่มรอบปีการศึกษาใหม่
+      </h3>
+      <p class="text-xs text-slate-500 mb-5">ระบบจะสร้างรอบข้อตกลงใหม่โดยยังคงรักษาข้อมูลของปีเดิมไว้ครบถ้วน</p>
+
+      <div class="mb-6">
+        <label class="block font-heading font-semibold text-slate-800 text-xs mb-1">ระบุปีการศึกษา (พ.ศ.):</label>
+        <input type="text" id="new-year-input" placeholder="เช่น 2569" 
+               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-heading font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+      </div>
+
+      <div class="flex justify-end gap-2.5">
+        <button onclick="closeNewYearModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold">ยกเลิก</button>
+        <button onclick="handleCreateNewYear()" class="px-5 py-2 rounded-xl bg-teal-600 text-white text-xs font-semibold shadow-md font-heading">
+          + เริ่มต้นปีการศึกษานี้
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CLONE / NEW TEACHER PROFILE ================= -->
+  <div id="teacher-clone-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeTeacherCloneModal()">
+    <div class="relative max-w-lg w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeTeacherCloneModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h3 class="font-heading font-bold text-slate-900 text-lg sm:text-xl mb-1 flex items-center gap-2">
+        <i class="fa-solid fa-user-plus text-teal-600"></i> สร้างโปรไฟล์ครูท่านใหม่ (Template Mode)
+      </h3>
+      <p class="text-xs text-slate-500 mb-6">สำหรับเพื่อนครูนำระบบ PAFolio ไปปรับใช้เป็นพอร์ตโฟลิโอของตนเอง</p>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-700 mb-6">
+        <div>
+          <label class="block font-heading font-semibold text-slate-900 mb-1">ชื่อ-นามสกุล:</label>
+          <input type="text" id="new-teacher-name" placeholder="เช่น นายสมชาย ใจดี" 
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 mb-1">วิทยฐานะ:</label>
+            <select id="new-teacher-standing" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-teal-500 text-xs">
+              <option value="ครู (คศ.1)">ครู (คศ.1)</option>
+              <option value="ครูชำนาญการ">ครูชำนาญการ</option>
+              <option value="ครูชำนาญการพิเศษ" selected>ครูชำนาญการพิเศษ</option>
+              <option value="ครูเชี่ยวชาญ">ครูเชี่ยวชาญ</option>
+              <option value="ครูเชี่ยวชาญพิเศษ">ครูเชี่ยวชาญพิเศษ</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 mb-1">กลุ่มสาระการเรียนรู้:</label>
+            <input type="text" id="new-teacher-dept" placeholder="เช่น คณิตศาสตร์" 
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 text-xs">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-heading font-semibold text-slate-900 mb-1">โรงเรียน:</label>
+          <input type="text" id="new-teacher-school" value="โรงเรียนเปรมติณสูลานนท์" 
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500">
+        </div>
+
+        <div>
+          <label class="block font-heading font-semibold text-slate-900 mb-1">หัวข้อประเด็นท้าทาย:</label>
+          <input type="text" id="new-teacher-challenge" placeholder="เช่น การจัดการเรียนรู้เชิงรุก Active Learning" 
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button onclick="closeTeacherCloneModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold">ยกเลิก</button>
+        <button onclick="handleCreateNewTeacher()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold shadow-md font-heading">
+          + บันทึกและสลับโปรไฟล์
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: DETAILED INDICATOR ================= -->
+  <div id="indicator-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeIndicatorModal()">
+    <div class="relative max-w-3xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeIndicatorModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+        <div class="flex items-center gap-2">
+          <span id="modal-code" class="text-xs font-bold px-3 py-1 rounded-lg bg-teal-100 text-teal-800 font-heading">
+            ตัวชี้วัด 1.1
+          </span>
+          <span id="modal-level" class="text-xs font-semibold px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800">
+            ริเริ่ม พัฒนา
+          </span>
+        </div>
+        <button onclick="openAIAssistantForIndicator()" class="px-3 py-1 rounded-xl bg-gradient-to-r from-teal-600 via-indigo-600 to-amber-500 hover:opacity-90 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> ให้ AI ช่วยร่างเนื้อหา
+        </button>
+      </div>
+
+      <h3 id="modal-title" class="text-xl sm:text-2xl font-bold font-heading text-slate-900 mt-2 mb-4 leading-snug">
+        สร้างและหรือพัฒนาหลักสูตร
+      </h3>
+
+      <div class="space-y-5 text-sm text-slate-700">
+        <div>
+          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-700 mb-1">
+            รายละเอียดการปฏิบัติงาน
+          </h5>
+          <p id="modal-details" class="leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100"></p>
+        </div>
+
+        <div>
+          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-700 mb-1">
+            ผลลัพธ์ที่เกิดขึ้นกับผู้เรียน
+          </h5>
+          <p id="modal-results" class="leading-relaxed bg-emerald-50/70 text-emerald-950 p-4 rounded-2xl border border-emerald-100"></p>
+        </div>
+
+        <div>
+          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-700 mb-2">
+            เอกสารหลักฐานใน Google Drive
+          </h5>
+          <div id="modal-evidence-list" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: LIGHTBOX ================= -->
+  <div id="lightbox" class="fixed inset-0 z-[100] bg-black/92 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeLightbox()">
+    <div class="relative max-w-4xl w-full text-center modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white/80 hover:text-white text-base font-semibold p-2 flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-xmark text-xl"></i> ปิด
+      </button>
+      <div id="lightbox-title" class="text-white/90 text-sm font-semibold font-heading mb-2"></div>
+      <img id="lightbox-img" src="" alt="ภาพขยาย" class="max-h-[75vh] w-auto mx-auto rounded-2xl shadow-2xl border border-white/20">
+      <div id="lightbox-caption" class="mt-4 text-slate-200 text-xs sm:text-sm font-light leading-relaxed max-w-2xl mx-auto"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SIMULATED DOCUMENT VIEWER ================= -->
+  <div id="doc-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeDocViewer()">
+    <div class="relative max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 text-center modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeDocViewer()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="w-16 h-16 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-3xl mx-auto mb-4">
+        <i class="fa-solid fa-file-lines"></i>
+      </div>
+
+      <h3 id="doc-modal-title" class="font-heading font-bold text-slate-900 text-lg sm:text-xl mb-1"></h3>
+      <div id="doc-modal-type" class="text-xs text-slate-500 mb-6"></div>
+
+      <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-left text-xs text-slate-600 space-y-2 mb-6">
+        <div class="flex items-center gap-2 text-teal-700 font-semibold">
+          <i class="fa-solid fa-shield-check"></i> เอกสารผ่านการรับรองความถูกต้องตามระเบียบราชการ
+        </div>
+        <div>• <strong>ผู้รับผิดชอบ:</strong> <span id="doc-modal-teacher-name">นายกรกฎ รัตนะโชติ</span></div>
+        <div>• <strong>หน่วยงาน:</strong> <span id="doc-modal-school">โรงเรียนเปรมติณสูลานนท์</span></div>
+        <div>• <strong>สถานะ:</strong> บันทึกในแฟ้มสะสมผลงาน ว.PA ใน Google Drive</div>
+      </div>
+
+      <div class="flex justify-center gap-3">
+        <button onclick="alert('กำลังเปิดโฟลเดอร์เอกสารใน Google Drive...')" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading transition shadow-md">
+          <i class="fa-brands fa-google-drive mr-1.5"></i> เปิดดูไฟล์ใน Google Drive
+        </button>
+        <button onclick="closeDocViewer()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold font-heading transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: AI ASSISTANT FOR PA ================= -->
+  <div id="ai-assistant-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeAIAssistant()">
+    <div class="relative max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeAIAssistant()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-500 via-indigo-500 to-amber-400 text-white flex items-center justify-center text-2xl shadow-md">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h3 class="font-heading font-bold text-slate-900 text-lg sm:text-xl flex items-center gap-2">
+            AI ผู้ช่วยร่างข้อความ ว.PA <span class="text-[11px] px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-semibold font-sans">ว9/2564</span>
+          </h3>
+          <p class="text-xs text-slate-500">สร้างข้อความสะท้อนคิด ผลลัพธ์ผู้เรียน และโมเดลประเด็นท้าทายอัจฉริยะ</p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="flex gap-2 p-1.5 rounded-2xl bg-slate-100 mb-5 text-xs font-semibold font-heading">
+        <button id="ai-tab-indicator" onclick="switchAITab('indicator')" class="flex-1 py-2 rounded-xl bg-white text-teal-800 shadow-sm transition">
+          <i class="fa-solid fa-list-check mr-1"></i> ร่างเนื้อหา 15 ตัวชี้วัด
+        </button>
+        <button id="ai-tab-challenge" onclick="switchAITab('challenge')" class="flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition">
+          <i class="fa-solid fa-lightbulb mr-1"></i> ออกแบบประเด็นท้าทาย
+        </button>
+      </div>
+
+      <!-- Tab 1: Indicator Generator -->
+      <div id="ai-panel-indicator" class="space-y-4 text-xs sm:text-sm text-slate-700">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 mb-1">เลือกตัวชี้วัด:</label>
+            <select id="ai-indicator-select" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-medium">
+              <option value="1.1">1.1 สร้างและพัฒนาหลักสูตร</option>
+              <option value="1.2">1.2 ออกแบบการจัดการเรียนรู้</option>
+              <option value="1.3">1.3 จัดกิจกรรมการเรียนรู้</option>
+              <option value="1.4">1.4 สร้าง/พัฒนาสื่อ นวัตกรรม</option>
+              <option value="1.5">1.5 วัดและประเมินผลการเรียนรู้</option>
+              <option value="1.6">1.6 ศึกษา วิเคราะห์ สังเคราะห์ วิจัย</option>
+              <option value="1.7">1.7 จัดบรรยากาศที่ส่งเสริมผู้เรียน</option>
+              <option value="1.8">1.8 อบรมและพัฒนาคุณลักษณะที่ดี</option>
+              <option value="2.1">2.1 ข้อมูลสารสนเทศและ ปพ.5</option>
+              <option value="2.2">2.2 ระบบดูแลช่วยเหลือผู้เรียน</option>
+              <option value="2.3">2.3 ปฏิบัติงานวิชาการและอื่นๆ</option>
+              <option value="2.4">2.4 ประสานความร่วมมือเครือข่าย</option>
+              <option value="3.1">3.1 พัฒนาตนเองอย่างต่อเนื่อง</option>
+              <option value="3.2">3.2 มีส่วนร่วมและเป็นผู้นำ PLC</option>
+              <option value="3.3">3.3 นำความรู้มาพัฒนานวัตกรรม</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 mb-1">กลุ่มสาระการเรียนรู้:</label>
+            <select id="ai-subject-select" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-medium">
+              <option value="การงานอาชีพ">การงานอาชีพ</option>
+              <option value="วิทยาศาสตร์และเทคโนโลยี">วิทยาศาสตร์และเทคโนโลยี</option>
+              <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+              <option value="ภาษาไทย">ภาษาไทย</option>
+              <option value="ภาษาต่างประเทศ">ภาษาต่างประเทศ</option>
+              <option value="ศิลปะ">ศิลปะ</option>
+              <option value="สังคมศึกษา ศาสนาฯ">สังคมศึกษา ศาสนาฯ</option>
+              <option value="สุขศึกษาและพลศึกษา">สุขศึกษาและพลศึกษา</option>
+              <option value="กิจกรรมพัฒนาผู้เรียน">กิจกรรมพัฒนาผู้เรียน / แนะแนว</option>
+            </select>
+          </div>
+        </div>
+
+        <button onclick="handleAIGenerateIndicator()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 via-indigo-600 to-teal-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-sparkles"></i> ร่างข้อความตัวชี้วัดด้วย AI
+        </button>
+
+        <!-- AI Output Display -->
+        <div id="ai-indicator-output" class="hidden space-y-3 pt-2">
+          <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 space-y-1.5">
+            <div class="font-bold text-teal-900 flex justify-between items-center text-xs">
+              <span><i class="fa-solid fa-pen-nib text-teal-600 mr-1"></i> รายละเอียดการปฏิบัติงาน (สอดคล้องตามวิทยฐานะ):</span>
+              <button onclick="copyToClipboard('ai-out-work')" class="text-[11px] text-teal-700 hover:text-teal-900 font-semibold"><i class="fa-regular fa-copy"></i> คัดลอก</button>
+            </div>
+            <p id="ai-out-work" class="text-xs leading-relaxed text-slate-800 bg-white p-3 rounded-xl border border-teal-100"></p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5">
+            <div class="font-bold text-emerald-900 flex justify-between items-center text-xs">
+              <span><i class="fa-solid fa-award text-emerald-600 mr-1"></i> ผลลัพธ์ที่เกิดขึ้นกับผู้เรียน:</span>
+              <button onclick="copyToClipboard('ai-out-outcome')" class="text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold"><i class="fa-regular fa-copy"></i> คัดลอก</button>
+            </div>
+            <p id="ai-out-outcome" class="text-xs leading-relaxed text-slate-800 bg-white p-3 rounded-xl border border-emerald-100 whitespace-pre-line"></p>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button onclick="applyAIToIndicatorModal()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading shadow-md transition">
+              <i class="fa-solid fa-check-double mr-1"></i> นำไปใช้ในหน้าต่างตัวชี้วัดทันที
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Challenge Model Designer -->
+      <div id="ai-panel-challenge" class="hidden space-y-4 text-xs sm:text-sm text-slate-700">
+        <div>
+          <label class="block font-heading font-semibold text-slate-900 mb-1">ประเด็นปัญหาหรือทักษะที่ต้องการพัฒนาผู้เรียน:</label>
+          <input type="text" id="ai-challenge-topic-input" placeholder="เช่น ทักษะการคิดวิเคราะห์, ทักษะงานประดิษฐ์, การคิดเชิงคำนวณ" 
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-medium">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 mb-1">รูปแบบการจัดการเรียนรู้ (Model):</label>
+            <select id="ai-challenge-model-type" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-medium">
+              <option value="PREM">PREM Model + Thinking Whiteboard</option>
+              <option value="STEM">STEM Education (5E Model)</option>
+              <option value="PBL">Project-Based Learning (PBL)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-heading font-semibold text-slate-900 mb-1">ระดับชั้น:</label>
+            <input type="text" id="ai-challenge-grade-input" value="มัธยมศึกษาปีที่ 6" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs font-medium">
+          </div>
+        </div>
+
+        <button onclick="handleAIGenerateChallenge()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-teal-600 to-indigo-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> ออกแบบโมเดลประเด็นท้าทายด้วย AI
+        </button>
+
+        <div id="ai-challenge-output" class="hidden space-y-3 pt-2">
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2">
+            <div class="font-bold text-indigo-900">หัวข้อประเด็นท้าทายที่สร้างสรรค์:</div>
+            <div id="ai-out-challenge-title" class="font-semibold text-slate-900 bg-white p-3 rounded-xl border border-indigo-100"></div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button onclick="applyAIToChallengeSection()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold font-heading shadow-md transition">
+              <i class="fa-solid fa-circle-arrow-down mr-1"></i> นำไปบันทึกในหน้าเว็บทันที
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: FULLSCREEN PRESENTATION DECK ================= -->
+  <div id="presentation-deck-modal" class="fixed inset-0 z-[100] bg-slate-950 hidden flex-col justify-between p-4 sm:p-8 backdrop-blur-2xl">
+    <!-- Top Bar: Counter & Exit -->
+    <div class="flex items-center justify-between text-white border-b border-white/10 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-teal-500 text-slate-950 font-bold flex items-center justify-center text-sm shadow-md">PA</div>
+        <span id="pres-slide-counter" class="text-xs sm:text-sm font-semibold font-heading text-teal-300">1 / 8</span>
+      </div>
+      
+      <!-- Progress Bar Container -->
+      <div class="hidden md:block flex-1 max-w-md mx-6 bg-white/10 h-2 rounded-full overflow-hidden">
+        <div id="pres-progress-bar" class="h-full bg-gradient-to-r from-teal-400 to-amber-400 w-[12.5%] transition-all duration-300"></div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Slide Theme Switcher -->
+        <button onclick="openThemeModal()" class="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-400/40 text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" title="เปลี่ยนธีมและชุดสีสไลด์นำเสนอ (11 ธีมพรีเมียม)">
+          <i class="fa-solid fa-palette text-indigo-400"></i> <span class="hidden sm:inline">ธีมสไลด์: </span><span class="current-theme-name-label">มรกต</span>
+        </button>
+        <!-- Download PowerPoint (.PPTX / .PPT) -->
+        <button id="pres-btn-download-pptx" onclick="PresentationDeck.downloadPPTX()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold font-heading transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20" title="ดาวน์โหลดเป็นไฟล์ Microsoft PowerPoint (.PPTX / .PPT) ครบทั้ง 26 สไลด์พร้อมรูปภาพ">
+          <i class="fa-solid fa-file-powerpoint text-sm"></i> <span>ดาวน์โหลดไฟล์ .PPTX / .PPT</span>
+        </button>
+        <button onclick="PresentationDeck.close()" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-xmark text-sm"></i> ปิด (ESC)
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Canvas Stage -->
+    <div id="pres-slide-stage" class="flex-1 overflow-y-auto flex items-center justify-center my-4">
+      <!-- Slides will render here dynamically -->
+    </div>
+
+    <!-- Bottom Navigation Controls -->
+    <div class="flex items-center justify-between border-t border-white/10 pt-4 text-white">
+      <button id="pres-btn-prev" onclick="PresentationDeck.prevSlide()" class="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:pointer-events-none text-xs sm:text-sm font-semibold font-heading transition flex items-center gap-2">
+        <i class="fa-solid fa-chevron-left"></i> ย้อนกลับ
+      </button>
+      
+      <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
+        <span><i class="fa-solid fa-computer-mouse text-teal-400 mr-1"></i> สกอร์เมาส์ (Scroll Wheel), <kbd class="px-2 py-0.5 bg-white/10 rounded font-mono text-[10px]">←</kbd> <kbd class="px-2 py-0.5 bg-white/10 rounded font-mono text-[10px]">→</kbd> หรือ <kbd class="px-2 py-0.5 bg-white/10 rounded font-mono text-[10px]">Space</kbd> เพื่อเปลี่ยนสไลด์</span>
+      </div>
+
+      <button id="pres-btn-next" onclick="PresentationDeck.nextSlide()" class="px-6 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 disabled:opacity-30 disabled:pointer-events-none text-xs sm:text-sm font-bold font-heading shadow-lg shadow-teal-500/30 transition flex items-center gap-2">
+        ถัดไป <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: THEME & STYLE SWITCHER ================= -->
+  <div id="theme-modal" class="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-lg shadow-inner">
+            <i class="fa-solid fa-palette"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-white text-lg sm:text-xl">เลือกธีมพรีเมียม (11 รูปแบบระดับพรีเมียม)</h3>
+            <p class="text-xs text-slate-400">ปรับเปลี่ยนบรรยากาศ โทนสีหน้าเว็บ และชุดสไลด์นำเสนอได้แบบเรียลไทม์ใน 1 คลิก</p>
+          </div>
+        </div>
+        <button onclick="closeThemeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Themes Grid (Scrollable) -->
+      <div class="p-6 overflow-y-auto flex-1 bg-slate-900/90">
+        <div id="theme-grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by ThemeEngine.renderThemeCardsHTML() -->
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/50 flex items-center justify-between text-xs text-slate-400">
+        <span class="flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-teal-400"></i> บันทึกค่าลงในเบราว์เซอร์อัตโนมัติ
+        </span>
+        <button onclick="closeThemeModal()" class="px-5 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold font-heading transition shadow-md">
+          เสร็จสิ้น
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: NO-CODE PROFILE & CONTENT EDITOR ================= -->
+  <div id="profile-editor-modal" class="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-teal-500/20 text-teal-400 border border-teal-500/30 flex items-center justify-center text-lg shadow-inner">
+            <i class="fa-solid fa-user-pen"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-white text-lg sm:text-xl">แก้ไขข้อมูลและโปรไฟล์ครู (No-Code Editor)</h3>
+            <p class="text-xs text-slate-400">ปรับแต่งชื่อ วิทยฐานะ โรงเรียน รูปภาพ และประเด็นท้าทายหน้าบ้านได้ทันที</p>
+          </div>
+        </div>
+        <button onclick="closeProfileEditorModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Form Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-4 text-xs text-slate-200">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">ชื่อ - นามสกุลครู *</label>
+            <input type="text" id="edit-profile-name" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">ตำแหน่ง</label>
+            <input type="text" id="edit-profile-position" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs" placeholder="ครู">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">วิทยฐานะ *</label>
+            <select id="edit-profile-standing" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs">
+              <option value="ครู (ไม่มีวิทยฐานะ)">ครู (ไม่มีวิทยฐานะ)</option>
+              <option value="ครูชำนาญการ">ครูชำนาญการ</option>
+              <option value="ครูชำนาญการพิเศษ">ครูชำนาญการพิเศษ</option>
+              <option value="ครูเชี่ยวชาญ">ครูเชี่ยวชาญ</option>
+              <option value="ครูเชี่ยวชาญพิเศษ">ครูเชี่ยวชาญพิเศษ</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">กลุ่มสาระการเรียนรู้</label>
+            <input type="text" id="edit-profile-department" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">สถานศึกษา (โรงเรียน)</label>
+            <input type="text" id="edit-profile-school" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">สังกัด / เขตพื้นที่</label>
+            <input type="text" id="edit-profile-affiliation" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs" placeholder="เช่น สพม.ขอนแก่น">
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <h4 class="font-heading font-bold text-teal-400 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-image"></i> รูปภาพและมีเดีย
+          </h4>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-slate-400 font-semibold mb-1">URL รูปโปรไฟล์ครู</label>
+              <input type="text" id="edit-profile-avatar" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs" placeholder="https://...">
+            </div>
+            <div>
+              <label class="block text-slate-400 font-semibold mb-1">URL ภาพปกแบนเนอร์ Hero</label>
+              <input type="text" id="edit-profile-cover" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs" placeholder="https://...">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <h4 class="font-heading font-bold text-amber-400 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-fire"></i> ประเด็นท้าทาย (วิจัย 5 บท)
+          </h4>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-slate-400 font-semibold mb-1">หัวข้อประเด็นท้าทาย</label>
+              <input type="text" id="edit-challenge-topic" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-400 font-semibold mb-1">กลุ่มเป้าหมาย / รายวิชา</label>
+              <input type="text" id="edit-challenge-target" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-white text-xs">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/50 flex items-center justify-end gap-2">
+        <button onclick="closeProfileEditorModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+          ยกเลิก
+        </button>
+        <button onclick="handleSaveProfileEditor()" class="px-5 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold font-heading text-xs transition shadow-md flex items-center gap-1.5">
+          <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลและอัปเดตหน้าเว็บ
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 🎬 VIDEO STUDIO MODAL (8-10 นาที ว.PA) ================= -->
+  <div id="video-studio-modal" class="fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl hidden items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div class="relative w-full max-w-6xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] text-white">
+      
+      <!-- Studio Header -->
+      <div class="px-5 py-3.5 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
+            <i class="fa-solid fa-clapperboard text-lg"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-white text-sm sm:text-base flex items-center gap-2">
+              PAFolio Video Studio
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">AI Showcase 1080p</span>
+            </h3>
+            <p class="text-xs text-slate-400">สร้างวิดีโอนำเสนอผลงาน ว.PA อัตโนมัติ (ภาพเคลื่อนไหว Ken Burns + เสียงพากย์ไทย + กราฟิกสถิติดิ้นได้)</p>
+          </div>
+        </div>
+
+        <!-- Mode Switcher & Close -->
+        <div class="flex items-center gap-2">
+          <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center gap-1 text-xs">
+            <button id="btn-mode-full" onclick="VideoStudioUI.setDurationMode('full')" class="px-3 py-1.5 rounded-lg bg-teal-500 text-slate-950 font-bold transition flex items-center gap-1">
+              <i class="fa-solid fa-clock"></i> ฉบับเต็ม (8-10 นาที)
+            </button>
+            <button id="btn-mode-short" onclick="VideoStudioUI.setDurationMode('short')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-1">
+              <i class="fa-solid fa-bolt"></i> สรุปด่วน (3 นาที)
+            </button>
+          </div>
+          <button onclick="VideoStudioUI.close()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Body: 2 Columns (Left: Canvas Preview / Right: Director & Script) -->
+      <div class="flex-1 overflow-y-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left Column: Video Preview Canvas & Live Controls (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col gap-3">
+          <!-- 16:9 Canvas Stage Container -->
+          <div id="video-preview-container" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex items-center justify-center group">
+            <canvas id="video-preview-canvas" width="1920" height="1080" class="w-full h-full object-contain"></canvas>
+            
+            <!-- Floating Quick Play Overlay (Center) -->
+            <button onclick="VideoStudioUI.togglePlay()" class="absolute inset-0 m-auto w-16 h-16 rounded-full bg-teal-500/80 hover:bg-teal-400 text-slate-950 flex items-center justify-center text-xl shadow-xl transition opacity-0 group-hover:opacity-100 hover:scale-110">
+              <i class="fa-solid fa-play ml-1"></i>
+            </button>
+          </div>
+
+          <!-- Seekbar & Time -->
+          <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 flex flex-col gap-2">
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden relative cursor-pointer">
+              <div id="studio-seekbar-progress" class="h-full bg-gradient-to-r from-teal-400 via-indigo-400 to-amber-400 w-0 transition-all duration-150"></div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <div class="flex items-center gap-2">
+                <button onclick="VideoEngine.prevScene()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="ย้อนไปฉากก่อนหน้า">
+                  <i class="fa-solid fa-backward-step"></i>
+                </button>
+                <button id="btn-studio-play" onclick="VideoStudioUI.togglePlay()" class="px-3.5 py-1 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-play"></i> <span>เล่นพรีวิว</span>
+                </button>
+                <button onclick="VideoEngine.nextScene()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="ข้ามไปฉากถัดไป">
+                  <i class="fa-solid fa-forward-step"></i>
+                </button>
+              </div>
+              <div id="studio-time-indicator" class="font-mono text-teal-300 font-semibold">00:00 / 08:45</div>
+            </div>
+          </div>
+
+          <!-- Scenes Grid Navigator (10 ฉาก) -->
+          <div class="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+            <div class="text-xs font-bold font-heading text-slate-300 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-film text-teal-400"></i> ลำดับ 10 ฉากมาตรฐาน (คลิกเลือกดูตัวอย่าง)
+            </div>
+            <div id="studio-scenes-list" class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 max-h-36 overflow-y-auto pr-1">
+              <!-- Scenes loaded dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Director & Script Editor (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-3">
+          
+          <!-- Active Scene Script Editor -->
+          <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <span id="studio-active-scene-title" class="font-heading font-bold text-xs sm:text-sm text-teal-300 truncate">ฉากที่ 1: หน้าปกและแนะนำตัว</span>
+              <span id="studio-active-scene-duration" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[11px] font-mono">48s</span>
+            </div>
+            
+            <div class="text-[11px] text-slate-400 mb-1 flex items-center justify-between">
+              <span>บทพากย์ภาษาไทย (สามารถแก้ไขคำพูดได้):</span>
+              <span id="studio-active-scene-voice-status" class="text-[10px]"></span>
+            </div>
+
+            <textarea id="studio-active-scene-script" rows="5" class="w-full flex-1 p-3 rounded-xl bg-slate-900 border border-slate-800 focus:border-teal-500 focus:outline-none text-slate-100 text-xs leading-relaxed resize-none" placeholder="กรอกสคริปต์เสียงพากย์สำหรับฉากนี้..."></textarea>
+
+            <div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-800/80">
+              <button onclick="VideoStudioUI.saveActiveSceneScript()" class="px-3 py-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs font-semibold transition flex items-center gap-1">
+                <i class="fa-solid fa-floppy-disk"></i> บันทึกสคริปต์
+              </button>
+              
+              <!-- Mic & Custom Audio Controls for Scene -->
+              <div class="flex items-center gap-1.5">
+                <button id="btn-record-mic" onclick="VideoStudioUI.toggleMicRecording()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700 text-xs font-semibold transition flex items-center gap-1" title="อัดเสียงพากย์จริงของครูสำหรับฉากนี้">
+                  <i class="fa-solid fa-microphone text-rose-400"></i> <span>อัดเสียงไมค์</span>
+                </button>
+                <label class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition flex items-center gap-1 cursor-pointer" title="อัปโหลดไฟล์เสียง MP3/WAV สำหรับฉากนี้">
+                  <i class="fa-solid fa-upload text-teal-400"></i> <span>อัปโหลดเสียง</span>
+                  <input type="file" accept="audio/*" class="hidden" onchange="VideoStudioUI.handleAudioUpload(event)">
+                </label>
+                <button onclick="VideoStudioUI.resetSceneVoice()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition" title="ล้างเสียงอัด/อัปโหลด คืนค่าเสียงระบบ">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Studio Audio & Voice Settings -->
+          <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 flex flex-col gap-2.5 text-xs">
+            <div class="font-bold text-slate-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-sliders text-indigo-400"></i> ตั้งค่าเสียงพากย์และดนตรีประกอบ (Audio Mixer)
+            </div>
+
+            <!-- Thai Voice Select -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">เสียงสังเคราะห์ภาษาไทย:</label>
+                <select id="studio-voice-select" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white text-[11px] focus:outline-none focus:border-teal-500">
+                  <option value="">กำลังโหลดเสียงไทย...</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">สไตล์ดนตรีประกอบ (BGM):</label>
+                <select id="studio-bgm-style" onchange="VideoEngine.bgmStyle = this.value; if(VideoEngine.isPlaying) VideoEngine.startBGM();" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white text-[11px] focus:outline-none focus:border-teal-500">
+                  <option value="inspirational">สร้างแรงบันดาลใจ (Inspirational)</option>
+                  <option value="none">ปิดเสียงดนตรี (Mute BGM)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sliders: Speech Rate & BGM Volume -->
+            <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-800/80">
+              <div>
+                <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <span>ความเร็วเสียงพากย์:</span>
+                  <span id="label-voice-rate" class="text-teal-300 font-mono">1.0x</span>
+                </div>
+                <input type="range" min="0.8" max="1.3" step="0.05" value="1.0" class="w-full accent-teal-400" oninput="VideoEngine.voiceRate = parseFloat(this.value); document.getElementById('label-voice-rate').innerText = this.value + 'x';">
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <span>ระดับเสียง BGM:</span>
+                  <span id="label-bgm-vol" class="text-teal-300 font-mono">35%</span>
+                </div>
+                <input type="range" min="0" max="1" step="0.05" value="0.35" class="w-full accent-teal-400" oninput="VideoEngine.bgmVolume = parseFloat(this.value); if(VideoEngine.bgmGainNode) VideoEngine.bgmGainNode.gain.value = this.value; document.getElementById('label-bgm-vol').innerText = Math.round(this.value*100) + '%';">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Studio Footer: Export Actions -->
+      <div class="px-5 py-3.5 border-t border-slate-800 bg-slate-950/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-xs text-slate-400 flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+            <i class="fa-solid fa-circle-check"></i> ความละเอียด Full HD 1080p (1920x1080)
+          </span>
+          <span class="hidden md:inline">· ระบบ Audio Ducking อัตโนมัติ</span>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button onclick="VideoStudioUI.uploadVideoToDrive()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/30 font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm" title="เรนเดอร์และอัปโหลดเข้า Google Drive โฟลเดอร์ 05_วิดีโอ">
+            <i class="fa-brands fa-google-drive text-amber-400"></i> <span>ส่งเข้า Google Drive</span>
+          </button>
+          <button id="btn-studio-export" onclick="VideoStudioUI.startExportVideo()" class="flex-1 sm:flex-none px-5 py-2 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 hover:opacity-95 text-white font-bold font-heading text-xs transition shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i> <span>เรนเดอร์ & ดาวน์โหลดวิดีโอ 1080p</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Progress Render Overlay Modal -->
+  <div id="studio-render-progress-modal" class="fixed inset-0 z-[130] bg-slate-950/95 backdrop-blur-2xl hidden items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center flex flex-col items-center">
+      <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-500 flex items-center justify-center text-white text-2xl shadow-xl shadow-rose-500/30 mb-4 animate-bounce">
+        <i class="fa-solid fa-film"></i>
+      </div>
+      <h4 class="font-heading font-bold text-white text-lg">กำลังเรนเดอร์วิดีโอ Full HD 1080p</h4>
+      <p id="studio-render-progress-status" class="text-xs text-slate-400 mt-1 mb-5">กำลังสร้างภาพเคลื่อนไหว Ken Burns และผสมผสานเสียงพากย์...</p>
+      
+      <!-- Progress Bar -->
+      <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5 mb-2">
+        <div id="studio-render-progress-bar" class="h-full bg-gradient-to-r from-teal-400 via-indigo-500 to-rose-500 rounded-full w-0 transition-all duration-300"></div>
+      </div>
+      <div id="studio-render-progress-percent" class="font-mono font-bold text-sm text-teal-300">0%</div>
+
+      <p class="text-[11px] text-slate-500 mt-4 leading-relaxed">
+        ระบบกำลังบันทึกภาพความละเอียดสูง 1920x1080 ที่ 30fps พร้อมประมวลผลดนตรีประกอบและเสียงบรรยาย<br>
+        กรุณาอย่าเพิ่งปิดหน้าต่างนี้จนกว่าการดาวน์โหลดจะเริ่มต้นครับ
+      </p>
+    </div>
+  </div>
+
+  <!-- SheetJS (Excel Generator) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- PptxGenJS (PowerPoint Generator) -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+
+  <!-- JavaScript Modules -->
+  <script src="js/data.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/certificate-vault.js"></script>
+  <script src="js/export-engine.js"></script>
+  <script src="js/drive-sync.js"></script>
+  <script src="js/ai-assistant.js"></script>
+  <script src="js/presentation.js"></script>
+  <script src="js/video-engine.js"></script>
+  <script src="js/video-studio-ui.js"></script>
+  <script src="js/chart-config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
