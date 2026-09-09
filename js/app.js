@@ -27,6 +27,11 @@ const BASE_INDICATOR_TEMPLATES = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 📲 ตรวจจับพารามิเตอร์ URL (เช่น เปิดจาก QR Code บนแท็บเล็ต/มือถือ เพื่อเชื่อมต่อ Google Drive อัตโนมัติ)
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.checkUrlParams === 'function') {
+    DriveSync.checkUrlParams();
+  }
+
   // ✨ Cache-Busting & Smart Version Migration: ตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ และรักษาโปรไฟล์ของครูไว้
   const CURRENT_APP_VERSION = '2569.5.0';
   const localVersion = localStorage.getItem('pafolio_app_version');
@@ -158,6 +163,11 @@ function convertToGoogleDriveThumbnailUrl(url, size = 'w1000') {
 
 // Update Header & Profile Section
 function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
+  teacher = teacher || (typeof getActiveTeacher === 'function' ? getActiveTeacher() : null);
+  if (!teacher) return;
+  yearData = yearData || (typeof getActiveYearData === 'function' ? getActiveYearData() : (teacher.years ? teacher.years[currentAcademicYear] : {}));
+  expectedLevel = expectedLevel || (typeof getExpectedLevel === 'function' ? getExpectedLevel(teacher.academicStanding) : "ริเริ่ม พัฒนา");
+
   // Brand Header
   document.querySelectorAll('.teacher-name-label').forEach(el => el.innerText = teacher.name);
   document.querySelectorAll('.teacher-standing-label').forEach(el => el.innerText = teacher.academicStanding);
@@ -1418,9 +1428,41 @@ function openDriveSyncModal() {
     feedbackEl.innerHTML = '';
   }
 
+  // 📲 อัปเดต QR Code และลิงก์สำหรับเปิดบนแท็บเล็ต/มือถือ
+  const qrContainer = document.getElementById('tablet-qr-preview');
+  const shareLinkInput = document.getElementById('tablet-share-link-input');
+  if (shareLinkInput && typeof DriveSync !== 'undefined' && typeof DriveSync.getTabletShareUrl === 'function') {
+    const shareUrl = DriveSync.getTabletShareUrl();
+    shareLinkInput.value = shareUrl;
+    if (qrContainer) {
+      qrContainer.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(shareUrl)}`;
+    }
+  }
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
+}
+
+// สลับการแสดงผลการ์ดสรุปข้อมูลหน้าปก (เพื่อเปิดดูภาพแบนเนอร์เต็มแผ่นโดยไม่มีตัวหนังสือบดบัง)
+function toggleHeroCardVisibility() {
+  const card = document.getElementById('hero-presentation-card');
+  const label = document.getElementById('hero-toggle-label');
+  const btn = document.getElementById('hero-toggle-btn');
+  if (!card) return;
+
+  const isHidden = card.classList.contains('opacity-0');
+  if (isHidden) {
+    card.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+    card.classList.add('opacity-100', 'scale-100');
+    if (label) label.innerText = 'ดูภาพปกเต็ม';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-eye text-amber-400"></i> <span id="hero-toggle-label">ดูภาพปกเต็ม</span>';
+  } else {
+    card.classList.remove('opacity-100', 'scale-100');
+    card.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+    if (label) label.innerText = 'แสดงข้อมูลสรุป';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-file-lines text-teal-400"></i> <span id="hero-toggle-label">แสดงข้อมูลสรุป</span>';
+  }
 }
 
 function closeDriveSyncModal() {

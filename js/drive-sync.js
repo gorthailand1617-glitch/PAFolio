@@ -51,6 +51,78 @@ const DriveSync = {
     this.updateStatusUI();
   },
 
+  // 📲 ตรวจจับและรับค่า URL Parameters สำหรับการเปิดและซิงก์ข้อมูลข้ามเครื่อง (เช่น สแกน QR หรือเปิดลิงก์บนแท็บเล็ต/มือถือ)
+  checkUrlParams() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      let updated = false;
+
+      if (params.has('appUrl') || params.has('scriptUrl')) {
+        const rawUrl = params.get('appUrl') || params.get('scriptUrl');
+        const cleanUrl = decodeURIComponent(rawUrl).trim();
+        if (cleanUrl.startsWith('https://script.google.com/macros/s/')) {
+          this.config.appsScriptUrl = cleanUrl;
+          localStorage.setItem('pafolio_apps_script_url', cleanUrl);
+          updated = true;
+        }
+      }
+
+      if (params.has('folderId')) {
+        const fId = params.get('folderId').trim();
+        if (fId) {
+          this.config.folderId = fId;
+          localStorage.setItem('pafolio_drive_folder_id', fId);
+          updated = true;
+        }
+      }
+
+      if (params.has('year')) {
+        const yr = params.get('year').trim();
+        if (yr) {
+          localStorage.setItem('pafolio_active_year', yr);
+          if (typeof currentAcademicYear !== 'undefined') {
+            currentAcademicYear = yr;
+          }
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        this.updateStatusUI();
+        this.showToast('📲 เชื่อมต่อการซิงก์ข้อมูลอัตโนมัติบนแท็บเล็ตสำเร็จ!', 'success', 4000);
+        try {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch(e) {}
+        return true;
+      }
+    } catch (e) {
+      console.warn('URL params parse error:', e);
+    }
+    return false;
+  },
+
+  // 📲 สร้างลิงก์และ QR Code สำหรับเปิดและซิงก์บนแท็บเล็ตทันที
+  getTabletShareUrl() {
+    const base = window.location.origin + window.location.pathname;
+    const year = (typeof currentAcademicYear !== 'undefined') ? currentAcademicYear : '2569';
+    const params = new URLSearchParams();
+    if (this.config.folderId) params.append('folderId', this.config.folderId);
+    if (this.config.appsScriptUrl) params.append('appUrl', this.config.appsScriptUrl);
+    params.append('year', year);
+    return `${base}?${params.toString()}`;
+  },
+
+  // คัดลอกลิงก์แท็บเล็ตไปที่ Clipboard
+  async copyTabletShareLink() {
+    const shareUrl = this.getTabletShareUrl();
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      this.showToast('📋 คัดลอกลิงก์สำหรับแท็บเล็ตเรียบร้อยแล้ว! สามารถนำไปเปิดบนแท็บเล็ตหรือส่งใน LINE ได้ทันที', 'success', 4500);
+    } catch(err) {
+      prompt('คัดลอกลิงก์ด้านล่างเพื่อนำไปเปิดบนแท็บเล็ต:', shareUrl);
+    }
+  },
+
   // ดึงข้อมูลสดจาก Google Drive ผ่าน Apps Script Web App
   async syncFromDrive(year = null) {
     if (!this.config.appsScriptUrl) {
