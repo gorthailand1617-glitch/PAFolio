@@ -464,7 +464,9 @@ const DriveSync = {
           if (ind.files) totalFiles += ind.files.length;
         });
       }
-      const totalImages = data.evidenceGallery ? data.evidenceGallery.length : 0;
+      const galleryItems = data.evidenceGallery || [];
+      const totalVideos = data.videos ? data.videos.length : galleryItems.filter(x => x.type === 'video').length;
+      const totalImages = galleryItems.filter(x => x.type !== 'video').length;
 
       // อัปเดตข้อมูลโปรไฟล์ครูสดจาก Cloud (liveProfile)
       if (data.liveProfile) {
@@ -552,7 +554,8 @@ const DriveSync = {
       }
 
       if (showToast) {
-        this.showToast(`ซิงก์ข้อมูลจาก Google Drive เรียบร้อยแล้ว (พบ ${totalFiles} ไฟล์, ${totalImages} ภาพ)`, 'success', 4000);
+        const videoMsg = totalVideos > 0 ? `, ${totalVideos} คลิปวิดีโอ` : '';
+        this.showToast(`ซิงก์ข้อมูลจาก Google Drive เรียบร้อยแล้ว (พบ ${totalFiles} ไฟล์, ${totalImages} ภาพ${videoMsg})`, 'success', 4000);
       }
       return true;
     } else if (result.status === 'error') {
@@ -765,6 +768,12 @@ const DriveSync = {
     docs.folder("02_แบบประเมินผลการพัฒนางาน (PA 2-ส)").file("คำแนะนำ.txt", "วางไฟล์เอกสาร PA 2/ส (แบบประเมินผลการพัฒนางานตามข้อตกลง)");
     docs.folder("03_แบบสรุปผลการประเมิน (PA 3-ส)").file("คำแนะนำ.txt", "วางไฟล์เอกสาร PA 3/ส (แบบสรุปผลการประเมินการพัฒนางาน)");
     docs.folder("04_รายงานผลการประเมินตนเองของสถานศึกษา (SAR)").file("คำแนะนำ.txt", "วางไฟล์รายงานประเมินตนเองรายบุคคล (Self-Assessment Report: SAR)");
+
+    // โฟลเดอร์คลิปวิดีโอการสอนและคลิปผลลัพธ์ ว.PA
+    const vids = yearFolder.folder("🎥 05_คลิปวิดีโอการสอนและคลิปผลลัพธ์ (Teaching Videos)");
+    vids.folder("01_คลิปการสอนตามเกณฑ์_ว.PA_60นาที").file("คำแนะนำ_คลิปการสอน.txt", "วางไฟล์คลิปการจัดกิจกรรมการเรียนรู้ 60 นาทีตามเกณฑ์ ว9/2564 (.mp4, .webm, .mov แนะนำ Full HD 1080p หรือ 720p)");
+    vids.folder("02_คลิปแรงบันดาลใจและสะท้อนคิด_10ถึง15นาที").file("คำแนะนำ_คลิปแรงบันดาลใจ.txt", "วางไฟล์คลิปวิดีโอแสดงที่มา ปัญหา หรือแรงบันดาลใจในการจัดกิจกรรมการเรียนรู้ 10-15 นาที");
+    vids.folder("03_คลิปการใช้นวัตกรรมและชิ้นงานนักเรียน").file("คำแนะนำ_คลิปผลงาน.txt", "วางไฟล์วิดีโอสาธิตการใช้นวัตกรรม การสัมภาษณ์ หรือการสะท้อนคิดของนักเรียน");
 
     // ไฟล์คำแนะนำรวมที่ root
     root.file("README_คำแนะนำการใช้งาน.txt", 

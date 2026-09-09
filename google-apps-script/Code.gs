@@ -348,6 +348,7 @@ function scanDriveRecursively(rootFolderId, filterYear) {
       coverUrl: ""
     },
     evidenceGallery: [],
+    videos: [],
     challengeDocs: [],
     extractedChallenge: null,
     indicatorFolders: {},
@@ -681,6 +682,9 @@ function traverseFolder(folder, result, depth, parentIndicatorCode) {
     let type = "doc";
     let icon = "fa-file-lines";
     
+    const fileName = file.getName();
+    const isVideo = mime.includes("video") || !!fileName.match(/\.(mp4|webm|mov|m4v|avi|mkv|flv|wmv)$/i);
+    
     if (mime.includes("pdf")) {
       type = "pdf";
       icon = "fa-file-pdf";
@@ -699,17 +703,36 @@ function traverseFolder(folder, result, depth, parentIndicatorCode) {
       if (!isAssetFolder) {
         result.evidenceGallery.push({
           id: file.getId(),
-          title: file.getName(),
+          title: fileName,
           caption: folderName,
           badge: indicatorCode ? `ตัวชี้วัด ${indicatorCode}` : folderName,
+          type: "image",
           thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800",
           fullUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w1600",
           date: file.getLastUpdated().toLocaleDateString('th-TH')
         });
       }
-    } else if (mime.includes("video")) {
+    } else if (isVideo) {
       type = "video";
       icon = "fa-file-video";
+
+      const videoEntry = {
+        id: file.getId(),
+        title: fileName,
+        caption: folderName,
+        badge: indicatorCode ? `ตัวชี้วัด ${indicatorCode}` : folderName,
+        type: "video",
+        thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800",
+        fullUrl: "https://drive.google.com/file/d/" + file.getId() + "/preview",
+        previewUrl: "https://drive.google.com/file/d/" + file.getId() + "/preview",
+        viewUrl: file.getUrl(),
+        downloadUrl: file.getDownloadUrl(),
+        date: file.getLastUpdated().toLocaleDateString('th-TH')
+      };
+
+      result.evidenceGallery.push(videoEntry);
+      if (!result.videos) result.videos = [];
+      result.videos.push(videoEntry);
     } else if (mime.includes("sheet") || mime.includes("excel")) {
       type = "sheet";
       icon = "fa-file-excel";
@@ -728,11 +751,12 @@ function traverseFolder(folder, result, depth, parentIndicatorCode) {
 
     const fileItem = {
       id: file.getId(),
-      title: file.getName(),
+      title: fileName,
       type: type,
       size: formatBytes(file.getSize()),
       icon: icon,
       viewUrl: file.getUrl(),
+      previewUrl: type === "video" ? "https://drive.google.com/file/d/" + file.getId() + "/preview" : file.getUrl(),
       downloadUrl: file.getDownloadUrl(),
       thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800",
       snippet: snippet

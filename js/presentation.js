@@ -168,8 +168,12 @@ const PresentationDeck = {
     const total = this.carouselState.images.length;
     if (total === 0) return;
     const img = this.carouselState.images[this.carouselState.currentIndex];
-    if (img && typeof openLightbox === 'function') {
-      openLightbox(img.fullUrl || img.thumbUrl, img.title, img.caption);
+    if (img) {
+      if ((img.type === 'video' || (typeof isVideoItem === 'function' && isVideoItem(img))) && typeof openVideoPlayer === 'function') {
+        openVideoPlayer(img);
+      } else if (typeof openLightbox === 'function') {
+        openLightbox(img.fullUrl || img.thumbUrl, img.title, img.caption);
+      }
     }
   },
 
@@ -289,12 +293,15 @@ const PresentationDeck = {
       );
       if (matchingKey && DriveSync.syncedData.indicators[matchingKey].files) {
         DriveSync.syncedData.indicators[matchingKey].files.forEach((f, fIdx) => {
-          if (f.type === 'image' || (f.thumbUrl && !f.thumbUrl.includes('unsplash'))) {
+          const isVid = f.type === 'video' || (f.title && f.title.match(/\.(mp4|webm|mov|m4v|avi|mkv)$/i));
+          if (f.type === 'image' || isVid || (f.thumbUrl && !f.thumbUrl.includes('unsplash'))) {
             images.push({
-              title: f.title || `ภาพกิจกรรมที่ ${fIdx + 1} (ตัวชี้วัด ${indCode})`,
-              caption: `ภาพหลักฐานร่องรอยการปฏิบัติงานจาก Google Drive [${matchingKey}]`,
+              title: f.title || `${isVid ? 'คลิปวิดีโอ' : 'ภาพกิจกรรม'}ที่ ${fIdx + 1} (ตัวชี้วัด ${indCode})`,
+              caption: `หลักฐานร่องรอยการปฏิบัติงานจาก Google Drive [${matchingKey}]`,
               thumbUrl: f.thumbUrl || f.viewUrl,
-              fullUrl: f.viewUrl,
+              fullUrl: isVid ? (f.previewUrl || f.viewUrl) : f.viewUrl,
+              previewUrl: f.previewUrl || f.viewUrl,
+              type: isVid ? 'video' : 'image',
               source: `Google Drive (${matchingKey})`,
               badge: `ตัวชี้วัด ${indCode}`
             });
@@ -375,6 +382,19 @@ const PresentationDeck = {
           badge: `ตัวชี้วัด ${indCode}`
         });
       });
+
+      if (indCode === '1.3' || indCode === '1.4') {
+        images.unshift({
+          title: `คลิปวิดีโอบันทึกการจัดกิจกรรมการเรียนรู้ Active Learning 60 นาที`,
+          caption: `คลิปวิดีโอหลักฐานการจัดการเรียนรู้ตามแผนการสอนและตามเกณฑ์ ว9/2564`,
+          thumbUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80',
+          fullUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          previewUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          type: 'video',
+          source: '🎥 คลิปวิดีโอการสอน ว.PA',
+          badge: `ตัวชี้วัด ${indCode}`
+        });
+      }
     }
 
     return images;
@@ -585,18 +605,27 @@ const PresentationDeck = {
                       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                       
                       <!-- Top Source Badge -->
-                      <div class="absolute top-3.5 left-3.5 px-3.5 py-1.5 rounded-full bg-teal-950/85 text-teal-300 border border-teal-400/40 text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-brands fa-google-drive text-amber-400"></i> ${img.source || 'ภาพจาก Google Drive'}
+                      <div class="absolute top-3.5 left-3.5 px-3.5 py-1.5 rounded-full ${img.type === 'video' ? 'bg-rose-950/85 text-rose-300 border-rose-400/40' : 'bg-teal-950/85 text-teal-300 border-teal-400/40'} border text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 shadow-sm">
+                        ${img.type === 'video' ? '<i class="fa-solid fa-play text-rose-400 text-[10px]"></i>' : '<i class="fa-brands fa-google-drive text-amber-400"></i>'} ${img.source || (img.type === 'video' ? 'คลิปวิดีโอการสอน' : 'ภาพจาก Google Drive')}
                       </div>
+
+                      ${img.type === 'video' ? `
+                        <!-- Video Play Indicator in Center -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div class="w-14 h-14 rounded-full bg-rose-600/90 text-white flex items-center justify-center text-xl shadow-2xl ring-4 ring-white/30 group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-play ml-1"></i>
+                          </div>
+                        </div>
+                      ` : ''}
 
                       <!-- Bottom Caption Overlay -->
                       <div class="absolute bottom-4 left-4 right-4 text-sm text-white/95 z-10">
                         <div class="font-bold font-heading line-clamp-1 flex items-center gap-2 text-base sm:text-lg">
-                          <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                          <span class="w-2 h-2 rounded-full ${img.type === 'video' ? 'bg-rose-400' : 'bg-teal-400'}"></span>
                           <span>${img.title || ind.title}</span>
                         </div>
                         <div class="text-xs sm:text-sm text-slate-300 font-light line-clamp-2 mt-1">
-                          ${img.caption || 'ภาพหลักฐานร่องรอยการจัดการเรียนรู้จริง'}
+                          ${img.caption || (img.type === 'video' ? 'คลิปวิดีโอบันทึกการสอนและผลลัพธ์การเรียนรู้' : 'ภาพหลักฐานร่องรอยการจัดการเรียนรู้จริง')}
                         </div>
                       </div>
                     </div>
@@ -621,11 +650,11 @@ const PresentationDeck = {
                   </button>
                 ` : ''}
 
-                <!-- Click to Zoom Lightbox Button (Center on Hover) -->
+                <!-- Click to Zoom or Play Button (Center on Hover) -->
                 <div onclick="PresentationDeck.openActiveCarouselLightbox()" 
                      class="absolute inset-0 z-20 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 bg-teal-950/20 backdrop-blur-[1px] transition duration-300">
                   <span class="px-5 py-2.5 rounded-2xl bg-slate-900/90 text-white border border-teal-400 text-sm font-bold flex items-center gap-2 shadow-2xl hover:scale-105 transition">
-                    <i class="fa-solid fa-magnifying-glass-plus text-teal-400"></i> คลิกดูภาพขยาย
+                    <i class="fa-solid fa-circle-play text-rose-400"></i> คลิกเล่นวิดีโอ / ดูภาพขยาย
                   </span>
                 </div>
 

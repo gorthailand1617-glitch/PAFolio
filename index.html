@@ -671,6 +671,19 @@
       <div class="w-16 h-1 bg-teal-500 mx-auto mt-4 rounded-full"></div>
     </div>
 
+    <!-- Gallery Filter Tabs (รูปภาพ vs คลิปวิดีโอ) -->
+    <div class="flex flex-wrap items-center justify-center gap-2 mb-8">
+      <button onclick="renderGallery('all', this)" class="gallery-filter-btn active px-4 py-2 rounded-xl text-xs font-heading font-semibold bg-teal-600 text-white shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-layer-group"></i> ทั้งหมด (<span id="gallery-count-all">0</span>)
+      </button>
+      <button onclick="renderGallery('image', this)" class="gallery-filter-btn px-4 py-2 rounded-xl text-xs font-heading font-medium bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-image text-teal-600"></i> 📸 ภาพถ่ายกิจกรรม (<span id="gallery-count-images">0</span>)
+      </button>
+      <button onclick="renderGallery('video', this)" class="gallery-filter-btn px-4 py-2 rounded-xl text-xs font-heading font-medium bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-circle-play text-rose-500"></i> 🎥 วิดีโอและคลิปการสอน (<span id="gallery-count-videos">0</span>)
+      </button>
+    </div>
+
     <!-- Gallery Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-container"></div>
 
@@ -1321,6 +1334,85 @@
       <div id="lightbox-title" class="text-white/90 text-sm font-semibold font-heading mb-2"></div>
       <img id="lightbox-img" src="" alt="ภาพขยาย" class="max-h-[75vh] w-auto mx-auto rounded-2xl shadow-2xl border border-white/20">
       <div id="lightbox-caption" class="mt-4 text-slate-200 text-xs sm:text-sm font-light leading-relaxed max-w-2xl mx-auto"></div>
+    </div>
+  </div>
+
+  <!-- ================= 🎬 MODAL: STUDIO VIDEO PLAYER (วิดีโอบันทึกการสอน ว.PA) ================= -->
+  <div id="video-player-modal" class="fixed inset-0 z-[115] bg-black/95 backdrop-blur-xl hidden items-center justify-center p-2 sm:p-4 modal-backdrop" onclick="closeVideoPlayer()">
+    <div class="relative max-w-5xl w-full bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] text-white modal-content" onclick="event.stopPropagation()">
+      
+      <!-- Video Modal Header -->
+      <div class="px-5 py-3.5 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20 flex-shrink-0">
+            <i class="fa-solid fa-play text-base ml-0.5"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="video-player-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 font-heading">
+                วิดีโอการสอน ว.PA
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <i class="fa-solid fa-circle-check text-[9px] mr-1"></i> Full HD 1080p
+              </span>
+            </div>
+            <h3 id="video-player-title" class="font-heading font-bold text-white text-sm sm:text-base leading-snug truncate mt-0.5">
+              ชื่อวิดีโอคลิปการสอน
+            </h3>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <a id="video-player-drive-btn" href="#" target="_blank" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/30 text-xs font-semibold transition items-center gap-1.5 shadow-sm" title="เปิดดูใน Google Drive">
+            <i class="fa-brands fa-google-drive text-amber-400"></i> <span class="hidden md:inline">เปิดใน</span> Drive
+          </a>
+          <button onclick="closeVideoPlayer()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition" title="ปิดหน้าต่าง (ESC)">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Video Player Screen Stage (16:9 Aspect Ratio) -->
+      <div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+        <!-- Direct HTML5 Video Element -->
+        <video id="video-player-html5" class="w-full h-full object-contain hidden" controls playsinline preload="auto">
+          <source id="video-player-source" src="" type="video/mp4">
+          เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ HTML5
+        </video>
+
+        <!-- Google Drive / YouTube Embed Iframe -->
+        <iframe id="video-player-iframe" class="w-full h-full border-0 hidden" src="" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+
+        <!-- Loading Indicator -->
+        <div id="video-player-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm pointer-events-none transition-opacity duration-300">
+          <div class="w-10 h-10 rounded-full border-2 border-teal-500/30 border-t-teal-400 animate-spin mb-3"></div>
+          <p class="text-xs text-slate-300 font-heading font-medium">กำลังเตรียมโหลดวิดีโอความละเอียดสูง...</p>
+        </div>
+      </div>
+
+      <!-- Video Meta Footer -->
+      <div class="px-5 py-3.5 border-t border-slate-800 bg-slate-950/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div class="flex-1 min-w-0 pr-2">
+          <p id="video-player-caption" class="text-slate-300 leading-relaxed text-xs">
+            คำอธิบายคลิปวิดีโอหลักฐานประกอบการประเมิน ว.PA
+          </p>
+          <div class="mt-1.5 flex items-center gap-3 text-[11px] text-slate-400">
+            <span id="video-player-date"><i class="fa-regular fa-calendar-check mr-1 text-teal-400"></i> ปีการศึกษา 2568</span>
+            <span>•</span>
+            <span class="text-teal-400"><i class="fa-solid fa-shield-halved mr-1"></i> หลักฐานเชิงประจักษ์ตามเกณฑ์ ก.ค.ศ. ว9/2564</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+          <button onclick="copyCurrentVideoLink()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1.5">
+            <i class="fa-regular fa-copy"></i> คัดลอกลิงก์
+          </button>
+          <a id="video-player-external-btn" href="#" target="_blank" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-600 hover:opacity-90 text-white font-heading font-bold text-xs transition shadow-md flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i> เต็มจอ
+          </a>
+        </div>
+      </div>
+
     </div>
   </div>
 

@@ -35,8 +35,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/📋 เอกสารแบบประเมิน ว.PA และ SAR/02_แบบประเมินผลการพัฒนางาน (PA 2-ส)\" | Out-Null;" ^
   "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/📋 เอกสารแบบประเมิน ว.PA และ SAR/03_แบบสรุปผลการประเมิน (PA 3-ส)\" | Out-Null;" ^
   "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/📋 เอกสารแบบประเมิน ว.PA และ SAR/04_รายงานผลการประเมินตนเองของสถานศึกษา (SAR)\" | Out-Null;" ^
-  "Set-Content -Path \"$rootName/README_คำแนะนำ.txt\" -Value 'ลากโฟลเดอร์นี้อัปโหลดขึ้น Google Drive แล้วนำ Folder ID มาใส่ในเว็บ PAFolio' -Encoding UTF8;" ^
-  "Write-Host \"`n[SUCCESS] สร้างโครงสร้างโฟลเดอร์ ว.PA สำเร็จสมบูรณ์ 100%!\" -ForegroundColor Green;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)/1.3 จัดกิจกรรมการเรียนรู้ (Active Learning)/🎥 วิดีโอบันทึกการสอน Active Learning (60 นาที)\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)/1.4 สร้างและหรือพัฒนาสื่อ นวัตกรรม เทคโนโลยี/🎥 วิดีโอคลิปนวัตกรรมและเทคโนโลยี\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/🎥 05_คลิปวิดีโอการสอนและคลิปผลลัพธ์ (Teaching Videos)/01_คลิปการสอนตามเกณฑ์_ว.PA_60นาที\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/🎥 05_คลิปวิดีโอการสอนและคลิปผลลัพธ์ (Teaching Videos)/02_คลิปแรงบันดาลใจและสะท้อนคิด_10ถึง15นาที\" | Out-Null;" ^
+  "Set-Content -Path \"$rootName/README_คำแนะนำ.txt\" -Value 'ลากโฟลเดอร์นี้อัปโหลดขึ้น Google Drive แล้วนำ Folder ID มาใส่ในเว็บ PAFolio (รองรับทั้งไฟล์รูปภาพ เอกสาร PDF และไฟล์วิดีโอ .mp4/.webm)' -Encoding UTF8;" ^
+  "Write-Host \"`n[SUCCESS] สร้างโครงสร้างโฟลเดอร์ ว.PA สำเร็จสมบูรณ์ 100%! (รองรับภาพ เอกสาร และวิดีโอ)\" -ForegroundColor Green;" ^
   "Write-Host \"สามารถลากโฟลเดอร์ '$rootName' อัปโหลดขึ้น Google Drive ได้ทันที`n\" -ForegroundColor Yellow;"
 
 echo.

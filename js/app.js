@@ -476,18 +476,227 @@ function renderChallengeSection(teacher, yearData) {
   }
 }
 
-// Render Evidence Gallery
+// ================= 🎥 ระบบเครื่องเล่นวิดีโอ ว.PA (Video Player Studio) =================
+let currentPlayingVideoData = null;
+
+function isVideoItem(item) {
+  if (!item) return false;
+  if (item.type === 'video') return true;
+  const target = (item.title || '') + ' ' + (item.fullUrl || '') + ' ' + (item.previewUrl || '') + ' ' + (item.thumbUrl || '');
+  return /\.(mp4|webm|mov|m4v|avi|mkv)($|\?)/i.test(target) || target.includes('/preview');
+}
+
+function openVideoPlayer(videoData) {
+  if (!videoData) return;
+  currentPlayingVideoData = videoData;
+
+  const modal = document.getElementById('video-player-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('video-player-title');
+  const captionEl = document.getElementById('video-player-caption');
+  const badgeEl = document.getElementById('video-player-badge');
+  const dateEl = document.getElementById('video-player-date');
+  const driveBtn = document.getElementById('video-player-drive-btn');
+  const extBtn = document.getElementById('video-player-external-btn');
+
+  if (titleEl) titleEl.innerText = videoData.title || 'วิดีโอคลิปการสอน ว.PA';
+  if (captionEl) captionEl.innerText = videoData.caption || 'คลิปวิดีโอบันทึกการจัดการเรียนรู้และผลลัพธ์การเรียนรู้ของผู้เรียน';
+  if (badgeEl) badgeEl.innerText = videoData.badge || 'วิดีโอการสอน ว.PA';
+  if (dateEl) dateEl.innerHTML = `<i class="fa-regular fa-calendar-check mr-1 text-teal-400"></i> ${videoData.date || 'ปีการศึกษา ' + currentAcademicYear}`;
+
+  const previewUrl = videoData.previewUrl || videoData.fullUrl || videoData.url || '';
+  const viewUrl = videoData.viewUrl || previewUrl;
+
+  if (driveBtn) {
+    if (viewUrl) {
+      driveBtn.href = viewUrl;
+      driveBtn.classList.remove('hidden');
+    } else {
+      driveBtn.classList.add('hidden');
+    }
+  }
+
+  if (extBtn) {
+    extBtn.href = previewUrl || viewUrl || '#';
+  }
+
+  const html5Video = document.getElementById('video-player-html5');
+  const videoSource = document.getElementById('video-player-source');
+  const iframe = document.getElementById('video-player-iframe');
+  const loader = document.getElementById('video-player-loader');
+
+  if (loader) loader.classList.remove('hidden', 'opacity-0');
+
+  const isDirectVideo = /\.(mp4|webm|mov|m4v|ogg)($|\?)/i.test(previewUrl);
+
+  if (isDirectVideo) {
+    if (iframe) {
+      iframe.src = '';
+      iframe.classList.add('hidden');
+    }
+    if (html5Video && videoSource) {
+      videoSource.src = previewUrl;
+      html5Video.load();
+      html5Video.classList.remove('hidden');
+      html5Video.oncanplay = () => {
+        if (loader) loader.classList.add('opacity-0', 'hidden');
+      };
+      html5Video.play().catch(() => {});
+    }
+  } else {
+    if (html5Video) {
+      html5Video.pause();
+      html5Video.classList.add('hidden');
+    }
+    if (iframe) {
+      iframe.src = previewUrl;
+      iframe.classList.remove('hidden');
+      iframe.onload = () => {
+        if (loader) loader.classList.add('opacity-0', 'hidden');
+      };
+    }
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideoPlayer() {
+  const modal = document.getElementById('video-player-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  const html5Video = document.getElementById('video-player-html5');
+  if (html5Video) {
+    html5Video.pause();
+    html5Video.src = '';
+  }
+
+  const iframe = document.getElementById('video-player-iframe');
+  if (iframe) {
+    iframe.src = '';
+  }
+
+  currentPlayingVideoData = null;
+
+  const indModal = document.getElementById('indicator-modal');
+  if (indModal && !indModal.classList.contains('hidden')) {
+    document.body.style.overflow = 'hidden';
+  } else if (typeof PresentationDeck !== 'undefined' && PresentationDeck.isOpen) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'auto';
+  }
+}
+
+function copyCurrentVideoLink() {
+  if (!currentPlayingVideoData) return;
+  const link = currentPlayingVideoData.viewUrl || currentPlayingVideoData.previewUrl || currentPlayingVideoData.fullUrl || window.location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(() => {
+      if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+        DriveSync.showToast('📋 คัดลอกลิงก์วิดีโอเรียบร้อยแล้ว!', 'success');
+      } else {
+        alert('คัดลอกลิงก์เรียบร้อยแล้ว');
+      }
+    });
+  }
+}
+
+// Render Evidence Gallery (รองรับคลังภาพถ่ายและคลิปวิดีโอการสอน)
 function renderGallery(filter = 'all') {
   const container = document.getElementById('gallery-container');
   if (!container) return;
 
   const sampleGallery = [
-    { title: "การจัดทำระบบสารสนเทศรายวิชาและโครงสร้างหลักสูตร", caption: "การชี้แจงโครงสร้างหน่วยการเรียนรู้และระบบสารสนเทศแก่นักเรียน", badge: "ด้านที่ 1 & 2", thumbUrl: "https://drive.google.com/thumbnail?id=1q0IFGBeO9johw1cmn9diWLuSXmt_CLZn&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1q0IFGBeO9johw1cmn9diWLuSXmt_CLZn&sz=w1600", date: "มิถุนายน" },
-    { title: "บรรยากาศการจัดกิจกรรมการเรียนรู้ Active Learning", caption: "นักเรียนลงมือปฏิบัติกิจกรรมการแก้ปัญหาในสถานการณ์จำลอง", badge: "ด้านที่ 1", thumbUrl: "https://drive.google.com/thumbnail?id=1sdnONlo5QD71M6R-UnHXhM55RyF5esrP&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1sdnONlo5QD71M6R-UnHXhM55RyF5esrP&sz=w1600", date: "กรกฎาคม" },
-    { title: "การระดมความคิดด้วย Thinking Whiteboard", caption: "นักเรียนร่วมกันวาดผังความคิดขั้นตอนการแก้ปัญหาเป็นทีม", badge: "ประเด็นท้าทาย", thumbUrl: "https://drive.google.com/thumbnail?id=1mCq2P2UvCAdAXivXcNS49wpM-x5LHS9e&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1mCq2P2UvCAdAXivXcNS49wpM-x5LHS9e&sz=w1600", date: "สิงหาคม" },
-    { title: "การวัดและประเมินผลตามสภาพจริง (Authentic Assessment)", caption: "ครูตรวจประเมินชิ้นงานและทักษะการปฏิบัติงานร่วมกับเกณฑ์รูบริกส์", badge: "ด้านที่ 1", thumbUrl: "https://drive.google.com/thumbnail?id=1VXtUko-oQv6bN7ws27GNsk2FKmW5nlSh&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1VXtUko-oQv6bN7ws27GNsk2FKmW5nlSh&sz=w1600", date: "กันยายน" },
-    { title: "ระบบดูแลช่วยเหลือผู้เรียน Students Support System (SSS)", caption: "การคัดกรอง SDQ และการประสานงานช่วยเหลือผู้เรียนร่วมกับผู้ปกครอง", badge: "ด้านที่ 2", thumbUrl: "https://drive.google.com/thumbnail?id=1bYywqjS4jbW3U5vMgT9lrCYS8c3Nt3wG&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1bYywqjS4jbW3U5vMgT9lrCYS8c3Nt3wG&sz=w1600", date: "ตุลาคม" },
-    { title: "การขับเคลื่อนชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC)", caption: "การประชุมแลกเปลี่ยนเรียนรู้กับคณะครูกลุ่มสาระการเรียนรู้และฝ่ายวิชาการ", badge: "ด้านที่ 3", thumbUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w1600", date: "พฤศจิกายน" }
+    { 
+      type: "video", 
+      title: "คลิปวิดีโอบันทึกการจัดกิจกรรม Active Learning 60 นาที", 
+      caption: "การบันทึกบรรยากาศการจัดการเรียนรู้เชิงรุก เรื่อง โครงงานนวัตกรรมอาชีพ AFS ตามเกณฑ์ ว9/2564", 
+      badge: "ด้านที่ 1 (วิดีโอ 1080p)", 
+      thumbUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80", 
+      fullUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", 
+      previewUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", 
+      date: "กรกฎาคม" 
+    },
+    { 
+      type: "image",
+      title: "การจัดทำระบบสารสนเทศรายวิชาและโครงสร้างหลักสูตร", 
+      caption: "การชี้แจงโครงสร้างหน่วยการเรียนรู้และระบบสารสนเทศแก่นักเรียน", 
+      badge: "ด้านที่ 1 & 2", 
+      thumbUrl: "https://drive.google.com/thumbnail?id=1q0IFGBeO9johw1cmn9diWLuSXmt_CLZn&sz=w800", 
+      fullUrl: "https://drive.google.com/thumbnail?id=1q0IFGBeO9johw1cmn9diWLuSXmt_CLZn&sz=w1600", 
+      date: "มิถุนายน" 
+    },
+    { 
+      type: "image",
+      title: "บรรยากาศการจัดกิจกรรมการเรียนรู้ Active Learning", 
+      caption: "นักเรียนลงมือปฏิบัติกิจกรรมการแก้ปัญหาในสถานการณ์จำลอง", 
+      badge: "ด้านที่ 1", 
+      thumbUrl: "https://drive.google.com/thumbnail?id=1sdnONlo5QD71M6R-UnHXhM55RyF5esrP&sz=w800", 
+      fullUrl: "https://drive.google.com/thumbnail?id=1sdnONlo5QD71M6R-UnHXhM55RyF5esrP&sz=w1600", 
+      date: "กรกฎาคม" 
+    },
+    { 
+      type: "video", 
+      title: "คลิปผลลัพธ์การเรียนรู้ของผู้เรียนและการสะท้อนคิด (Thinking Whiteboard)", 
+      caption: "การนำเสนอผลงานโครงงานอาชีพและการสะท้อนคิดหลังการเรียนรู้ของนักเรียนกลุ่มตัวอย่าง", 
+      badge: "ประเด็นท้าทาย (วิดีโอ 1080p)", 
+      thumbUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80", 
+      fullUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", 
+      previewUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", 
+      date: "สิงหาคม" 
+    },
+    { 
+      type: "image",
+      title: "การระดมความคิดด้วย Thinking Whiteboard", 
+      caption: "นักเรียนร่วมกันวาดผังความคิดขั้นตอนการแก้ปัญหาเป็นทีม", 
+      badge: "ประเด็นท้าทาย", 
+      thumbUrl: "https://drive.google.com/thumbnail?id=1mCq2P2UvCAdAXivXcNS49wpM-x5LHS9e&sz=w800", 
+      fullUrl: "https://drive.google.com/thumbnail?id=1mCq2P2UvCAdAXivXcNS49wpM-x5LHS9e&sz=w1600", 
+      date: "สิงหาคม" 
+    },
+    { 
+      type: "image",
+      title: "การวัดและประเมินผลตามสภาพจริง (Authentic Assessment)", 
+      caption: "ครูตรวจประเมินชิ้นงานและทักษะการปฏิบัติงานร่วมกับเกณฑ์รูบริกส์", 
+      badge: "ด้านที่ 1", 
+      thumbUrl: "https://drive.google.com/thumbnail?id=1VXtUko-oQv6bN7ws27GNsk2FKmW5nlSh&sz=w800", 
+      fullUrl: "https://drive.google.com/thumbnail?id=1VXtUko-oQv6bN7ws27GNsk2FKmW5nlSh&sz=w1600", 
+      date: "กันยายน" 
+    },
+    { 
+      type: "image",
+      title: "ระบบดูแลช่วยเหลือผู้เรียน Students Support System (SSS)", 
+      caption: "การคัดกรอง SDQ และการประสานงานช่วยเหลือผู้เรียนร่วมกับผู้ปกครอง", 
+      badge: "ด้านที่ 2", 
+      thumbUrl: "https://drive.google.com/thumbnail?id=1bYywqjS4jbW3U5vMgT9lrCYS8c3Nt3wG&sz=w800", 
+      fullUrl: "https://drive.google.com/thumbnail?id=1bYywqjS4jbW3U5vMgT9lrCYS8c3Nt3wG&sz=w1600", 
+      date: "ตุลาคม" 
+    },
+    { 
+      type: "video", 
+      title: "คลิปการเผยแพร่นวัตกรรมและการเป็นวิทยากรขยายผล", 
+      caption: "การบันทึกการจัดอบรมเชิงปฏิบัติการขยายผลโมเดลการสอนให้แก่ครูในกลุ่มสาระและโรงเรียนเครือข่าย", 
+      badge: "ด้านที่ 3 (วิดีโอ 1080p)", 
+      thumbUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80", 
+      fullUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", 
+      previewUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", 
+      date: "พฤศจิกายน" 
+    },
+    { 
+      type: "image",
+      title: "การขับเคลื่อนชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC)", 
+      caption: "การประชุมแลกเปลี่ยนเรียนรู้กับคณะครูกลุ่มสาระการเรียนรู้และฝ่ายวิชาการ", 
+      badge: "ด้านที่ 3", 
+      thumbUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w800", 
+      fullUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w1600", 
+      date: "พฤศจิกายน" 
+    }
   ];
 
   // ถ้ามีภาพจริงที่ซิงก์สดมาจาก Google Drive ให้แสดงภาพจาก Google Drive
@@ -500,27 +709,94 @@ function renderGallery(filter = 'all') {
     isLiveDrive = true;
   }
 
+  // อัปเดตตัวเลขนับจำนวนสื่อ
+  const countAll = galleryList.length;
+  const countVideos = galleryList.filter(item => isVideoItem(item)).length;
+  const countImages = galleryList.filter(item => !isVideoItem(item)).length;
+
+  if (document.getElementById('gallery-count-all')) document.getElementById('gallery-count-all').innerText = countAll;
+  if (document.getElementById('gallery-count-images')) document.getElementById('gallery-count-images').innerText = countImages;
+  if (document.getElementById('gallery-count-videos')) document.getElementById('gallery-count-videos').innerText = countVideos;
+
+  // กรองตามประเภท
+  let filteredList = galleryList;
+  if (filter === 'videos') {
+    filteredList = galleryList.filter(item => isVideoItem(item));
+  } else if (filter === 'images') {
+    filteredList = galleryList.filter(item => !isVideoItem(item));
+  }
+
+  // อัปเดตปุ่มแท็บกรอง
+  ['all', 'images', 'videos'].forEach(tab => {
+    const btn = document.getElementById(`gallery-tab-${tab}`);
+    if (btn) {
+      if (tab === filter) {
+        btn.className = 'gallery-filter-btn px-4 py-2 rounded-xl text-xs font-bold font-heading transition flex items-center gap-1.5 shadow-sm bg-teal-600 text-white active';
+      } else {
+        btn.className = 'gallery-filter-btn px-4 py-2 rounded-xl text-xs font-bold font-heading transition flex items-center gap-1.5 shadow-sm bg-slate-100 hover:bg-slate-200 text-slate-700';
+      }
+    }
+  });
+
   container.innerHTML = '';
-  galleryList.forEach(item => {
+
+  if (filteredList.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-400">
+        <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl text-slate-400">
+          <i class="fa-regular fa-folder-open"></i>
+        </div>
+        <p class="text-sm font-medium">ยังไม่พบรายการสื่อในหมวดหมู่นี้</p>
+      </div>
+    `;
+    return;
+  }
+
+  filteredList.forEach(item => {
+    const isVideo = isVideoItem(item);
     const card = document.createElement('div');
-    card.className = 'group bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 hover-lift flex flex-col cursor-pointer';
-    card.onclick = () => openLightbox(item.fullUrl, item.title, item.caption);
+    card.className = 'group bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 hover-lift flex flex-col cursor-pointer transition';
+    
+    if (isVideo) {
+      card.onclick = () => openVideoPlayer(item);
+    } else {
+      card.onclick = () => openLightbox(item.fullUrl, item.title, item.caption);
+    }
+
     card.innerHTML = `
-      <div class="relative overflow-hidden aspect-[4/3] bg-slate-100">
+      <div class="relative overflow-hidden aspect-[4/3] bg-slate-900">
         <img src="${item.thumbUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'">
-        <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition"></div>
-        <span class="absolute top-3 left-3 bg-teal-700 text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
-          ${isLiveDrive ? '<i class="fa-brands fa-google-drive text-[10px]"></i>' : ''} ${item.badge}
+        <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/10 transition"></div>
+        
+        <!-- Badge -->
+        <span class="absolute top-3 left-3 ${isVideo ? 'bg-rose-600' : 'bg-teal-700'} text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1 z-10">
+          ${isLiveDrive ? '<i class="fa-brands fa-google-drive text-[10px]"></i>' : (isVideo ? '<i class="fa-solid fa-play text-[9px]"></i>' : '')} ${item.badge || (isVideo ? 'วิดีโอคลิป' : 'ภาพหลักฐาน')}
         </span>
+
+        ${isVideo ? `
+          <!-- Center Video Play Icon Button -->
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-rose-600/90 text-white flex items-center justify-center text-xl shadow-2xl ring-4 ring-white/30 group-hover:scale-110 group-hover:bg-rose-500 transition duration-300">
+              <i class="fa-solid fa-play ml-1"></i>
+            </div>
+          </div>
+          <!-- 1080p Tag -->
+          <span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-black/75 text-white text-[10px] font-bold tracking-wider backdrop-blur-sm z-10">
+            HD 1080p
+          </span>
+        ` : ''}
       </div>
       <div class="p-4 flex-1 flex flex-col justify-between">
         <div>
-          <h4 class="font-heading font-bold text-slate-900 text-sm leading-snug group-hover:text-teal-700 transition line-clamp-1">${item.title}</h4>
-          <p class="text-xs text-slate-500 mt-1 line-clamp-2">${item.caption || 'ภาพหลักฐานประกอบการประเมิน PA'}</p>
+          <h4 class="font-heading font-bold text-slate-900 text-sm leading-snug group-hover:${isVideo ? 'text-rose-600' : 'text-teal-700'} transition line-clamp-1">${item.title}</h4>
+          <p class="text-xs text-slate-500 mt-1 line-clamp-2">${item.caption || 'หลักฐานประกอบการประเมิน ว.PA'}</p>
         </div>
         <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
           <span><i class="fa-regular fa-calendar-check mr-1"></i> ${item.date || 'ปี'} ${currentAcademicYear}</span>
-          <span class="text-teal-600 font-medium">คลิกดูภาพขยาย</span>
+          <span class="${isVideo ? 'text-rose-600' : 'text-teal-600'} font-semibold flex items-center gap-1">
+            <i class="fa-solid ${isVideo ? 'fa-play text-[10px]' : 'fa-magnifying-glass-plus text-[11px]'}"></i> 
+            ${isVideo ? 'คลิกเปิดเล่นวิดีโอ' : 'คลิกดูภาพขยาย'}
+          </span>
         </div>
       </div>
     `;
@@ -706,12 +982,33 @@ function getIndicatorFilesAndMedia(indicatorCode, academicYear = null) {
       if (Array.isArray(indData.files)) {
         indData.files.forEach(f => {
           const isImg = f.type === 'image' || (f.mime && f.mime.includes('image')) || /\.(jpe?g|png|webp|gif)$/i.test(f.title);
+          const isVid = f.type === 'video' || (f.mime && f.mime.includes('video')) || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(f.title);
           if (isImg) {
             driveImages.push({
               title: f.title,
               url: f.thumbUrl || f.viewUrl,
               fullUrl: f.thumbUrl ? f.thumbUrl.replace('w800', 'w1600') : f.viewUrl,
+              type: 'image',
               caption: `ภาพหลักฐานจาก Google Drive (${indData.folderName || 'ตัวชี้วัด ' + code})`
+            });
+          } else if (isVid) {
+            const vidObj = {
+              title: f.title,
+              url: f.thumbUrl || "https://drive.google.com/thumbnail?id=" + f.id + "&sz=w800",
+              fullUrl: f.previewUrl || "https://drive.google.com/file/d/" + f.id + "/preview",
+              previewUrl: f.previewUrl || "https://drive.google.com/file/d/" + f.id + "/preview",
+              viewUrl: f.viewUrl,
+              type: 'video',
+              caption: `คลิปวิดีโอหลักฐานจาก Google Drive (${indData.folderName || 'ตัวชี้วัด ' + code})`
+            };
+            driveImages.push(vidObj);
+            driveDocs.push({
+              title: f.title,
+              size: f.size || '15 MB',
+              icon: 'fa-file-video',
+              viewUrl: f.viewUrl,
+              previewUrl: f.previewUrl || "https://drive.google.com/file/d/" + f.id + "/preview",
+              type: 'video'
             });
           } else {
             driveDocs.push({
@@ -946,32 +1243,43 @@ function openIndicatorModal(indicator, teacher, expectedLevel, domain = null) {
   }
 
   docsToRender.forEach(doc => {
+    const isVideo = doc.type === 'video' || (doc.title && /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(doc.title));
     const docCard = document.createElement('div');
-    docCard.className = 'flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition';
+    docCard.className = isVideo 
+      ? 'flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-rose-50/80 to-pink-50/70 border border-rose-200/80 hover:bg-rose-50 transition'
+      : 'flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition';
     
     const isLive = Boolean(doc.viewUrl);
     const viewUrl = doc.viewUrl || getIndicatorDriveUrl(indicator.code);
+    const previewUrl = doc.previewUrl || viewUrl;
+    const safeTitle = (doc.title || '').replace(/'/g, "\\'");
 
     docCard.innerHTML = `
       <div class="flex items-center gap-3 min-w-0 pr-2">
-        <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-base flex-shrink-0">
-          <i class="fa-solid ${doc.icon || 'fa-file-pdf'}"></i>
+        <div class="w-9 h-9 rounded-lg ${isVideo ? 'bg-rose-100 text-rose-600' : 'bg-teal-100 text-teal-800'} flex items-center justify-center text-base flex-shrink-0">
+          <i class="fa-solid ${isVideo ? 'fa-file-video' : (doc.icon || 'fa-file-pdf')}"></i>
         </div>
         <div class="min-w-0">
           <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm truncate" title="${doc.title}">${doc.title}</div>
           <div class="text-[11px] text-slate-500 flex items-center gap-2">
             <span>ขนาด ${doc.size || '1.5 MB'}</span>
             <span>•</span>
-            <span class="${isLive ? 'text-emerald-700 font-semibold' : 'text-teal-700 font-medium'}">
-              ${isLive ? '<i class="fa-brands fa-google-drive"></i> ไฟล์จาก Google Drive' : 'เอกสารหลักฐานมาตรฐาน'}
+            <span class="${isVideo ? 'text-rose-600 font-semibold' : (isLive ? 'text-emerald-700 font-semibold' : 'text-teal-700 font-medium')}">
+              ${isVideo ? '🎥 คลิปวิดีโอการสอน 1080p' : (isLive ? '<i class="fa-brands fa-google-drive"></i> ไฟล์จาก Google Drive' : 'เอกสารหลักฐานมาตรฐาน')}
             </span>
           </div>
         </div>
       </div>
       <div class="flex items-center gap-1.5 flex-shrink-0">
-        <a href="${viewUrl}" target="_blank" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> <span>เปิดดูเอกสาร</span>
-        </a>
+        ${isVideo ? `
+          <button onclick="openVideoPlayer({ previewUrl: '${previewUrl}', viewUrl: '${viewUrl}', title: '${safeTitle}', caption: 'คลิปวิดีโอหลักฐานการจัดการเรียนรู้ ตัวชี้วัด ${indicator.code}', badge: 'ตัวชี้วัด ${indicator.code}' })" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-play text-[10px]"></i> <span>เล่นวิดีโอ</span>
+          </button>
+        ` : `
+          <a href="${viewUrl}" target="_blank" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> <span>เปิดดูเอกสาร</span>
+          </a>
+        `}
       </div>
     `;
     listEl.appendChild(docCard);
@@ -1008,8 +1316,13 @@ function closeIndicatorModal() {
   }
 }
 
-// Lightbox Logic
+// Lightbox Logic (อัปเกรดให้สามารถเปิด Video Player ได้หากเป็นไฟล์วิดีโอ)
 function openLightbox(src, title, caption) {
+  if (typeof src === 'string' && (src.match(/\.(mp4|webm|mov|m4v|avi)($|\?)/i) || src.includes('/preview'))) {
+    openVideoPlayer({ previewUrl: src, title, caption, badge: 'วิดีโอคลิป' });
+    return;
+  }
+
   const lightbox = document.getElementById('lightbox');
   const img = document.getElementById('lightbox-img');
   const cap = document.getElementById('lightbox-caption');
@@ -2769,3 +3082,29 @@ function handleSaveProfileEditor() {
     DriveSync.showToast('✅ บันทึกข้อมูลโปรไฟล์และอัปเดตหน้าเว็บเรียบร้อยแล้ว!', 'success', 3500);
   }
 }
+
+// Global Keydown Listener for Modals
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const videoModal = document.getElementById('video-player-modal');
+    if (videoModal && !videoModal.classList.contains('hidden')) {
+      closeVideoPlayer();
+      return;
+    }
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox && !lightbox.classList.contains('hidden')) {
+      closeLightbox();
+      return;
+    }
+    const indModal = document.getElementById('indicator-modal');
+    if (indModal && !indModal.classList.contains('hidden')) {
+      closeIndicatorModal();
+      return;
+    }
+    const docModal = document.getElementById('doc-modal');
+    if (docModal && !docModal.classList.contains('hidden')) {
+      closeDocViewer();
+      return;
+    }
+  }
+});
