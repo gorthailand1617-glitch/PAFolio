@@ -356,16 +356,19 @@ function renderIndicators(filter = 'all', searchQuery = '') {
 
       card.innerHTML = `
         <div>
-          <!-- 🖼️ ภาพตัวอย่างจากโฟลเดอร์ภาพตัวชี้วัดในไดรฟ์ -->
-          <div class="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-3.5 bg-slate-100 shadow-inner">
-            <img src="${primaryImgUrl}" alt="${ind.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
-            <span class="absolute top-2.5 left-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${tagBg}">
+          <!-- 🖼️ ภาพตัวอย่างจากโฟลเดอร์ภาพตัวชี้วัดในไดรฟ์ (ฟิตขอบครบทุกด้าน) -->
+          <div class="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-3.5 bg-slate-950 flex items-center justify-center shadow-inner group/img">
+            <!-- Soft ambient blurred backdrop -->
+            <img src="${primaryImgUrl}" alt="" class="absolute inset-0 w-full h-full object-cover filter blur-lg opacity-35 scale-110 pointer-events-none" aria-hidden="true">
+            <!-- Main uncropped fitted image showing all edges -->
+            <img src="${primaryImgUrl}" alt="${ind.title}" class="relative z-10 max-w-full max-h-full w-auto h-auto object-contain p-1 group-hover:scale-105 transition duration-500 drop-shadow-md" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none z-10"></div>
+            <span class="absolute top-2.5 left-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${tagBg} z-20">
               ตัวชี้วัด ${ind.code}
             </span>
-            ${liveBadge}
-            ${photoBadge}
-            <div class="absolute bottom-2 left-2.5 right-14 text-white/95 text-[11px] font-medium truncate drop-shadow">
+            <div class="z-20">${liveBadge}</div>
+            <div class="z-20">${photoBadge}</div>
+            <div class="absolute bottom-2 left-2.5 right-14 text-white/95 text-[11px] font-medium truncate drop-shadow z-20">
               ${primaryImg ? (primaryImg.title || ind.title) : ind.title}
             </div>
           </div>
@@ -752,9 +755,14 @@ function updateIndicatorSliderView() {
   if (!slide) return;
 
   const imgEl = document.getElementById('modal-slider-img');
+  const bgEl = document.getElementById('modal-slider-bg');
+  const imgSrc = slide.url || slide.thumbUrl || slide.fullUrl;
   if (imgEl) {
-    imgEl.src = slide.url || slide.thumbUrl || slide.fullUrl;
+    imgEl.src = imgSrc;
     imgEl.alt = slide.title || 'ภาพหลักฐานตัวชี้วัด';
+  }
+  if (bgEl) {
+    bgEl.src = imgSrc;
   }
 
   const counterEl = document.getElementById('modal-slider-counter');
