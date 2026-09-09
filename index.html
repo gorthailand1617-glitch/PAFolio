@@ -1129,34 +1129,49 @@
     </div>
   </div>
 
-  <!-- ================= MODAL: SIMULATED DOCUMENT VIEWER ================= -->
-  <div id="doc-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeDocViewer()">
+  <!-- ================= MODAL: DOCUMENT & EVIDENCE VIEWER ================= -->
+  <div id="doc-modal" class="fixed inset-0 z-[80] bg-black/85 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeDocViewer()">
     <div class="relative max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 text-center modal-content" onclick="event.stopPropagation()">
       <button onclick="closeDocViewer()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
-      <div class="w-16 h-16 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-3xl mx-auto mb-4">
+      <div class="w-16 h-16 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">
         <i class="fa-solid fa-file-lines"></i>
       </div>
 
       <h3 id="doc-modal-title" class="font-heading font-bold text-slate-900 text-lg sm:text-xl mb-1"></h3>
-      <div id="doc-modal-type" class="text-xs text-slate-500 mb-6"></div>
+      <div id="doc-modal-type" class="text-xs text-slate-500 mb-5"></div>
+
+      <!-- Evidence Description Card -->
+      <div id="doc-modal-evidence-desc" class="hidden p-4 rounded-2xl bg-teal-50/80 border border-teal-200/70 text-left text-xs text-teal-950 space-y-1 mb-4 leading-relaxed"></div>
 
       <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-left text-xs text-slate-600 space-y-2 mb-6">
         <div class="flex items-center gap-2 text-teal-700 font-semibold">
-          <i class="fa-solid fa-shield-check"></i> เอกสารผ่านการรับรองความถูกต้องตามระเบียบราชการ
+          <i class="fa-solid fa-shield-check text-emerald-600"></i> เอกสารและร่องรอยหลักฐานจัดเก็บในระบบแฟ้มสะสมงานดิจิทัล
         </div>
         <div>• <strong>ผู้รับผิดชอบ:</strong> <span id="doc-modal-teacher-name">นายกรกฎ รัตนะโชติ</span></div>
         <div>• <strong>หน่วยงาน:</strong> <span id="doc-modal-school">โรงเรียนเปรมติณสูลานนท์</span></div>
-        <div>• <strong>สถานะ:</strong> บันทึกในแฟ้มสะสมผลงาน ว.PA ใน Google Drive</div>
+        <div class="flex items-center gap-1.5 text-slate-700">
+          • <strong>สถานะไดรฟ์:</strong> 
+          <span id="doc-modal-drive-status" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-teal-100 text-teal-800">
+            <i class="fa-brands fa-google-drive text-teal-700"></i> โฟลเดอร์ Google Drive พร้อมเปิด
+          </span>
+        </div>
       </div>
 
-      <div class="flex justify-center gap-3">
-        <button onclick="alert('กำลังเปิดโฟลเดอร์เอกสารใน Google Drive...')" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading transition shadow-md">
-          <i class="fa-brands fa-google-drive mr-1.5"></i> เปิดดูไฟล์ใน Google Drive
+      <div class="flex flex-wrap justify-center gap-2.5">
+        <a id="doc-modal-drive-btn" href="https://drive.google.com/drive/my-drive" target="_blank" 
+           class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading transition shadow-md inline-flex items-center gap-2">
+          <i class="fa-brands fa-google-drive"></i> <span>เปิดดูใน Google Drive</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+        <button onclick="copyDocDriveLink()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-regular fa-copy text-teal-600"></i> คัดลอกลิงก์
         </button>
-        <button onclick="closeDocViewer()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold font-heading transition">
+        <button onclick="closeDocViewer(); openDriveSyncModal();" class="px-4 py-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/80 text-xs font-semibold font-heading transition flex items-center gap-1.5">
+          <i class="fa-solid fa-gear text-teal-600"></i> ตั้งค่าไดรฟ์
+        </button>
+        <button onclick="closeDocViewer()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold font-heading transition">
           ปิดหน้าต่าง
         </button>
       </div>

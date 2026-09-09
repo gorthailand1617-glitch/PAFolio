@@ -527,11 +527,12 @@ function openIndicatorModal(indicator, teacher, expectedLevel) {
       listEl.appendChild(fileCard);
     });
 
-    if (driveFolderData.folderUrl) {
+    const folderTargetUrl = driveFolderData.folderUrl || (driveFolderData.folderId ? `https://drive.google.com/drive/folders/${driveFolderData.folderId}` : getIndicatorDriveUrl(indicator.code));
+    if (folderTargetUrl) {
       const folderLink = document.createElement('div');
       folderLink.className = 'pt-2 text-right';
       folderLink.innerHTML = `
-        <a href="${driveFolderData.folderUrl}" target="_blank" class="text-xs text-teal-700 hover:text-teal-900 font-semibold inline-flex items-center gap-1">
+        <a href="${folderTargetUrl}" target="_blank" class="text-xs text-teal-700 hover:text-teal-900 font-semibold inline-flex items-center gap-1">
           <i class="fa-brands fa-google-drive"></i> เปิดดูโฟลเดอร์นี้ใน Google Drive <i class="fa-solid fa-chevron-right text-[10px]"></i>
         </a>
       `;
@@ -539,18 +540,26 @@ function openIndicatorModal(indicator, teacher, expectedLevel) {
     }
   } else {
     // โหมดจำลอง / หรือยังไม่มีไฟล์ใน Google Drive
+    const targetDriveUrl = getIndicatorDriveUrl(indicator.code);
     listEl.innerHTML = `
-      <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition cursor-pointer" onclick="openDocViewer('เอกสารประกอบตัวชี้วัด ${indicator.code}', 'PDF')">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-base"><i class="fa-solid fa-file-pdf"></i></div>
-          <div>
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center text-lg flex-shrink-0">
+            <i class="fa-solid fa-file-shield"></i>
+          </div>
+          <div class="min-w-0">
             <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm">เอกสารร่องรอยหลักฐาน ตัวชี้วัด ${indicator.code} (ปีการศึกษา ${currentAcademicYear})</div>
-            <div class="text-[11px] text-teal-800 font-medium">${(synth && synth.evidence) ? '<i class="fa-solid fa-list-check mr-1 text-teal-600"></i> ' + synth.evidence : 'Google Drive Folder · ตัวชี้วัด ' + indicator.code}</div>
+            <div class="text-[11px] text-teal-800 font-medium line-clamp-1">${(synth && synth.evidence) ? '<i class="fa-solid fa-list-check mr-1 text-teal-600"></i> ' + synth.evidence : 'Google Drive Folder · ตัวชี้วัด ' + indicator.code}</div>
           </div>
         </div>
-        <button class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-teal-700 text-xs font-semibold hover:bg-teal-600 hover:text-white transition shadow-sm">
-          <i class="fa-solid fa-eye mr-1"></i> เปิดดูตัวอย่าง
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0">
+          <a href="${targetDriveUrl}" target="_blank" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading transition shadow-sm inline-flex items-center gap-1.5">
+            <i class="fa-brands fa-google-drive"></i> เปิดไดรฟ์ <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+          <button onclick="openDocViewer('เอกสารประกอบตัวชี้วัด ${indicator.code}', 'PDF', '${indicator.code}')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition shadow-sm inline-flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-teal-600"></i> รายละเอียด
+          </button>
+        </div>
       </div>
     `;
   }
@@ -565,7 +574,14 @@ function closeIndicatorModal() {
   if (modal) {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    document.body.style.overflow = 'auto';
+    const docModal = document.getElementById('doc-modal');
+    if (docModal && !docModal.classList.contains('hidden')) {
+      document.body.style.overflow = 'hidden';
+    } else if (typeof PresentationDeck !== 'undefined' && PresentationDeck.isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
   }
 }
 
@@ -599,8 +615,55 @@ function closeLightbox() {
   }
 }
 
-// Document Viewer Modal
-function openDocViewer(title, type) {
+// Document Viewer Modal & Drive Link Helper
+let currentDocDriveUrl = 'https://drive.google.com/drive/my-drive';
+
+function getIndicatorDriveUrl(indicatorCode = '') {
+  // 1. Check synced indicator folder
+  if (indicatorCode && typeof DriveSync !== 'undefined' && DriveSync.syncedData && DriveSync.syncedData.indicators) {
+    const cleanCode = String(indicatorCode).trim();
+    const matchingKey = Object.keys(DriveSync.syncedData.indicators).find(key => 
+      key === cleanCode || key.startsWith(cleanCode + ' ') || key.startsWith(cleanCode + '.') || key.includes(cleanCode)
+    );
+    if (matchingKey && DriveSync.syncedData.indicators[matchingKey]) {
+      const indData = DriveSync.syncedData.indicators[matchingKey];
+      if (indData.folderUrl) return indData.folderUrl;
+      if (indData.folderId) return `https://drive.google.com/drive/folders/${indData.folderId}`;
+      if (indData.files && indData.files.length > 0 && indData.files[0].viewUrl) {
+        return indData.files[0].viewUrl;
+      }
+    }
+  }
+
+  // 2. Check DriveSync main folderUrl / folderId
+  if (typeof DriveSync !== 'undefined' && DriveSync.config) {
+    if (DriveSync.config.folderUrl && DriveSync.config.folderUrl.includes('drive.google.com')) {
+      return DriveSync.config.folderUrl;
+    }
+    if (DriveSync.config.folderId) {
+      return `https://drive.google.com/drive/folders/${DriveSync.config.folderId}`;
+    }
+  }
+
+  // 3. Check Teacher Profile driveFolderId
+  const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : null;
+  if (teacher && teacher.driveFolderId) {
+    const fid = teacher.driveFolderId.trim();
+    if (fid.startsWith('http')) return fid;
+    return `https://drive.google.com/drive/folders/${fid}`;
+  }
+
+  // 4. Check global teacherProfile
+  if (typeof teacherProfile !== 'undefined' && teacherProfile.driveFolderId) {
+    const fid = teacherProfile.driveFolderId.trim();
+    if (fid.startsWith('http')) return fid;
+    return `https://drive.google.com/drive/folders/${fid}`;
+  }
+
+  return 'https://drive.google.com/drive/my-drive';
+}
+
+function openDocViewer(title, type, indicatorCode = '') {
   const modal = document.getElementById('doc-modal');
   if (!modal) return;
   const teacher = getActiveTeacher();
@@ -609,6 +672,45 @@ function openDocViewer(title, type) {
   document.getElementById('doc-modal-type').innerText = `ประเภทเอกสาร: ${type} · ปีการศึกษา ${currentAcademicYear}`;
   document.getElementById('doc-modal-teacher-name').innerText = teacher.name;
   document.getElementById('doc-modal-school').innerText = `${teacher.learningArea} · ${teacher.school}`;
+
+  const targetDriveUrl = getIndicatorDriveUrl(indicatorCode);
+  currentDocDriveUrl = targetDriveUrl;
+
+  const driveBtn = document.getElementById('doc-modal-drive-btn');
+  if (driveBtn) {
+    driveBtn.href = targetDriveUrl;
+  }
+
+  const driveStatus = document.getElementById('doc-modal-drive-status');
+  if (driveStatus) {
+    if (targetDriveUrl.includes('folders/')) {
+      driveStatus.innerHTML = '<i class="fa-brands fa-google-drive text-teal-700"></i> โฟลเดอร์ Google Drive พร้อมเปิดดู';
+    } else {
+      driveStatus.innerHTML = '<i class="fa-brands fa-google-drive text-teal-700"></i> ลิงก์ไดรฟ์พร้อมใช้งาน';
+    }
+  }
+
+  const descEl = document.getElementById('doc-modal-evidence-desc');
+  if (descEl) {
+    let evidenceText = '';
+    if (indicatorCode && typeof indicatorSyntheses !== 'undefined' && indicatorSyntheses[indicatorCode]) {
+      evidenceText = indicatorSyntheses[indicatorCode].evidence || '';
+    }
+    if (evidenceText) {
+      descEl.innerHTML = `
+        <div class="font-semibold text-teal-900 flex items-center gap-1.5 mb-1">
+          <i class="fa-solid fa-list-check text-teal-600"></i> รายการร่องรอยหลักฐานที่กำหนดสำหรับตัวชี้วัดนี้:
+        </div>
+        <div class="text-teal-800 text-[11px] leading-relaxed pl-2 border-l-2 border-teal-300">
+          ${evidenceText}
+        </div>
+      `;
+      descEl.classList.remove('hidden');
+    } else {
+      descEl.innerHTML = '';
+      descEl.classList.add('hidden');
+    }
+  }
 
   modal.classList.remove('hidden');
   modal.classList.add('flex');
@@ -620,7 +722,45 @@ function closeDocViewer() {
   if (modal) {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    document.body.style.overflow = 'auto';
+    const indModal = document.getElementById('indicator-modal');
+    if (indModal && !indModal.classList.contains('hidden')) {
+      document.body.style.overflow = 'hidden';
+    } else if (typeof PresentationDeck !== 'undefined' && PresentationDeck.isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }
+}
+
+function copyDocDriveLink() {
+  const urlToCopy = currentDocDriveUrl || getIndicatorDriveUrl();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(urlToCopy).then(() => {
+      if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+        DriveSync.showToast('📋 คัดลอกลิงก์ Google Drive เรียบร้อยแล้ว!', 'success', 3000);
+      } else {
+        alert('คัดลอกลิงก์ Google Drive สำเร็จ: ' + urlToCopy);
+      }
+    }).catch(() => {
+      fallbackCopyText(urlToCopy);
+    });
+  } else {
+    fallbackCopyText(urlToCopy);
+  }
+}
+
+function fallbackCopyText(text) {
+  const tempInput = document.createElement('input');
+  tempInput.value = text;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  document.execCommand('copy');
+  document.body.removeChild(tempInput);
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast('📋 คัดลอกลิงก์ Google Drive เรียบร้อยแล้ว!', 'success', 3000);
+  } else {
+    alert('คัดลอกลิงก์ Google Drive สำเร็จ: ' + text);
   }
 }
 
@@ -1033,6 +1173,11 @@ function setupEventListeners() {
       closeNewYearModal();
       closeTeacherCloneModal();
       closeAIAssistant();
+      if (typeof closeProfileEditorModal === 'function') closeProfileEditorModal();
+      if (typeof closeFolderTemplateModal === 'function') closeFolderTemplateModal();
+      if (typeof closeThemeModal === 'function') closeThemeModal();
+      if (typeof VideoStudioUI !== 'undefined' && VideoStudioUI.close) VideoStudioUI.close();
+      if (typeof CertificateVault !== 'undefined' && CertificateVault.close) CertificateVault.close();
       if (typeof PresentationDeck !== 'undefined' && PresentationDeck.isOpen) {
         PresentationDeck.close();
       }
@@ -1044,6 +1189,12 @@ function setupEventListeners() {
   if (menuBtn && mobileMenu) {
     menuBtn.addEventListener('click', () => {
       mobileMenu.classList.toggle('hidden');
+    });
+
+    mobileMenu.querySelectorAll('a, button').forEach(item => {
+      item.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
     });
   }
 }
