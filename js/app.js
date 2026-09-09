@@ -3106,8 +3106,9 @@ function handleSaveProfileEditor() {
   renderApp();
   closeProfileEditorModal();
 
-  // ☁️ Real-time Cloud Sync: ส่งข้อมูลโปรไฟล์ไปบันทึกบน Google Drive ทันที
+  // ☁️ Real-time Cloud Sync: ส่งข้อมูลโปรไฟล์ไปบันทึกบน Google Drive ทันทีเป็นค่าเริ่มต้นสากล
   if (typeof DriveSync !== 'undefined' && typeof DriveSync.saveProfileToCloud === 'function') {
+    if (_cloudSyncDatabaseTimeout) clearTimeout(_cloudSyncDatabaseTimeout);
     DriveSync.saveProfileToCloud(teacher);
   } else if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
     DriveSync.showToast('✅ บันทึกข้อมูลโปรไฟล์และอัปเดตหน้าเว็บเรียบร้อยแล้ว!', 'success', 3500);
