@@ -177,10 +177,32 @@ function doGet(e) {
 }
 
 /**
+ * 🧪 ฟังก์ชันทดสอบการสแกนไดรฟ์ (กดเลือกฟังก์ชันนี้ใน Apps Script แล้วกด "เรียกใช้" ได้ทันที)
+ */
+function testScanDrive() {
+  Logger.log("🔍 กำลังทดสอบสแกน Google Drive ด้วย ROOT_FOLDER_ID: " + ROOT_FOLDER_ID);
+  const res = scanDriveRecursively(ROOT_FOLDER_ID, "2569");
+  Logger.log("📁 ชื่อโฟลเดอร์หลัก: " + res.folderName);
+  Logger.log("📂 ปีที่พบ: " + JSON.stringify(res.years));
+  Logger.log("📋 ตัวชี้วัดที่พบ: " + Object.keys(res.indicators).join(", "));
+  Logger.log("🔗 โฟลเดอร์ตัวชี้วัดที่ตรวจพบ: " + JSON.stringify(res.indicatorFolders));
+  Logger.log("✅ ทดสอบสแกนสำเร็จเรียบร้อย!");
+}
+
+/**
  * สแกนค้นหาโฟลเดอร์และไฟล์อย่างชาญฉลาด
  */
 function scanDriveRecursively(rootFolderId, filterYear) {
-  const rootFolder = DriveApp.getFolderById(rootFolderId);
+  // หากไม่ได้ส่ง rootFolderId มา ให้ดึงจาก ROOT_FOLDER_ID อัตโนมัติ (ป้องกันข้อผิดพลาด Invalid argument: id เมื่อกด Run ใน Apps Script)
+  const targetId = (rootFolderId && typeof rootFolderId === 'string' && rootFolderId.trim()) 
+    ? rootFolderId.trim() 
+    : ROOT_FOLDER_ID;
+
+  if (!targetId || targetId === "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE") {
+    throw new Error("ไม่พบ Folder ID กรุณาระบุ ROOT_FOLDER_ID ใน Code.gs หรือส่ง parameter folderId มา");
+  }
+
+  const rootFolder = DriveApp.getFolderById(targetId);
   const result = {
     folderName: rootFolder.getName(),
     years: [],
