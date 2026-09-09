@@ -18,17 +18,48 @@ const CertificateVault = {
     return num >= 2560 && num <= 2579;
   },
 
+  // สกัดและคำนวณรอบปีการศึกษาที่แท้จริงจากชื่อไฟล์ ข้อความ หรือข้อมูลภาพ
+  // ป้องกันภาพถ่ายกล้องมือถือ เช่น IMG_20250718_... หรือ IMG_20250524_... ไม่ให้กลายเป็นปี 2507, 2505, 2503
+  // และแปลงปี ค.ศ. (2023-2029) เป็นปี พ.ศ. (2566-2572) ให้ตรงกับรอบปีการศึกษา
+  extractAcademicYear(text, defaultYear = null) {
+    if (!text) return defaultYear ? String(defaultYear) : null;
+    const str = String(text);
+
+    // 1. ตรวจจับชื่อไฟล์จากกล้องมือถือ เช่น IMG_20250718_150422, 20250524_084944, 2025-07-18
+    const cameraMatch = str.match(/(?:IMG_)?(202[3-9])[-_]?(0[1-9]|1[0-2])[-_]?([0-3]\d)/i);
+    if (cameraMatch) {
+      const ceYear = parseInt(cameraMatch[1], 10);
+      const month = parseInt(cameraMatch[2], 10);
+      const beYear = ceYear + 543;
+      // รอบปีการศึกษา/งบประมาณไทย: พฤษภาคม (เดือน 5) ถึง เมษายน (เดือน 4) ของปีถัดไป
+      const academicYear = (month >= 5) ? beYear : (beYear - 1);
+      return String(academicYear);
+    }
+
+    // 2. ตรวจจับ พ.ศ. 4 หลักตรงๆ เช่น 2566, 2567, 2568, 2569, 2570 (ไม่ติดกับตัวเลขอื่น)
+    const beMatch = str.match(/(?<!\d)(25[6-7]\d)(?!\d)/);
+    if (beMatch && this.isValidAcademicYear(beMatch[1])) {
+      return beMatch[1];
+    }
+
+    // 3. ตรวจจับคำนำหน้า เช่น ปี 68, PA68, พ.ศ. 68, ปีการศึกษา 2568, ปีงบประมาณ 2569
+    const prefixMatch = str.match(/(?:PA|ปี|พ\.ศ\.|ปีการศึกษา|ปีงบประมาณ)\s*[:.]?\s*([6-7]\d)\b/i);
+    if (prefixMatch) {
+      return "25" + prefixMatch[1];
+    }
+
+    // 4. ถ้ามี defaultYear ที่ถูกต้อง
+    if (defaultYear && this.isValidAcademicYear(defaultYear)) {
+      return String(defaultYear);
+    }
+
+    return null;
+  },
+
   // ทำความสะอาดและแปลงปีให้อยู่ในกรอบปีการศึกษาที่ประเมิน
   sanitizeYear(yr, fallbackYear = '2569') {
-    if (this.isValidAcademicYear(yr)) {
-      return String(yr).trim();
-    }
-    // หากมี พ.ศ. 4 หลัก (2560 - 2579) ซ่อนอยู่ในข้อความ ให้ดึงออกมา
-    const match = String(yr || '').match(/\b(25[6-7]\d)\b/);
-    if (match && this.isValidAcademicYear(match[1])) {
-      return match[1];
-    }
-    return String(fallbackYear);
+    const extracted = this.extractAcademicYear(yr, fallbackYear);
+    return extracted || String(fallbackYear);
   },
 
   // ฐานข้อมูลเกียรติบัตรและรางวัลมาตรฐาน แยกตามรอบปีการศึกษาโดยเฉพาะ (ไม่ปะปนกัน)
@@ -265,12 +296,16 @@ const CertificateVault = {
     if (typeof DriveSync !== 'undefined' && DriveSync.syncedData) {
       if (Array.isArray(DriveSync.syncedData.certificates) && DriveSync.syncedData.certificates.length > 0) {
         DriveSync.syncedData.certificates.forEach(c => {
-          // ล้างค่าปีให้อยู่ในช่วงที่ถูกต้อง (กำจัด 2503, 2505, 2507)
-          const certYear = this.sanitizeYear(c.year, activeYear);
-          
+          // ดึงปีที่แท้จริงจากชื่อไฟล์ โฟลเดอร์ หรือคำอธิบาย (เช่น IMG_2025... แปลงเป็น 2568)
+          const fullInfo = `${c.title || ''} ${c.issuer || ''} ${c.description || ''}`;
+          let itemYear = this.extractAcademicYear(fullInfo);
+          if (!itemYear && c.year && this.isValidAcademicYear(c.year)) {
+            itemYear = String(c.year);
+          }
+
           // ⚠️ จุดสำคัญที่สุด: ต้องตรงกับรอบปีที่กำลังประเมิน (activeYear) เท่านั้น ไม่เอาของปีอื่นมาแสดง
-          if (certYear === activeYear) {
-            c.year = certYear;
+          if (itemYear === activeYear) {
+            c.year = activeYear;
             if (!seenIds.has(c.id)) {
               seenIds.add(c.id);
               driveCerts.push(c);
@@ -301,6 +336,13 @@ const CertificateVault = {
               if (isCertFile && (file.type === 'image' || file.type === 'pdf')) {
                 const cId = `drive-cert-${file.id || fIdx}`;
                 if (!seenIds.has(cId)) {
+                  // วิเคราะห์ปีของไฟล์นี้
+                  const fullText = (ind.folderName || '') + ' ' + (file.title || '');
+                  const fileYear = this.extractAcademicYear(fullText, activeYear);
+                  
+                  // ตรวจสอบว่าตรงกับปีที่กำลังประเมินหรือไม่
+                  if (fileYear !== activeYear) return;
+
                   seenIds.add(cId);
                   
                   // วิเคราะห์ระดับรางวัลจากชื่อ
@@ -309,16 +351,16 @@ const CertificateVault = {
                   let badge = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
                   let icon = 'fa-trophy text-amber-400';
 
-                  const fullText = (ind.folderName + ' ' + file.title).toLowerCase();
-                  if (fullText.includes('ภาค') || fullText.includes('จังหวัด')) {
+                  const textLow = fullText.toLowerCase();
+                  if (textLow.includes('ภาค') || textLow.includes('จังหวัด')) {
                     cat = 'regional'; catThai = 'ระดับภาค / จังหวัด';
                     badge = 'bg-teal-500/20 text-teal-300 border-teal-500/40';
                     icon = 'fa-medal text-teal-400';
-                  } else if (fullText.includes('เขต') || fullText.includes('สพม') || fullText.includes('สพป')) {
+                  } else if (textLow.includes('เขต') || textLow.includes('สพม') || textLow.includes('สพป')) {
                     cat = 'district'; catThai = 'ระดับเขตพื้นที่การศึกษา';
                     badge = 'bg-blue-500/20 text-blue-300 border-blue-500/40';
                     icon = 'fa-star text-blue-400';
-                  } else if (fullText.includes('โรงเรียน') || fullText.includes('สถานศึกษา')) {
+                  } else if (textLow.includes('โรงเรียน') || textLow.includes('สถานศึกษา')) {
                     cat = 'school'; catThai = 'ระดับสถานศึกษา';
                     badge = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
                     icon = 'fa-certificate text-emerald-400';
@@ -333,9 +375,9 @@ const CertificateVault = {
                     badgeIcon: icon,
                     issuer: `Google Drive (${ind.folderName || 'โฟลเดอร์เกียรติบัตร'})`,
                     year: activeYear,
-                    date: 'รอบปีการศึกษา ' + activeYear,
+                    date: 'รอบปีงบประมาณ ' + activeYear,
                     imageUrl: file.thumbUrl || `https://drive.google.com/thumbnail?id=${file.id}&sz=w1200`,
-                    description: `ไฟล์ภาพเกียรติบัตรจริงจาก Google Drive ประจำปีการศึกษา ${activeYear}`,
+                    description: `ไฟล์ภาพเกียรติบัตรจริงจาก Google Drive ประจำรอบปี ${activeYear}`,
                     docUrl: file.viewUrl
                   });
                 }

@@ -41,8 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('pafolio_app_version', CURRENT_APP_VERSION);
     currentAcademicYear = '2569';
 
-    // 🧹 ล้างแคชภาพเก่า (ชุดกากีเดิม 1Dyu3SQW) ที่อาจค้างในเบราว์เซอร์ เพื่อให้แสดงภาพสูทขาวและปกทองปี 2569 ตรงกันทุกเบราว์เซอร์
+    // 🧹 ล้างแคชข้อมูลเก่าและเกียรติบัตรปีเพี้ยน (2503, 2505, 2507) ที่เคยค้างในเบราว์เซอร์
     try {
+      localStorage.removeItem('pafolio_synced_data');
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('pafolio_synced_data_') || key.startsWith('pafolio_cached_'))) {
+          localStorage.removeItem(key);
+        }
+      }
       const cached = localStorage.getItem('pafolio_custom_teachers');
       if (cached && cached.includes('1Dyu3SQW')) {
         localStorage.removeItem('pafolio_custom_teachers');

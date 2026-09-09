@@ -608,15 +608,22 @@ function scanCertificates(rootFolder, targetFoldersToScan, result) {
       }
 
       // ดึงปีการศึกษาให้สัมพันธ์กับรอบการประเมินอย่างถูกต้อง
-      // ป้องกันการตรวจจับวันที่เป็นปีผิดพลาด (เช่น วันที่ 25/03/67 กลายเป็น 2503, 25/05 กลายเป็น 2505, 25/07 กลายเป็น 2507)
+      // ป้องกันการตรวจจับวันที่เป็นปีผิดพลาด (เช่น วันที่ 25/03/67 กลายเป็น 2503, 25/05 กลายเป็น 2505, 2507)
       let fileYear = result.year || (result.years && result.years[0] ? result.years[0] : "2569");
       
+      // ตรวจจับชื่อไฟล์จากกล้อง เช่น IMG_20250718 (ค.ศ. 2025 -> พ.ศ. 2568)
+      const cameraMatch = (folderName + " " + cleanTitle).match(/(?:IMG_)?(202[3-9])[-_]?(0[1-9]|1[0-2])[-_]?([0-3]\d)/i);
       // ตรวจหาปี พ.ศ. 4 หลักในช่วง ว.PA ที่เป็นไปได้จริง (2560 - 2579)
-      const fullYearMatch = (folderName + " " + cleanTitle).match(/\b(25[6-7]\d)\b/);
+      const fullYearMatch = (folderName + " " + cleanTitle).match(/(?<!\d)(25[6-7]\d)(?!\d)/);
       // หรือตรวจหาแบบมีคำนำหน้า เช่น PA68, ปี 68, พ.ศ. 68
-      const prefixYearMatch = (folderName + " " + cleanTitle).match(/(?:PA|ปี|พ\.ศ\.|ปีการศึกษา)\s*([6-7]\d)\b/i);
+      const prefixYearMatch = (folderName + " " + cleanTitle).match(/(?:PA|ปี|พ\.ศ\.|ปีการศึกษา|ปีงบประมาณ)\s*[:.]?\s*([6-7]\d)\b/i);
 
-      if (fullYearMatch) {
+      if (cameraMatch) {
+        const ceYear = parseInt(cameraMatch[1], 10);
+        const month = parseInt(cameraMatch[2], 10);
+        const beYear = ceYear + 543;
+        fileYear = String(month >= 5 ? beYear : beYear - 1);
+      } else if (fullYearMatch) {
         fileYear = fullYearMatch[1];
       } else if (prefixYearMatch) {
         fileYear = "25" + prefixYearMatch[1];
