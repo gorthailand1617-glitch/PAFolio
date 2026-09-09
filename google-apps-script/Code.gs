@@ -285,7 +285,7 @@ function scanSystemAssets(rootFolder, result) {
   try {
     const rootFiles = rootFolder.getFiles();
     while (rootFiles.hasNext()) {
-      checkAndAssignAsset(rootFiles.next(), "root");
+      checkAndAssignAsset(rootFiles.next(), rootFolder.getName());
     }
   } catch(e) {}
 

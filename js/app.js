@@ -102,6 +102,33 @@ function renderApp() {
   }
 }
 
+// แปลง Google Drive URL เป็น Thumbnail Image URL ที่เบราว์เซอร์แสดงผลได้ 100%
+function convertToGoogleDriveThumbnailUrl(url, size = 'w1000') {
+  if (!url) return '';
+  let clean = url.trim();
+
+  // หากเป็น Thumbnail URL อยู่แล้ว หรือเป็น direct image file
+  if (clean.includes('thumbnail?id=') || clean.match(/\.(jpeg|jpg|png|webp|gif|bmp)(\?.*)?$/i)) {
+    return clean;
+  }
+
+  // หากเป็นลิงก์โฟลเดอร์ Google Drive (ไม่สามารถแสดงผลเป็นรูปภาพได้)
+  if (clean.includes('/drive/folders/')) {
+    return clean;
+  }
+
+  // ตรวจจับ Google Drive file sharing link เช่น:
+  // https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+  // https://drive.google.com/open?id=FILE_ID
+  // https://drive.google.com/uc?id=FILE_ID
+  const fileMatch = clean.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || clean.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (fileMatch && fileMatch[1]) {
+    return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=${size}`;
+  }
+
+  return clean;
+}
+
 // Update Header & Profile Section
 function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   // Brand Header
@@ -109,10 +136,19 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   document.querySelectorAll('.teacher-standing-label').forEach(el => el.innerText = teacher.academicStanding);
   document.querySelectorAll('.teacher-school-label').forEach(el => el.innerText = teacher.school);
   document.querySelectorAll('.teacher-dept-label').forEach(el => el.innerText = teacher.learningArea);
-  document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = teacher.avatarUrl);
-  if (teacher.coverUrl) {
-    document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = teacher.coverUrl);
+
+  // อัปเดตรูปโปรไฟล์ครู (ป้องกันกรณีผู้ใช้ใส่ลิงก์โฟลเดอร์)
+  if (teacher.avatarUrl && !teacher.avatarUrl.includes('/drive/folders/')) {
+    const avatarSrc = convertToGoogleDriveThumbnailUrl(teacher.avatarUrl, 'w800');
+    document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = avatarSrc);
   }
+
+  // อัปเดตภาพปกแบนเนอร์ Hero (ป้องกันกรณีผู้ใช้ใส่ลิงก์โฟลเดอร์)
+  if (teacher.coverUrl && !teacher.coverUrl.includes('/drive/folders/')) {
+    const coverSrc = convertToGoogleDriveThumbnailUrl(teacher.coverUrl, 'w1920');
+    document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = coverSrc);
+  }
+
   document.querySelectorAll('.expected-level-badge').forEach(el => el.innerText = expectedLevel);
   document.querySelectorAll('.current-year-label').forEach(el => el.innerText = `ปีการศึกษา ${currentAcademicYear}`);
 
@@ -883,6 +919,16 @@ function loadStoredTeachers() {
     const data = localStorage.getItem('pafolio_custom_teachers');
     if (data) {
       const parsed = JSON.parse(data);
+      // ตรวจสอบและล้างลิงก์ที่เป็นโฟลเดอร์ Google Drive ออก เพื่อไม่ให้เกิดภาพแตก
+      for (const key in parsed) {
+        const t = parsed[key];
+        if (t.avatarUrl && t.avatarUrl.includes('/drive/folders/')) {
+          t.avatarUrl = PAFOLIO_DATABASE[key]?.avatarUrl || PAFOLIO_DATABASE['teacher-korakot']?.avatarUrl || '';
+        }
+        if (t.coverUrl && t.coverUrl.includes('/drive/folders/')) {
+          t.coverUrl = PAFOLIO_DATABASE[key]?.coverUrl || PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
+        }
+      }
       Object.assign(PAFOLIO_DATABASE, parsed);
     }
   } catch (e) {
@@ -1103,6 +1149,66 @@ function closeThemeModal() {
 // =========================================================================
 // Profile Editor Modal Handlers (No-Code Visual Editor)
 // =========================================================================
+function handleAvatarInputLive(val) {
+  const preview = document.getElementById('edit-profile-avatar-preview');
+  const feedback = document.getElementById('avatar-input-feedback');
+  if (!preview || !feedback) return;
+
+  const clean = (val || '').trim();
+  if (!clean) {
+    feedback.className = 'text-[11px] hidden';
+    preview.src = PAFOLIO_DATABASE['teacher-korakot']?.avatarUrl || '';
+    return;
+  }
+
+  feedback.classList.remove('hidden');
+
+  if (clean.includes('/drive/folders/')) {
+    feedback.className = 'text-[11px] text-amber-400 bg-amber-950/60 p-2 rounded-lg border border-amber-500/40 mt-1';
+    feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i> <b>ตรวจพบลิงก์โฟลเดอร์:</b> เบราว์เซอร์ไม่สามารถแสดงโฟลเดอร์เป็นภาพได้ กรุณาเปิดโฟลเดอร์ คลิกขวาที่ <u>ไฟล์รูปภาพ</u> แล้วเลือก <b>แชร์ &gt; คัดลอกลิงก์</b> มาวางแทนครับ';
+    preview.src = PAFOLIO_DATABASE['teacher-korakot']?.avatarUrl || '';
+  } else {
+    const converted = convertToGoogleDriveThumbnailUrl(clean, 'w800');
+    if (clean.includes('/file/d/') || clean.includes('id=')) {
+      feedback.className = 'text-[11px] text-emerald-400 bg-emerald-950/60 p-1.5 rounded-lg border border-emerald-500/40 mt-1';
+      feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> ตรวจพบลิงก์ภาพ Google Drive เรียบร้อยแล้ว';
+    } else {
+      feedback.className = 'text-[11px] hidden';
+    }
+    preview.src = converted;
+  }
+}
+
+function handleCoverInputLive(val) {
+  const preview = document.getElementById('edit-profile-cover-preview');
+  const feedback = document.getElementById('cover-input-feedback');
+  if (!preview || !feedback) return;
+
+  const clean = (val || '').trim();
+  if (!clean) {
+    feedback.className = 'text-[11px] hidden';
+    preview.src = PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
+    return;
+  }
+
+  feedback.classList.remove('hidden');
+
+  if (clean.includes('/drive/folders/')) {
+    feedback.className = 'text-[11px] text-amber-400 bg-amber-950/60 p-2 rounded-lg border border-amber-500/40 mt-1';
+    feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i> <b>ตรวจพบลิงก์โฟลเดอร์:</b> เบราว์เซอร์ไม่สามารถแสดงโฟลเดอร์เป็นภาพได้ กรุณาเปิดโฟลเดอร์ คลิกขวาที่ <u>ไฟล์รูปภาพ</u> แล้วเลือก <b>แชร์ &gt; คัดลอกลิงก์</b> มาวางแทนครับ';
+    preview.src = PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
+  } else {
+    const converted = convertToGoogleDriveThumbnailUrl(clean, 'w1920');
+    if (clean.includes('/file/d/') || clean.includes('id=')) {
+      feedback.className = 'text-[11px] text-emerald-400 bg-emerald-950/60 p-1.5 rounded-lg border border-emerald-500/40 mt-1';
+      feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> ตรวจพบลิงก์ภาพ Google Drive เรียบร้อยแล้ว';
+    } else {
+      feedback.className = 'text-[11px] hidden';
+    }
+    preview.src = converted;
+  }
+}
+
 function openProfileEditorModal() {
   const modal = document.getElementById('profile-editor-modal');
   if (!modal) return;
@@ -1118,8 +1224,15 @@ function openProfileEditorModal() {
   if (document.getElementById('edit-profile-department')) document.getElementById('edit-profile-department').value = teacher.learningArea || teacher.department || '';
   if (document.getElementById('edit-profile-school')) document.getElementById('edit-profile-school').value = teacher.school || '';
   if (document.getElementById('edit-profile-affiliation')) document.getElementById('edit-profile-affiliation').value = teacher.affiliation || '';
-  if (document.getElementById('edit-profile-avatar')) document.getElementById('edit-profile-avatar').value = teacher.avatarUrl || '';
-  if (document.getElementById('edit-profile-cover')) document.getElementById('edit-profile-cover').value = teacher.coverUrl || '';
+  
+  const currentAvatar = teacher.avatarUrl || '';
+  const currentCover = teacher.coverUrl || '';
+  if (document.getElementById('edit-profile-avatar')) document.getElementById('edit-profile-avatar').value = currentAvatar;
+  if (document.getElementById('edit-profile-cover')) document.getElementById('edit-profile-cover').value = currentCover;
+
+  handleAvatarInputLive(currentAvatar);
+  handleCoverInputLive(currentCover);
+
   if (document.getElementById('edit-challenge-topic')) document.getElementById('edit-challenge-topic').value = challenge.topic || '';
   if (document.getElementById('edit-challenge-target')) document.getElementById('edit-challenge-target').value = (challenge.targetGroup ? challenge.targetGroup + ' / ' : '') + (challenge.subject || '');
 
@@ -1157,15 +1270,26 @@ function handleSaveProfileEditor() {
     return;
   }
 
-  // Update teacher object
+  // ป้องกันการใส่ลิงก์โฟลเดอร์ Google Drive
+  if (avatar && avatar.includes('/drive/folders/')) {
+    alert('⚠️ ช่อง "URL รูปโปรไฟล์ครู" ปัจจุบันเป็นลิงก์โฟลเดอร์ Google Drive (ไม่ใช่ไฟล์ภาพ)\n\nกรุณาเปิดเข้าไปในโฟลเดอร์นั้น แล้วคลิกขวาที่ "ไฟล์รูปภาพโปรไฟล์" > เลือก "แชร์" > "คัดลอกลิงก์" มาวางแทนครับ');
+    return;
+  }
+
+  if (cover && cover.includes('/drive/folders/')) {
+    alert('⚠️ ช่อง "URL ภาพปกแบนเนอร์ Hero" ปัจจุบันเป็นลิงก์โฟลเดอร์ Google Drive (ไม่ใช่ไฟล์ภาพ)\n\nกรุณาเปิดเข้าไปในโฟลเดอร์นั้น แล้วคลิกขวาที่ "ไฟล์รูปภาพหน้าปก" > เลือก "แชร์" > "คัดลอกลิงก์" มาวางแทนครับ');
+    return;
+  }
+
+  // Update teacher object with converted URLs
   teacher.name = name;
   if (position) teacher.position = position;
   if (standing) teacher.academicStanding = standing;
   if (dept) { teacher.learningArea = dept; teacher.department = dept; }
   if (school) teacher.school = school;
   if (affiliation) teacher.affiliation = affiliation;
-  if (avatar) teacher.avatarUrl = avatar;
-  if (cover) teacher.coverUrl = cover;
+  if (avatar) teacher.avatarUrl = convertToGoogleDriveThumbnailUrl(avatar, 'w800');
+  if (cover) teacher.coverUrl = convertToGoogleDriveThumbnailUrl(cover, 'w1920');
 
   if (topic) {
     if (!yearData.challengeIssue) yearData.challengeIssue = {};
