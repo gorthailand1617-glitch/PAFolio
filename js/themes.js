@@ -228,8 +228,13 @@ const ThemeEngine = {
       updateChartsTheme(theme);
     }
 
-    if (showToast && typeof DriveSync !== 'undefined' && DriveSync.showToast) {
-      DriveSync.showToast(`เปลี่ยนธีมเป็น "${theme.nameThai}" เรียบร้อยแล้ว`, 'success', 3000);
+    if (showToast && typeof DriveSync !== 'undefined') {
+      if (DriveSync.showToast) {
+        DriveSync.showToast(`เปลี่ยนธีมเป็น "${theme.nameThai}" เรียบร้อยแล้ว`, 'success', 3000);
+      }
+      if (typeof DriveSync.syncThemeToCloud === 'function') {
+        DriveSync.syncThemeToCloud(themeId);
+      }
     }
   },
 

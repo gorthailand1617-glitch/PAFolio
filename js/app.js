@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ✨ Cache-Busting & Smart Version Migration: ตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ และรักษาโปรไฟล์ของครูไว้
-  const CURRENT_APP_VERSION = '2569.6.5';
+  const CURRENT_APP_VERSION = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APP_VERSION) || '2569.7.0';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.setItem('pafolio_active_year', '2569');
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ✨ AI Auto-Heal: ตรวจสอบและแก้ไข Google Drive Folder ID อัตโนมัติ (Zero-Config)
   // หากพบ ID ที่เป็นโฟลเดอร์สคริปต์ (19mPdGDZ...) หรือค่าว่าง ให้ AI สลับเป็นโฟลเดอร์ ว.PA จริงทันที
   const badFolderIds = ['19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE'];
-  const trueRootFolderId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+  const trueRootFolderId = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.ROOT_FOLDER_ID) || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
   const savedFolderId = (localStorage.getItem('pafolio_drive_folder_id') || '').trim();
   if (!savedFolderId || badFolderIds.includes(savedFolderId)) {
     localStorage.setItem('pafolio_drive_folder_id', trueRootFolderId);
@@ -67,6 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auto-sync ข้อมูลสดจาก Google Drive เมื่อเปิดหน้าเว็บ (ถ้ามีการตั้งค่าไว้)
   if (DriveSync.config.appsScriptUrl) {
+    // 1. ดึง Cloud State ด่วนพิเศษทันที (ตอบกลับ < 0.3 วินาที)
+    if (typeof DriveSync.fetchCloudState === 'function') {
+      DriveSync.fetchCloudState().then(cloudState => {
+        if (cloudState) DriveSync.applyCloudState(cloudState, true);
+      }).catch(err => console.warn('fetchCloudState error:', err));
+    }
+    // 2. สแกนและซิงก์โฟลเดอร์เต็มรูปแบบในพื้นหลัง
     DriveSync.syncAndApply(currentAcademicYear, false);
   }
 });

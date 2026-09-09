@@ -907,6 +907,23 @@
           <div id="drive-test-feedback" class="hidden"></div>
         </div>
 
+        <!-- ☁️ ซิงก์สถานะคลาวด์ศูนย์กลาง (Cloud State Sync) -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-teal-500/10 border border-amber-300/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="space-y-0.5 text-left">
+            <div class="font-bold text-xs text-amber-950 flex items-center gap-1.5 font-heading">
+              <i class="fa-solid fa-cloud-arrow-up text-amber-600"></i>
+              <span>ซิงก์สถานะระบบขึ้น Google Drive (ให้กรรมการทั่วโลกเห็นตรงกัน)</span>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              บันทึกธีม (ทองคำจักรพรรดิ), ปี 2569, ภาพปก และการตั้งค่าขึ้นคลาวด์ เพื่อให้แท็บเล็ตของกรรมการเปิดมาแล้วตรงกันทันที
+            </p>
+          </div>
+          <button type="button" onclick="DriveSync.saveCloudState().then(ok => { if(ok) DriveSync.showToast('☁️ บันทึกสถานะขึ้น Cloud สำเร็จ! กรรมการทุกคนจะเห็นธีมและข้อมูลตรงกันทันที', 'success', 4500); else DriveSync.showToast('กรุณากรอกและบันทึก Web App URL ก่อน', 'warning', 3500); })" 
+                  class="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white font-semibold text-[11px] transition shadow-sm flex-shrink-0 flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกขึ้น Cloud
+          </button>
+        </div>
+
         <!-- 📲 ซิงก์ข้ามเครื่อง (ส่งลิงก์ไปแท็บเล็ต/มือถือ พร้อม QR Code) -->
         <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/90 to-teal-50/90 border border-indigo-200/80 text-xs text-slate-800 space-y-3 shadow-sm">
           <div class="flex items-center justify-between">
@@ -2097,17 +2114,18 @@
   <!-- PptxGenJS (PowerPoint Generator) -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
-  <!-- JavaScript Modules (Cache-Busted v2569.6.5) -->
-  <script src="js/data.js?v=2569.6.5"></script>
-  <script src="js/themes.js?v=2569.6.5"></script>
-  <script src="js/certificate-vault.js?v=2569.6.5"></script>
-  <script src="js/export-engine.js?v=2569.6.5"></script>
-  <script src="js/drive-sync.js?v=2569.6.5"></script>
-  <script src="js/ai-assistant.js?v=2569.6.5"></script>
-  <script src="js/presentation.js?v=2569.6.5"></script>
-  <script src="js/video-engine.js?v=2569.6.5"></script>
-  <script src="js/video-studio-ui.js?v=2569.6.5"></script>
-  <script src="js/chart-config.js?v=2569.6.5"></script>
-  <script src="js/app.js?v=2569.6.5"></script>
+  <!-- JavaScript Modules (Cache-Busted v2569.7.0) -->
+  <script src="js/config.js?v=2569.7.0"></script>
+  <script src="js/data.js?v=2569.7.0"></script>
+  <script src="js/themes.js?v=2569.7.0"></script>
+  <script src="js/certificate-vault.js?v=2569.7.0"></script>
+  <script src="js/export-engine.js?v=2569.7.0"></script>
+  <script src="js/drive-sync.js?v=2569.7.0"></script>
+  <script src="js/ai-assistant.js?v=2569.7.0"></script>
+  <script src="js/presentation.js?v=2569.7.0"></script>
+  <script src="js/video-engine.js?v=2569.7.0"></script>
+  <script src="js/video-studio-ui.js?v=2569.7.0"></script>
+  <script src="js/chart-config.js?v=2569.7.0"></script>
+  <script src="js/app.js?v=2569.7.0"></script>
 </body>
 </html>

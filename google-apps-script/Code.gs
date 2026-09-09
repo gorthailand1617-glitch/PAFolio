@@ -165,6 +165,23 @@ function doGet(e) {
       throw new Error("กรุณาระบุ Google Drive Folder ID ในหน้าเว็บหรือใน Code.gs");
     }
 
+    // ⚡ โหมดดึงสถานะคลาวด์ศูนย์กลางแบบด่วนพิเศษ (Cloud State Query): ตอบกลับทันที < 0.2 วินาที
+    if (e && e.parameter && (e.parameter.action === 'getCloudState' || e.parameter.cloudState === '1')) {
+      const rootFolder = DriveApp.getFolderById(folderId);
+      let cloudState = null;
+      try {
+        const stateFiles = rootFolder.getFilesByName("pafolio_cloud_state.json");
+        if (stateFiles.hasNext()) {
+          cloudState = JSON.parse(stateFiles.next().getBlob().getDataAsString());
+        }
+      } catch(err) {}
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        timestamp: new Date().toISOString(),
+        cloudState: cloudState
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     // ⚡ โหมดทดสอบการเชื่อมต่อด่วน (Quick Test / Ping): ตอบกลับทันทีใน 0.5 วินาที ไม่ต้องรอสแกนไฟล์ทั้งหมด
     if (e && e.parameter && (e.parameter.test === '1' || e.parameter.quick === '1')) {
       const rootFolder = DriveApp.getFolderById(folderId);
@@ -224,6 +241,34 @@ function doPost(e) {
       : ROOT_FOLDER_ID;
 
     const rootFolder = DriveApp.getFolderById(targetFolderId);
+
+    // บันทึกสถานะระบบศูนย์กลาง (Cloud State: ธีม, ปี, ภาพปก, การตั้งค่า) ให้อุปกรณ์ทั่วโลกซิงก์ตรงกัน
+    if (action === "saveCloudState") {
+      const stateData = postData.state || {};
+      stateData.lastUpdated = new Date().toISOString();
+      const fileName = "pafolio_cloud_state.json";
+      const files = rootFolder.getFilesByName(fileName);
+      let file;
+      const content = JSON.stringify(stateData, null, 2);
+
+      if (files.hasNext()) {
+        file = files.next();
+        file.setContent(content);
+      } else {
+        file = rootFolder.createFile(fileName, content, "application/json");
+      }
+
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch(err) {}
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "บันทึกสถานะศูนย์กลาง (Cloud State) ขึ้น Google Drive สำเร็จ",
+        timestamp: stateData.lastUpdated,
+        cloudState: stateData
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
 
     if (action === "saveProfile") {
       const profile = postData.profile || {};
@@ -310,7 +355,8 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     certificateFolderUrl: "",
     teachingLoad: [],
     totalHours: "",
-    pa1DocInfo: null
+    pa1DocInfo: null,
+    cloudState: null
   };
 
   // 1. ตรวจสอบโฟลเดอร์ปีการศึกษา
@@ -375,6 +421,15 @@ function scanDriveRecursively(rootFolderId, filterYear) {
 
   // 7. สแกนและสกัดข้อมูล "ภาระงานสอนตามตารางสอน" จากไฟล์ข้อตกลงในโฟลเดอร์ 01_แบบข้อตกลงในการพัฒนางาน (PA 1-ส) โดยตรง (ห้ามคาดเดา)
   scanPA1TeachingLoad(targetFoldersToScan, result);
+
+  // 8. ตรวจสอบไฟล์ pafolio_cloud_state.json (สถานะศูนย์กลาง: ธีม, ปี, ภาพปก, การตั้งค่า เพื่อให้อุปกรณ์ทั่วโลกซิงก์ตรงกัน 100%)
+  try {
+    const stateFiles = rootFolder.getFilesByName("pafolio_cloud_state.json");
+    if (stateFiles.hasNext()) {
+      const sFile = stateFiles.next();
+      result.cloudState = JSON.parse(sFile.getBlob().getDataAsString());
+    }
+  } catch(err) {}
 
   return result;
 }

@@ -24,9 +24,9 @@ const PAFOLIO_DATABASE = {
     learningArea: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
     avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
     coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
-    driveFolderId: "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
-    appsScriptUrl: "",
-    selectedYear: "2569",
+    driveFolderId: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.ROOT_FOLDER_ID) || "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
+    appsScriptUrl: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APPS_SCRIPT_URL) || "",
+    selectedYear: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_YEAR) || "2569",
     years: {
       "2570": {
         year: "2570",

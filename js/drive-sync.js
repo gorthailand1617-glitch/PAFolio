@@ -9,11 +9,11 @@ const DriveSync = {
   isSyncing: false,
   lastAutoSyncTimestamp: 0,
 
-  // ค่าตั้งค่าการเชื่อมต่อปัจจุบัน (พร้อม AI Auto-Heal ป้องกันปัญหา Folder ID ผิดพลาด)
+  // ค่าตั้งค่าการเชื่อมต่อปัจจุบัน (พร้อม Universal Fallback และ AI Auto-Heal)
   config: {
     folderId: (function() {
       const badIds = ['19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE'];
-      const trueId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+      const trueId = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.ROOT_FOLDER_ID) || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
       const saved = (localStorage.getItem('pafolio_drive_folder_id') || '').trim();
       if (!saved || badIds.includes(saved)) {
         localStorage.setItem('pafolio_drive_folder_id', trueId);
@@ -21,14 +21,24 @@ const DriveSync = {
       }
       return saved;
     })(),
-    appsScriptUrl: localStorage.getItem('pafolio_apps_script_url') || '',
+    appsScriptUrl: (function() {
+      const saved = (localStorage.getItem('pafolio_apps_script_url') || '').trim();
+      if (saved) return saved;
+      if (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APPS_SCRIPT_URL) {
+        return window.PAFOLIO_CONFIG.APPS_SCRIPT_URL.trim();
+      }
+      if (typeof window !== 'undefined' && window.PAFOLIO_DATABASE && window.PAFOLIO_DATABASE['teacher-korakot'] && window.PAFOLIO_DATABASE['teacher-korakot'].appsScriptUrl) {
+        return window.PAFOLIO_DATABASE['teacher-korakot'].appsScriptUrl.trim();
+      }
+      return '';
+    })(),
     autoSync: localStorage.getItem('pafolio_auto_sync') !== 'false', // ค่าเริ่มต้นเปิด auto sync
     lastSyncTime: localStorage.getItem('pafolio_last_sync_time') || null
   },
 
   // ✨ ให้ AI ตั้งค่าและตรวจสอบโฟลเดอร์ ว.PA อัตโนมัติในคลิกเดียว (Zero-Config)
   aiAutoConfigure() {
-    const trueId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+    const trueId = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.ROOT_FOLDER_ID) || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
     this.config.folderId = trueId;
     localStorage.setItem('pafolio_drive_folder_id', trueId);
     this.updateStatusUI();
@@ -38,7 +48,7 @@ const DriveSync = {
     return trueId;
   },
 
-  // บันทึกการตั้งค่า
+  // บันทึกการตั้งค่า พร้อมซิงก์สถานะขึ้น Cloud
   saveConfig(folderId, appsScriptUrl, autoSync = true) {
     this.config.folderId = folderId.trim();
     this.config.appsScriptUrl = appsScriptUrl.trim();
@@ -49,6 +59,147 @@ const DriveSync = {
     localStorage.setItem('pafolio_auto_sync', autoSync);
 
     this.updateStatusUI();
+
+    // บันทึกสถานะตั้งค่าปัจจุบันขึ้น Google Drive อัตโนมัติ เพื่อให้อุปกรณ์อื่นรับรู้
+    if (this.config.appsScriptUrl) {
+      this.saveCloudState();
+    }
+  },
+
+  // ☁️ บันทึกสถานะระบบศูนย์กลาง (Cloud State) ขึ้น Google Drive
+  async saveCloudState(customPayload = {}) {
+    if (!this.config.appsScriptUrl) {
+      console.warn('[DriveSync] Cannot save cloud state: No Apps Script URL configured.');
+      return false;
+    }
+
+    try {
+      const currentTheme = (typeof ThemeManager !== 'undefined' && ThemeManager.activeThemeId) 
+        ? ThemeManager.activeThemeId 
+        : (localStorage.getItem('pafolio_active_theme') || 'gold');
+
+      const currentYear = (typeof currentAcademicYear !== 'undefined')
+        ? currentAcademicYear
+        : (localStorage.getItem('pafolio_active_year') || '2569');
+
+      const currentTeacher = (typeof currentTeacherId !== 'undefined')
+        ? currentTeacherId
+        : (localStorage.getItem('pafolio_active_teacher') || 'teacher-korakot');
+
+      const teacherObj = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : (window.PAFOLIO_DATABASE && window.PAFOLIO_DATABASE[currentTeacher]);
+
+      const stateData = {
+        theme: currentTheme,
+        year: currentYear,
+        teacherId: currentTeacher,
+        avatarUrl: (teacherObj && teacherObj.avatarUrl) || 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800',
+        coverUrl: (teacherObj && teacherObj.coverUrl) || 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920',
+        lastUpdated: new Date().toISOString(),
+        deviceOrigin: navigator.userAgent || 'Desktop',
+        ...customPayload
+      };
+
+      const response = await fetch(this.config.appsScriptUrl.trim(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'saveCloudState',
+          folderId: this.config.folderId,
+          state: stateData
+        })
+      });
+
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+      const res = await response.json();
+      if (res.status === 'success') {
+        localStorage.setItem('pafolio_cloud_state', JSON.stringify(stateData));
+        localStorage.setItem('pafolio_last_cloud_sync', stateData.lastUpdated);
+        console.log('[DriveSync] Cloud State saved to Google Drive successfully:', stateData);
+        return true;
+      }
+    } catch(err) {
+      console.error('[DriveSync] saveCloudState error:', err);
+    }
+    return false;
+  },
+
+  // ☁️ ดึงสถานะคลาวด์ศูนย์กลางจาก Google Drive (ตอบกลับด่วนพิเศษ)
+  async fetchCloudState() {
+    if (!this.config.appsScriptUrl) return null;
+    try {
+      const url = new URL(this.config.appsScriptUrl.trim());
+      url.searchParams.set('action', 'getCloudState');
+      if (this.config.folderId) url.searchParams.set('folderId', this.config.folderId);
+      url.searchParams.set('_t', Date.now());
+
+      const res = await fetch(url.toString());
+      if (!res.ok) return null;
+      const json = await res.json();
+      if (json.status === 'success' && json.cloudState) {
+        return json.cloudState;
+      }
+    } catch(err) {
+      console.warn('[DriveSync] fetchCloudState error:', err);
+    }
+    return null;
+  },
+
+  // ☁️ ปรับใช้สถานะคลาวด์ศูนย์กลางบนเครื่องผู้เข้าชม (เช่น แท็บเล็ตกรรมการ) แบบไร้รอยต่อ
+  applyCloudState(cloudState, silent = true) {
+    if (!cloudState || typeof cloudState !== 'object') return false;
+
+    let modified = false;
+
+    // 1. ซิงก์ธีม (เช่น หากครูปรับเป็นธีมสีทองคำจักรพรรดิบนคอมทำงาน)
+    if (cloudState.theme && typeof ThemeManager !== 'undefined') {
+      const currentTheme = ThemeManager.activeThemeId;
+      if (currentTheme !== cloudState.theme) {
+        ThemeManager.setTheme(cloudState.theme, false);
+        modified = true;
+      }
+    }
+
+    // 2. ซิงก์ปีการศึกษา (ถ้าไม่ระบุใน URL)
+    if (cloudState.year && typeof currentAcademicYear !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.has('year') && currentAcademicYear !== cloudState.year) {
+        currentAcademicYear = cloudState.year;
+        localStorage.setItem('pafolio_active_year', cloudState.year);
+        modified = true;
+      }
+    }
+
+    // 3. ซิงก์รูปโปรไฟล์หรือภาพปก
+    if (cloudState.avatarUrl || cloudState.coverUrl) {
+      const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : (window.PAFOLIO_DATABASE && window.PAFOLIO_DATABASE['teacher-korakot']);
+      if (teacher) {
+        if (cloudState.avatarUrl && teacher.avatarUrl !== cloudState.avatarUrl) {
+          teacher.avatarUrl = cloudState.avatarUrl;
+          modified = true;
+        }
+        if (cloudState.coverUrl && teacher.coverUrl !== cloudState.coverUrl) {
+          teacher.coverUrl = cloudState.coverUrl;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified && typeof renderApp === 'function') {
+      renderApp();
+      if (!silent) {
+        this.showToast('☁️ ปรับใช้สถานะล่าสุดจาก Google Drive เรียบร้อยแล้ว', 'success', 3500);
+      }
+    }
+    return true;
+  },
+
+  // ☁️ ส่งต่อการเปลี่ยนธีมขึ้น Google Drive อัตโนมัติ (Debounced เพื่อไม่ให้เรียก API ถี่เกินไป)
+  syncThemeToCloud(themeId) {
+    if (!this.config.appsScriptUrl) return;
+    if (this._themeSyncTimeout) clearTimeout(this._themeSyncTimeout);
+    this._themeSyncTimeout = setTimeout(() => {
+      this.saveCloudState({ theme: themeId });
+    }, 1500);
   },
 
   // 📲 ตรวจจับและรับค่า URL Parameters สำหรับการเปิดและซิงก์ข้อมูลข้ามเครื่อง (เช่น สแกน QR หรือเปิดลิงก์บนแท็บเล็ต/มือถือ)
@@ -185,6 +336,11 @@ const DriveSync = {
           localStorage.setItem(customMapKey, JSON.stringify(customMap));
         } catch(cacheErr) {
           console.warn('[DriveSync] Failed to cache Drive data to localStorage', cacheErr);
+        }
+
+        // ☁️ ตรวจจับและปรับใช้สถานะคลาวด์ศูนย์กลางถ้าได้รับกลับมา
+        if (result.data.cloudState) {
+          this.applyCloudState(result.data.cloudState, true);
         }
 
         this.updateStatusUI(true);
