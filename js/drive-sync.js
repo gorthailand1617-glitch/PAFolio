@@ -233,6 +233,25 @@ const DriveSync = {
       }
       const totalImages = data.evidenceGallery ? data.evidenceGallery.length : 0;
 
+      // อัปเดตข้อมูลโปรไฟล์ครูสดจาก Cloud (liveProfile)
+      if (data.liveProfile) {
+        const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
+        if (teacher) {
+          if (data.liveProfile.name) teacher.name = data.liveProfile.name;
+          if (data.liveProfile.position) teacher.position = data.liveProfile.position;
+          if (data.liveProfile.academicStanding) teacher.academicStanding = data.liveProfile.academicStanding;
+          if (data.liveProfile.avatarUrl) {
+            teacher.avatarUrl = data.liveProfile.avatarUrl;
+            document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = data.liveProfile.avatarUrl);
+          }
+          if (data.liveProfile.coverUrl) {
+            teacher.coverUrl = data.liveProfile.coverUrl;
+            document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = data.liveProfile.coverUrl);
+          }
+          if (typeof updateHeaderAndProfile === 'function') updateHeaderAndProfile();
+        }
+      }
+
       // อัปเดตรูปโปรไฟล์, ภาพปก และโลโก้จาก Google Drive (ถ้ามี)
       if (data.assets) {
         const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
@@ -381,13 +400,13 @@ const DriveSync = {
       }
     });
 
-    // 2. ซิงก์อัตโนมัติทุกๆ 3 นาทีในพื้นหลัง (Periodic Polling)
+    // 2. ซิงก์อัตโนมัติทุกๆ 45 วินาทีเมื่อเปิดหน้าเว็บทิ้งไว้ (Real-time Background Polling)
     setInterval(() => {
-      if (this.config.appsScriptUrl && this.config.autoSync && !this.isSyncing) {
-        console.log('[DriveSync] Periodic polling check...');
+      if (document.visibilityState === 'visible' && this.config.appsScriptUrl && this.config.autoSync && !this.isSyncing) {
+        console.log('[DriveSync] Periodic real-time sync check...');
         this.syncAndApply(typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : null, false);
       }
-    }, 3 * 60 * 1000);
+    }, 45 * 1000);
   },
 
   // =========================================================================
@@ -572,6 +591,38 @@ const DriveSync = {
       reader.onerror = (e) => reject(e);
       reader.readAsDataURL(videoBlob);
     });
+  },
+
+  // ☁️ ส่งข้อมูลโปรไฟล์ครูไปบันทึกลง Google Drive ทันที (Real-time Cloud Sync)
+  async saveProfileToCloud(profile) {
+    if (!this.config.appsScriptUrl) {
+      console.log('[DriveSync] No Apps Script URL configured. Saved locally.');
+      return { status: 'offline', message: 'ยังไม่ได้เชื่อมต่อ Apps Script URL เพื่อซิงก์ข้ามเครื่อง' };
+    }
+
+    try {
+      const payload = {
+        action: 'saveProfile',
+        folderId: this.config.folderId || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K',
+        profile: profile
+      };
+
+      const res = await fetch(this.config.appsScriptUrl.trim(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json.status === 'success') {
+        this.showToast('☁️ ซิงก์โปรไฟล์ขึ้น Google Drive คลาวด์สำเร็จ! (ทุกเครื่องจะอัปเดตตรงกันทันที)', 'success', 3500);
+      }
+      return json;
+    } catch (err) {
+      console.warn('[DriveSync] Error syncing profile to cloud:', err);
+      return { status: 'error', message: err.toString() };
+    }
   },
 
   // โหลดข้อมูล Google Drive ที่เคยซิงก์และแคชไว้ในเครื่อง

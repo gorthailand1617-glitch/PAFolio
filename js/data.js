@@ -22,7 +22,7 @@ const PAFOLIO_DATABASE = {
     school: "โรงเรียนเปรมติณสูลานนท์",
     affiliation: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น",
     learningArea: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
-    avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
+    avatarUrl: "https://drive.google.com/thumbnail?id=1hQk-lMCZVHPmZ_3uj9jiwWf58EaRKdEE&sz=w800",
     coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
     driveFolderId: "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
     appsScriptUrl: "",
@@ -31,7 +31,7 @@ const PAFOLIO_DATABASE = {
       "2570": {
         year: "2570",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2570 (แผนพัฒนาต่อเนื่อง)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1hQk-lMCZVHPmZ_3uj9jiwWf58EaRKdEE&sz=w800",
         coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
@@ -173,7 +173,7 @@ const PAFOLIO_DATABASE = {
       "2569": {
         year: "2569",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2569 (รอบการประเมินปัจจุบัน)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1hQk-lMCZVHPmZ_3uj9jiwWf58EaRKdEE&sz=w800",
         coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",

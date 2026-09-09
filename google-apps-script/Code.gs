@@ -177,6 +177,66 @@ function doGet(e) {
 }
 
 /**
+ * =========================================================================
+ * 💾 ฟังก์ชันที่ 2.1: Web App API (doPost) บันทึกและซิงก์ข้อมูลโปรไฟล์ครูขึ้น Google Drive แบบ Real-time
+ * =========================================================================
+ */
+function doPost(e) {
+  try {
+    let postData = {};
+    if (e && e.postData && e.postData.contents) {
+      postData = JSON.parse(e.postData.contents);
+    } else if (e && e.parameter) {
+      postData = e.parameter;
+    }
+
+    const action = postData.action || "saveProfile";
+    const targetFolderId = (postData.folderId && typeof postData.folderId === 'string' && postData.folderId.trim()) 
+      ? postData.folderId.trim() 
+      : ROOT_FOLDER_ID;
+
+    const rootFolder = DriveApp.getFolderById(targetFolderId);
+
+    if (action === "saveProfile") {
+      const profile = postData.profile || {};
+      const fileName = "pafolio_profile_live.json";
+      const files = rootFolder.getFilesByName(fileName);
+      let file;
+      const content = JSON.stringify(profile, null, 2);
+
+      if (files.hasNext()) {
+        file = files.next();
+        file.setContent(content);
+      } else {
+        file = rootFolder.createFile(fileName, content, "application/json");
+      }
+
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch(err) {}
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "บันทึกข้อมูลโปรไฟล์ครูขึ้น Google Drive สำเร็จ (Real-time Cloud Synced)",
+        timestamp: new Date().toISOString(),
+        profile: profile
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: "ไม่รู้จักคำสั่ง action: " + action
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
  * 🧪 ฟังก์ชันทดสอบการสแกนไดรฟ์ (กดเลือกฟังก์ชันนี้ใน Apps Script แล้วกด "เรียกใช้" ได้ทันที)
  */
 function testScanDrive() {
@@ -271,6 +331,16 @@ function scanDriveRecursively(rootFolderId, filterYear) {
 
   // 5. สแกนหาคลังเกียรติบัตรและโล่รางวัลจากโฟลเดอร์เกียรติบัตรโดยตรง
   scanCertificates(rootFolder, targetFoldersToScan, result);
+
+  // 6. ตรวจสอบไฟล์ pafolio_profile_live.json ใน Google Drive (ถ้ามี ให้ส่งกลับไปอัปเดตหน้าเว็บทุกเครื่องแบบ Real-time)
+  try {
+    const profileFiles = rootFolder.getFilesByName("pafolio_profile_live.json");
+    if (profileFiles.hasNext()) {
+      const pFile = profileFiles.next();
+      const pContent = pFile.getBlob().getDataAsString();
+      result.liveProfile = JSON.parse(pContent);
+    }
+  } catch(err) {}
 
   return result;
 }

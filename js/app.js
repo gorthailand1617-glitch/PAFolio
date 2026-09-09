@@ -28,7 +28,7 @@ const BASE_INDICATOR_TEMPLATES = [
 
 document.addEventListener('DOMContentLoaded', () => {
   // ✨ Cache-Busting & Auto-Migration: ล้างแคชเก่าที่ค้างอยู่ในเครื่องอื่น และตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ
-  const CURRENT_APP_VERSION = '2569.4.1';
+  const CURRENT_APP_VERSION = '2569.4.2';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.removeItem('pafolio_custom_teachers');
@@ -2454,7 +2454,10 @@ function handleSaveProfileEditor() {
   renderApp();
   closeProfileEditorModal();
 
-  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+  // ☁️ Real-time Cloud Sync: ส่งข้อมูลโปรไฟล์ไปบันทึกบน Google Drive ทันที
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.saveProfileToCloud === 'function') {
+    DriveSync.saveProfileToCloud(teacher);
+  } else if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
     DriveSync.showToast('✅ บันทึกข้อมูลโปรไฟล์และอัปเดตหน้าเว็บเรียบร้อยแล้ว!', 'success', 3500);
   }
 }
