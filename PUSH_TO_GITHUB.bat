@@ -16,7 +16,8 @@ git add .
 git commit -m "Update PAFolio: Video Studio 1080p, Thai Natural TTS, 11 Themes, and Drive Sync" 2>nul
 echo.
 
-echo [3/3] Pushing to GitHub (https://github.com/gorthailand1617-glitch/PAFolio.git)...
+echo [3/3] Pulling remote updates and pushing to GitHub (https://github.com/gorthailand1617-glitch/PAFolio.git)...
+git pull --rebase origin main
 git push -u origin main
 
 if %ERRORLEVEL% EQU 0 (
