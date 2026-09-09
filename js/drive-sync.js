@@ -119,10 +119,17 @@ const DriveSync = {
       return { ok: false, message: 'กรุณากรอก Google Apps Script Web App URL ก่อนทดสอบ' };
     }
 
+    if (cleanUrl.includes('/macros/library/')) {
+      return {
+        ok: false,
+        message: '❌ ตรวจพบ URL ของ "คลัง (Library)" ซึ่งเบราว์เซอร์ไม่สามารถเรียกใช้งานได้!\n\n👉 วิธีแก้ไขใน Google Apps Script:\n1. กดปุ่มสีน้ำเงินมุมขวาบน "การทำให้ใช้งานได้" (Deploy) ➔ "การทำให้ใช้งานได้ใหม่" (New deployment)\n2. คลิกรูปฟันเฟือง ⚙️ ด้านซ้าย เลือกประเภทเป็น "เว็บแอป" (Web app) (ห้ามเลือก "คลัง")\n3. ดำเนินการในฐานะ: "ฉัน (Me)"\n4. ผู้มีสิทธิ์เข้าถึง (Who has access): ต้องเลือกเป็น "ทุกคน" (Anyone)\n5. กด Deploy แล้วคัดลอก URL เว็บแอป (ขึ้นต้นด้วย macros/s/... และลงท้ายด้วย /exec) มาวางครับ'
+      };
+    }
+
     if (!cleanUrl.startsWith('https://script.google.com/macros/s/')) {
       return { 
         ok: false, 
-        message: 'รูปแบบ URL ไม่ถูกต้อง: URL Web App ต้องขึ้นต้นด้วย https://script.google.com/macros/s/... (ไม่ใช่ URL หน้าแก้ไขสคริปต์)' 
+        message: 'รูปแบบ URL ไม่ถูกต้อง: URL Web App ต้องขึ้นต้นด้วย https://script.google.com/macros/s/... (ไม่ใช่ URL หน้าแก้ไขสคริปต์ หรือ URL คลังไลบรารี)' 
       };
     }
 

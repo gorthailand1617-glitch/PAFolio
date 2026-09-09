@@ -1053,7 +1053,8 @@ function openDriveSyncModal() {
   const modal = document.getElementById('drive-sync-modal');
   if (!modal) return;
 
-  document.getElementById('drive-folder-id-input').value = DriveSync.config.folderId;
+  const currentFolderId = DriveSync.config.folderId || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+  document.getElementById('drive-folder-id-input').value = currentFolderId;
   document.getElementById('apps-script-url-input').value = DriveSync.config.appsScriptUrl;
 
   const feedbackEl = document.getElementById('drive-test-feedback');
@@ -1127,12 +1128,39 @@ async function testDriveSyncConnection() {
 }
 
 function saveDriveSyncSettings() {
-  const folderId = document.getElementById('drive-folder-id-input').value.trim();
+  const folderId = document.getElementById('drive-folder-id-input').value.trim() || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
   let scriptUrl = document.getElementById('apps-script-url-input').value.trim();
+  const feedbackEl = document.getElementById('drive-test-feedback');
 
-  // ปรับแก้เบื้องต้นหากผู้ใช้เผลอวาง URL หน้า Editor
-  if (scriptUrl.includes('/edit')) {
-    scriptUrl = scriptUrl.replace(/\/edit.*$/, '/exec');
+  if (scriptUrl) {
+    // ปรับแก้เบื้องต้นหากผู้ใช้เผลอวาง URL หน้า Editor
+    if (scriptUrl.includes('/edit')) {
+      scriptUrl = scriptUrl.replace(/\/edit.*$/, '/exec');
+    }
+
+    if (scriptUrl.includes('/macros/library/')) {
+      if (feedbackEl) {
+        feedbackEl.classList.remove('hidden');
+        feedbackEl.className = 'mt-2 p-3.5 rounded-xl text-xs bg-rose-50 border border-rose-200 text-rose-950 space-y-1.5';
+        feedbackEl.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5 text-rose-800">
+            <i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i> URL ไม่ถูกต้อง: คุณคัดลอก URL ของ "คลัง (Library)" มาใส่
+          </div>
+          <div class="text-[11px] leading-relaxed text-rose-900 font-sans space-y-1">
+            <p>เบราว์เซอร์ไม่สามารถเชื่อมต่อกับ "คลัง" ได้ ต้องใช้ URL ของ <b>"เว็บแอป (Web app)"</b> เท่านั้น</p>
+            <div class="bg-white/80 p-2.5 rounded-lg border border-rose-200 font-medium">
+              <b>วิธีแก้ใน Apps Script:</b><br>
+              1. กดปุ่มสีน้ำเงินมุมขวาบน <b>"การทำให้ใช้งานได้" (Deploy)</b> &rarr; <b>"การทำให้ใช้งานได้ใหม่" (New deployment)</b><br>
+              2. คลิกรูปฟันเฟือง ⚙️ ด้านซ้าย เลือก <b>"เว็บแอป" (Web app)</b> (ห้ามเลือก "คลัง")<br>
+              3. ผู้มีสิทธิ์เข้าถึง (Who has access): เลือก <b>"ทุกคน" (Anyone)</b> แล้วกด Deploy<br>
+              4. คัดลอก URL ที่ขึ้นต้นด้วย <code class="bg-rose-100 px-1 rounded font-mono">macros/s/...</code> และลงท้ายด้วย <code class="bg-rose-100 px-1 rounded font-mono">/exec</code> มาวางครับ
+            </div>
+          </div>
+        `;
+      }
+      alert('❌ URL ไม่ถูกต้องครับ!\n\nURL ที่นำมาวางเป็น URL ของ "คลัง (Library)" ซึ่งเบราว์เซอร์ไม่สามารถเข้าถึงได้\n\nวิธีแก้:\n1. ไปที่ Google Apps Script กด Deploy -> New deployment\n2. คลิกรูปฟันเฟือง ⚙️ ด้านซ้าย เลือกประเภทเป็น "เว็บแอป" (Web app)\n3. เลือก ผู้มีสิทธิ์เข้าถึง: "ทุกคน (Anyone)" แล้วกด Deploy\n4. จะได้ URL ที่ขึ้นต้นด้วย macros/s/... และลงท้ายด้วย /exec ครับ');
+      return;
+    }
   }
 
   DriveSync.saveConfig(folderId, scriptUrl, true);
