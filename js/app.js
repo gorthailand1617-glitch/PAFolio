@@ -223,7 +223,7 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   }
 
   document.querySelectorAll('.expected-level-badge').forEach(el => el.innerText = expectedLevel);
-  document.querySelectorAll('.current-year-label').forEach(el => el.innerText = `ปีการศึกษา ${currentAcademicYear}`);
+  document.querySelectorAll('.current-year-label').forEach(el => el.innerText = `ปีงบประมาณ ${currentAcademicYear}`);
 
   // Teaching Load
   const teachingLoadList = document.getElementById('teaching-load-list');
@@ -271,7 +271,7 @@ function renderYearSwitcher(teacher) {
       <select id="year-select-input" onchange="switchAcademicYear(this.value)" class="bg-transparent font-bold text-teal-800 focus:outline-none cursor-pointer">
         ${years.map(y => `<option value="${y}" ${y === currentAcademicYear ? 'selected' : ''}>ปี ${y}</option>`).join('')}
       </select>
-      <button onclick="openNewYearModal()" title="เพิ่มรอบปีการศึกษาใหม่" class="ml-1 w-5 h-5 rounded-md bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-[10px] shadow-sm">
+      <button onclick="openNewYearModal()" title="เพิ่มรอบปีงบประมาณใหม่" class="ml-1 w-5 h-5 rounded-md bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center text-[10px] shadow-sm">
         <i class="fa-solid fa-plus"></i>
       </button>
     </div>
@@ -528,7 +528,7 @@ function openVideoPlayer(videoData) {
   if (titleEl) titleEl.innerText = videoData.title || 'วิดีโอคลิปการสอน ว.PA';
   if (captionEl) captionEl.innerText = videoData.caption || 'คลิปวิดีโอบันทึกการจัดการเรียนรู้และผลลัพธ์การเรียนรู้ของผู้เรียน';
   if (badgeEl) badgeEl.innerText = videoData.badge || 'วิดีโอการสอน ว.PA';
-  if (dateEl) dateEl.innerHTML = `<i class="fa-regular fa-calendar-check mr-1 text-teal-400"></i> ${videoData.date || 'ปีการศึกษา ' + currentAcademicYear}`;
+  if (dateEl) dateEl.innerHTML = `<i class="fa-regular fa-calendar-check mr-1 text-teal-400"></i> ${videoData.date || 'ปีงบประมาณ ' + currentAcademicYear}`;
 
   const previewUrl = videoData.previewUrl || videoData.fullUrl || videoData.url || '';
   const viewUrl = videoData.viewUrl || previewUrl;
@@ -887,7 +887,7 @@ const INDICATOR_CURATED_MEDIA = {
       { title: "เอกสารรายงานผลการวิจัยและ Best Practice", url: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w1600", caption: "รายงานผลการพัฒนานวัตกรรมการจัดการเรียนรู้ฉบับสมบูรณ์" }
     ],
     sampleDocs: [
-      { title: "รายงานการวิจัยในชั้นเรียน 5 บท ฉบับสมบูรณ์ ปีการศึกษา 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "5.4 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "รายงานการวิจัยในชั้นเรียน 5 บท ฉบับสมบูรณ์ ปีงบประมาณ 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "5.4 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
       { title: "บทคัดย่อและเอกสารสังเคราะห์ผลการพัฒนาผู้เรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.3 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
@@ -957,7 +957,7 @@ const INDICATOR_CURATED_MEDIA = {
       { title: "ภาพการเข้าร่วมกิจกรรมพัฒนาวิชาชีพและสัมมนาวิชาการ", url: "https://drive.google.com/thumbnail?id=1fIMtnTSqOvFVhEwnvcR_UWxjHV_Msmi5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1fIMtnTSqOvFVhEwnvcR_UWxjHV_Msmi5&sz=w1600", caption: "การแลกเปลี่ยนเรียนรู้และเพิ่มพูนสมรรถนะการจัดการเรียนรู้ยุคดิจิทัล" }
     ],
     sampleDocs: [
-      { title: "แผนพัฒนาตนเองรายบุคคล (ID Plan) ประจำปีการศึกษา 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.2 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "แผนพัฒนาตนเองรายบุคคล (ID Plan) ประจำปีงบประมาณ 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.2 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
       { title: "รวมวุฒิบัตรและเกียรติบัตรการพัฒนาวิชาชีพครู 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "5.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
@@ -1626,7 +1626,7 @@ function openDocViewer(title, type, indicatorCode = '') {
   const teacher = getActiveTeacher();
 
   document.getElementById('doc-modal-title').innerText = title;
-  document.getElementById('doc-modal-type').innerText = `ประเภทเอกสาร: ${type} · ปีการศึกษา ${currentAcademicYear}`;
+  document.getElementById('doc-modal-type').innerText = `ประเภทเอกสาร: ${type} · ปีงบประมาณ ${currentAcademicYear}`;
   document.getElementById('doc-modal-teacher-name').innerText = teacher.name;
   document.getElementById('doc-modal-school').innerText = `${teacher.learningArea} · ${teacher.school}`;
 
@@ -2026,25 +2026,25 @@ function closeNewYearModal() {
 
 function handleCreateNewYear() {
   const newYearInput = document.getElementById('new-year-input').value.trim();
-  if (!newYearInput) return alert('กรุณาระบุปีการศึกษา');
+  if (!newYearInput) return alert('กรุณาระบุปีงบประมาณ');
 
   const teacher = getActiveTeacher();
   if (!teacher.years) teacher.years = {};
 
   if (teacher.years[newYearInput]) {
-    return alert(`ปีการศึกษา ${newYearInput} มีอยู่ในระบบแล้ว`);
+    return alert(`ปีงบประมาณ ${newYearInput} มีอยู่ในระบบแล้ว`);
   }
 
   // Clone from current year as baseline
   const baseline = getActiveYearData();
   teacher.years[newYearInput] = JSON.parse(JSON.stringify(baseline));
   teacher.years[newYearInput].year = newYearInput;
-  teacher.years[newYearInput].status = `รอบการประเมินปีการศึกษา ${newYearInput}`;
+  teacher.years[newYearInput].status = `รอบการประเมินปีงบประมาณ ${newYearInput}`;
 
   saveStoredTeachers();
   closeNewYearModal();
   switchAcademicYear(newYearInput);
-  alert(`เริ่มต้นปีการศึกษา ${newYearInput} สำเร็จแล้ว! คุณครูสามารถเพิ่มผลงานในรอบปีนี้ได้ทันที`);
+  alert(`เริ่มต้นปีงบประมาณ ${newYearInput} สำเร็จแล้ว! คุณครูสามารถเพิ่มผลงานในรอบปีนี้ได้ทันที`);
 }
 
 // Teacher Clone / Onboarding Wizard

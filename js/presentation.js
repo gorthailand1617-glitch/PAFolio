@@ -435,7 +435,7 @@ const PresentationDeck = {
           <div class="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm sm:text-base lg:text-xl text-slate-200 mb-8">
             <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/10 shadow-sm"><i class="fa-solid fa-school text-teal-400 mr-2.5"></i>${teacher.school}</span>
             <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/10 shadow-sm"><i class="fa-solid fa-book-open text-amber-400 mr-2.5"></i>${teacher.learningArea}</span>
-            <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold shadow-sm"><i class="fa-regular fa-calendar-check mr-2.5"></i>รอบปีการศึกษา ${currentAcademicYear}</span>
+            <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold shadow-sm"><i class="fa-regular fa-calendar-check mr-2.5"></i>รอบปีงบประมาณ ${currentAcademicYear}</span>
           </div>
           <div class="text-xs sm:text-sm lg:text-base text-slate-400 flex items-center gap-2.5 font-light">
             <i class="fa-solid fa-shield-halved text-teal-400"></i> มาตรฐานตำแหน่งและวิทยฐานะ ว9/2564 สำนักงาน ก.ค.ศ.
@@ -693,7 +693,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 1: สภาพปัญหา 1/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 1: สภาพปัญหา 1/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             1. สภาพปัญหา ที่มา และความสำคัญของการวิจัยในชั้นเรียน
@@ -740,7 +740,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 1: วัตถุประสงค์ 2/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 1: วัตถุประสงค์ 2/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             2. วัตถุประสงค์ สมมติฐาน และขอบเขตการวิจัย
@@ -782,7 +782,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 2: ทฤษฎีและเอกสารที่เกี่ยวข้อง 3/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 2: ทฤษฎีและเอกสารที่เกี่ยวข้อง 3/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             3. เอกสาร ทฤษฎี และงานวิจัยที่เกี่ยวข้อง
@@ -838,7 +838,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: กรอบแนวคิดนวัตกรรม 4/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: กรอบแนวคิดนวัตกรรม 4/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-2 text-white">
             4. กรอบแนวคิดและขั้นตอนนวัตกรรมการเรียนรู้ (${modelName})
@@ -870,7 +870,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: ระเบียบวิธีวิจัย 5/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: ระเบียบวิธีวิจัย 5/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             5. ระเบียบวิธีวิจัยและวงจรการวิจัยเชิงปฏิบัติการ (PA Action Research)
@@ -910,7 +910,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: เครื่องมือวิจัย 6/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: เครื่องมือวิจัย 6/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             6. เครื่องมือวิจัยและการตรวจสอบคุณภาพเครื่องมือ (IOC)
@@ -966,7 +966,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 4: ผลการวิเคราะห์ข้อมูล 7/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 4: ผลการวิเคราะห์ข้อมูล 7/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             7. ผลการวิเคราะห์ข้อมูลและผลสัมฤทธิ์ทางการเรียน
@@ -1024,7 +1024,7 @@ const PresentationDeck = {
       html = `
         <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
-            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 5: การอภิปรายผลและการขยายผล 8/8) · ปีการศึกษา ${currentAcademicYear}
+            ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 5: การอภิปรายผลและการขยายผล 8/8) · ปีงบประมาณ ${currentAcademicYear}
           </div>
           <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             8. การอภิปรายผล ประโยชน์ที่ได้รับ และการขยายผลในชุมชน PLC
@@ -1081,7 +1081,7 @@ const PresentationDeck = {
             <i class="fa-solid fa-clipboard-check"></i>
           </div>
           <h2 class="text-3xl sm:text-5xl lg:text-6xl font-bold font-heading mb-3">สรุปผลการประเมินตนเอง ว.PA</h2>
-          <p class="text-sm sm:text-xl lg:text-2xl text-teal-300 mb-8 font-medium">ปีการศึกษา ${currentAcademicYear} · ${teacher.name} (${teacher.academicStanding})</p>
+          <p class="text-sm sm:text-xl lg:text-2xl text-teal-300 mb-8 font-medium">ปีงบประมาณ ${currentAcademicYear} · ${teacher.name} (${teacher.academicStanding})</p>
           
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl mb-8 text-xs sm:text-sm lg:text-base">
             <div class="p-5 sm:p-6 rounded-3xl bg-white/10 border border-white/10 shadow-lg">
@@ -1233,7 +1233,7 @@ const PresentationDeck = {
       });
 
       const deptName = teacher.learningArea || teacher.department || "กลุ่มสาระการเรียนรู้การงานอาชีพ";
-      slide1.addText("กลุ่มสาระการเรียนรู้: " + deptName + "\nสถานศึกษา: " + (teacher.school || "โรงเรียนเปรมติณสูลานนท์") + " (" + (teacher.affiliation || "สพม.ขอนแก่น") + ")\nรอบการประเมิน: ปีการศึกษา " + curYear + " (1 ตุลาคม " + prevYear + " - 30 กันยายน " + curYear + ")", {
+      slide1.addText("กลุ่มสาระการเรียนรู้: " + deptName + "\nสถานศึกษา: " + (teacher.school || "โรงเรียนเปรมติณสูลานนท์") + " (" + (teacher.affiliation || "สพม.ขอนแก่น") + ")\nรอบการประเมิน: ปีงบประมาณ " + curYear + " (1 ตุลาคม " + prevYear + " - 30 กันยายน " + curYear + ")", {
         x: 0.8, y: 2.9, w: 5.8, h: 1.2,
         fontSize: 12, color: TEXT_WHITE, fontFace: FONT_NAME, lineSpacing: 20
       });
@@ -1701,7 +1701,7 @@ const PresentationDeck = {
       slide26.addText("สรุปผลการประเมินตนเองตามข้อตกลงในการพัฒนางาน (ว.PA)", {
         x: 0.8, y: 0.6, w: 8.4, h: 0.5, fontSize: 22, color: TEXT_WHITE, fontFace: FONT_NAME, bold: true, align: "center"
       });
-      slide26.addText("ปีการศึกษา " + curYear + " · " + (teacher.name || "ครูผู้รับการประเมิน") + " (" + (teacher.academicStanding || "ครูชำนาญการพิเศษ") + ")", {
+      slide26.addText("ปีงบประมาณ " + curYear + " · " + (teacher.name || "ครูผู้รับการประเมิน") + " (" + (teacher.academicStanding || "ครูชำนาญการพิเศษ") + ")", {
         x: 0.8, y: 1.1, w: 8.4, h: 0.35, fontSize: 13, color: TEXT_TEAL, fontFace: FONT_NAME, align: "center"
       });
 
@@ -1741,7 +1741,7 @@ const PresentationDeck = {
       // บันทึกและดาวน์โหลดไฟล์ .pptx
       // -------------------------------------------------------------
       const teacherNameSafe = (teacher.name || "ครูผู้รับการประเมิน").replace(/\s+/g, '_');
-      const fileName = `วPA_สไลด์นำเสนอ_${teacherNameSafe}_ปีการศึกษา${curYear}.pptx`;
+      const fileName = `วPA_สไลด์นำเสนอ_${teacherNameSafe}_ปีงบประมาณ${curYear}.pptx`;
       await pptx.writeFile({ fileName: fileName });
 
       if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {

@@ -23,7 +23,7 @@ const ExportEngine = {
     // Sheet 1: ข้อมูลทั่วไปและประวัติ
     const profileData = [
       ['ระบบรายงานผลการประเมินผลการพัฒนางานตามข้อตกลง (ว.PA) — PAFolio'],
-      ['รอบการประเมินปีการศึกษา:', year],
+      ['รอบการประเมินปีงบประมาณ:', year],
       [''],
       ['ข้อมูลผู้รับการประเมิน'],
       ['ชื่อ - นามสกุล:', teacher.name],
@@ -137,7 +137,7 @@ const ExportEngine = {
         <div class="header-box">
           <h1>แบบรายงานผลการพัฒนางานตามข้อตกลงในการพัฒนางาน (PA)</h1>
           <h2>สำหรับข้าราชการครูและบุคลากรทางการศึกษา ตำแหน่งครู วิทยฐานะ${teacher.academicStanding}</h2>
-          <p class="center"><strong>รอบการประเมิน:</strong> ปีการศึกษา ${year} (ระหว่างวันที่ 1 ตุลาคม ถึง 30 กันยายน)</p>
+          <p class="center"><strong>รอบการประเมิน:</strong> ปีงบประมาณ ${year} (ระหว่างวันที่ 1 ตุลาคม ถึง 30 กันยายน)</p>
           <p class="center"><strong>ผู้รับการประเมิน:</strong> ${teacher.name} | <strong>ตำแหน่ง:</strong> ${teacher.position} | <strong>สถานศึกษา:</strong> ${teacher.school}</p>
         </div>
 

@@ -30,7 +30,7 @@ const PAFOLIO_DATABASE = {
     years: {
       "2570": {
         year: "2570",
-        status: "รอบการประเมิน ว.PA ปีการศึกษา 2570 (แผนพัฒนาต่อเนื่อง)",
+        status: "รอบการประเมิน ว.PA ปีงบประมาณ 2570 (แผนพัฒนาต่อเนื่อง)",
         avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
         coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
         roles: [
@@ -172,7 +172,7 @@ const PAFOLIO_DATABASE = {
       },
       "2569": {
         year: "2569",
-        status: "รอบการประเมิน ว.PA ปีการศึกษา 2569 (รอบการประเมินปัจจุบัน)",
+        status: "รอบการประเมิน ว.PA ปีงบประมาณ 2569 (รอบการประเมินปัจจุบัน)",
         avatarUrl: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
         coverUrl: "https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920",
         roles: [

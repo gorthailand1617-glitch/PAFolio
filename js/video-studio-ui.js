@@ -328,7 +328,7 @@ const VideoStudioUI = {
       // ดาวน์โหลดไฟล์วิดีโอลงเครื่อง
       const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : { name: "ครู" };
       const curYear = (typeof currentAcademicYear !== 'undefined') ? currentAcademicYear : "2568";
-      const filename = `วPA_คลิปนำเสนอ_${teacher.name}_ปีการศึกษา${curYear}.webm`;
+      const filename = `วPA_คลิปนำเสนอ_${teacher.name}_ปีงบประมาณ${curYear}.webm`;
 
       const downloadUrl = URL.createObjectURL(videoBlob);
       const a = document.createElement('a');
@@ -366,7 +366,7 @@ const VideoStudioUI = {
         const videoBlob = await VideoEngine.exportVideo();
         const teacher = getActiveTeacher();
         const curYear = (typeof currentAcademicYear !== 'undefined') ? currentAcademicYear : "2568";
-        const filename = `วPA_คลิปนำเสนอ_${teacher.name}_ปีการศึกษา${curYear}.webm`;
+        const filename = `วPA_คลิปนำเสนอ_${teacher.name}_ปีงบประมาณ${curYear}.webm`;
 
         await DriveSync.uploadVideoFile(videoBlob, filename);
       } catch (err) {

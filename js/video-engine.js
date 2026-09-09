@@ -101,17 +101,17 @@ const VideoEngine = {
         id: 1,
         type: 'intro',
         title: 'หน้าปกและแนะนำตัวครูผู้รับการประเมิน',
-        subtitle: `การพัฒนางานตามข้อตกลง ว.PA ประจำปีการศึกษา ${curYear}`,
+        subtitle: `การพัฒนางานตามข้อตกลง ว.PA ประจำปีงบประมาณ ${curYear}`,
         durationFull: 48,
         durationShort: 18,
         bgImage: teacher.coverBannerUrl || defaultCover,
         avatar: teacher.avatarUrl || "images/profile.jpg",
-        script: `กราบเรียนท่านประธานและคณะกรรมการผู้ทรงคุณวุฒิทุกท่าน ดิฉัน/กระผม ${teacher.name} ตำแหน่ง ${teacher.position} วิทยฐานะ ${teacher.academicStanding} สังกัด ${teacher.school} ${teacher.affiliation} ขอรายงานผลการพัฒนางานตามข้อตกลงในการพัฒนางาน ว.PA ประจำปีการศึกษา ${curYear} ครับ`,
+        script: `กราบเรียนท่านประธานและคณะกรรมการผู้ทรงคุณวุฒิทุกท่าน ดิฉัน/กระผม ${teacher.name} ตำแหน่ง ${teacher.position} วิทยฐานะ ${teacher.academicStanding} สังกัด ${teacher.school} ${teacher.affiliation} ขอรายงานผลการพัฒนางานตามข้อตกลงในการพัฒนางาน ว.PA ประจำปีงบประมาณ ${curYear} ครับ`,
         keyPoints: [
           `วิทยฐานะ: ${teacher.academicStanding}`,
           `สถานศึกษา: ${teacher.school}`,
           `กลุ่มสาระฯ: ${teacher.department}`,
-          `รอบการประเมิน: ปีการศึกษา ${curYear}`
+          `รอบการประเมิน: ปีงบประมาณ ${curYear}`
         ]
       },
       {
