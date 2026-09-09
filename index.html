@@ -553,9 +553,14 @@
           <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold uppercase">
             <i class="fa-solid fa-fire text-amber-300"></i> ข้อตกลงในการพัฒนางานที่เป็นประเด็นท้าทาย (<span class="current-year-label">ปี 2568</span>)
           </div>
-          <button onclick="PresentationDeck.open('res-problem')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-bold font-heading shadow-md hover:scale-105 transition">
-            <i class="fa-solid fa-tv"></i> สไลด์ประเด็นท้าทาย (วิจัย 5 บท)
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="autoSynthesizeChallengeFromDrive(false)" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 hover:opacity-90 text-white text-xs font-bold font-heading shadow-md hover:scale-105 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i> ให้ AI ค้นหาและสังเคราะห์จากไฟล์ในไดรฟ์
+            </button>
+            <button onclick="PresentationDeck.open('res-problem')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-bold font-heading shadow-md hover:scale-105 transition">
+              <i class="fa-solid fa-tv"></i> สไลด์ประเด็นท้าทาย (วิจัย 5 บท)
+            </button>
+          </div>
         </div>
         
         <h2 class="text-2xl sm:text-4xl font-bold font-heading mb-3 leading-tight" id="challenge-topic-text">
@@ -1535,9 +1540,16 @@
         </div>
 
         <div class="pt-2 border-t border-slate-800">
-          <h4 class="font-heading font-bold text-amber-400 mb-3 flex items-center gap-1.5">
-            <i class="fa-solid fa-fire"></i> ประเด็นท้าทาย (วิจัย 5 บท)
-          </h4>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <h4 class="font-heading font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-fire"></i> ประเด็นท้าทาย (วิจัย 5 บท)
+            </h4>
+            <button type="button" onclick="autoSynthesizeChallengeFromDrive(true)" 
+                    class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i> ให้ AI ค้นหาและสังเคราะห์จากไฟล์ในไดรฟ์
+            </button>
+          </div>
+          <div id="editor-ai-challenge-status" class="hidden mb-3"></div>
           <div class="space-y-3">
             <div>
               <label class="block text-slate-400 font-semibold mb-1">หัวข้อประเด็นท้าทาย</label>

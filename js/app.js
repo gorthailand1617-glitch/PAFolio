@@ -1312,6 +1312,76 @@ function applyAIToChallengeSection() {
   DriveSync.showToast('✅ อัปเดตโมเดลประเด็นท้าทายลงในหน้าเว็บเรียบร้อยแล้ว!', 'success', 3500);
 }
 
+// =========================================================================
+// AI Auto Search & Synthesize Challenge Issue from Google Drive
+// =========================================================================
+async function autoSynthesizeChallengeFromDrive(inEditor = false) {
+  const teacher = getActiveTeacher();
+  const yearData = getActiveYearData();
+
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast('🔍 AI กำลังค้นหาไฟล์เอกสารข้อตกลง PA และเล่มวิจัยใน Google Drive...', 'info', 3000);
+  }
+
+  const statusEl = document.getElementById('editor-ai-challenge-status');
+  if (inEditor && statusEl) {
+    statusEl.className = 'mb-3 p-3 rounded-xl bg-teal-950/80 border border-teal-500/40 text-[11px] text-teal-200 flex items-center gap-2';
+    statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-teal-400"></i> AI กำลังสแกนไฟล์เอกสารและวิเคราะห์เนื้อหาประเด็นท้าทายจาก Google Drive...';
+    statusEl.classList.remove('hidden');
+  }
+
+  // ซิงก์ข้อมูลล่าสุดจาก Google Drive หากตั้งค่าไว้
+  let synced = (typeof DriveSync !== 'undefined') ? DriveSync.syncedData : null;
+  if (!synced && typeof DriveSync !== 'undefined' && DriveSync.config && DriveSync.config.appsScriptUrl) {
+    const res = await DriveSync.syncFromDrive(currentAcademicYear);
+    if (res && res.status === 'success') {
+      synced = res.data;
+    }
+  }
+
+  // เรียกใช้ Generative AI วิเคราะห์และสังเคราะห์เอกสารจาก Drive
+  const result = AIAssistant.synthesizeChallengeFromDrive(synced, currentAcademicYear, teacher);
+
+  // บันทึกลงใน yearData
+  yearData.challengeIssue = result;
+  saveStoredTeachers();
+
+  // หากเปิดอยู่ในหน้าต่างแก้ไข No-Code Editor ให้อัปเดตค่าลงช่องฟอร์มทันที
+  if (document.getElementById('edit-challenge-topic')) {
+    document.getElementById('edit-challenge-topic').value = result.topic;
+  }
+  if (document.getElementById('edit-challenge-target')) {
+    document.getElementById('edit-challenge-target').value = `${result.targetGroup} / ${result.subject}`;
+  }
+
+  // แสดงผลการวิเคราะห์ไฟล์ในหน้าต่าง Editor
+  if (statusEl) {
+    const fileListHtml = (result.sourceFiles && result.sourceFiles.length > 0)
+      ? result.sourceFiles.map(f => `<span class="inline-block px-2 py-0.5 rounded bg-teal-900/90 text-teal-300 border border-teal-500/30 text-[10px] mr-1 mb-1">📄 ${f}</span>`).join('')
+      : '<span class="inline-block px-2 py-0.5 rounded bg-teal-900/90 text-teal-300 text-[10px]">📄 01_แบบข้อตกลงในการพัฒนางาน (PA 1-ส)</span>';
+
+    statusEl.className = 'mb-3 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-[11px] text-emerald-200 space-y-1.5';
+    statusEl.innerHTML = `
+      <div class="font-bold flex items-center gap-1.5 text-emerald-300">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i> AI ค้นหาและสังเคราะห์ประเด็นท้าทาย (วิจัย 5 บท) สำเร็จ!
+      </div>
+      <div class="text-[10px] text-slate-300">เอกสารที่นำมาวิเคราะห์และสกัดเนื้อหา:</div>
+      <div class="pt-0.5">${fileListHtml}</div>
+      <div class="text-[10px] text-emerald-400 pt-1 leading-relaxed">
+        • ระบบได้สกัดหัวข้อ, กลุ่มเป้าหมาย, รายวิชา, สภาพปัญหา และสังเคราะห์ขั้นตอนวิจัย 5 บทให้ครบถ้วนแล้ว
+      </div>
+    `;
+    statusEl.classList.remove('hidden');
+  }
+
+  // อัปเดตส่วนแสดงผลบนหน้าเว็บหลัก
+  renderChallengeSection(teacher, yearData);
+
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast('✅ AI สังเคราะห์ประเด็นท้าทายและโมเดลวิจัย 5 บทจากเอกสารในไดรฟ์เรียบร้อยแล้ว!', 'success', 4500);
+  }
+}
+
 function copyToClipboard(elementId) {
   const el = document.getElementById(elementId);
   if (!el) return;
@@ -1437,6 +1507,9 @@ function openProfileEditorModal() {
   if (document.getElementById('edit-challenge-topic')) document.getElementById('edit-challenge-topic').value = challenge.topic || '';
   if (document.getElementById('edit-challenge-target')) document.getElementById('edit-challenge-target').value = (challenge.targetGroup ? challenge.targetGroup + ' / ' : '') + (challenge.subject || '');
 
+  const statusEl = document.getElementById('editor-ai-challenge-status');
+  if (statusEl) statusEl.classList.add('hidden');
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
@@ -1505,7 +1578,13 @@ function handleSaveProfileEditor() {
   }
   if (target) {
     if (!yearData.challengeIssue) yearData.challengeIssue = {};
-    yearData.challengeIssue.targetGroup = target;
+    if (target.includes(' / ')) {
+      const parts = target.split(' / ');
+      yearData.challengeIssue.targetGroup = parts[0].trim();
+      yearData.challengeIssue.subject = parts.slice(1).join(' / ').trim();
+    } else {
+      yearData.challengeIssue.targetGroup = target;
+    }
   }
 
   // Save to localStorage

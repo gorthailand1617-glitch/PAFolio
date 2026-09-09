@@ -190,7 +190,9 @@ function scanDriveRecursively(rootFolderId, filterYear) {
       logoUrl: "",
       coverUrl: ""
     },
-    evidenceGallery: []
+    evidenceGallery: [],
+    challengeDocs: [],
+    extractedChallenge: null
   };
 
   // 1. สแกนหา Asset กลาง (รูปโปรไฟล์ / โลโก้ / ปก)
@@ -368,7 +370,15 @@ function traverseFolder(folder, result, depth) {
       icon = "fa-file-powerpoint";
     }
 
-    fileItems.push({
+    let snippet = "";
+    if (mime === "application/vnd.google-apps.document" || mime.includes("text")) {
+      try {
+        const doc = DocumentApp.openById(file.getId());
+        snippet = doc.getBody().getText().substring(0, 3000);
+      } catch(e) {}
+    }
+
+    const fileItem = {
       id: file.getId(),
       title: file.getName(),
       type: type,
@@ -376,8 +386,24 @@ function traverseFolder(folder, result, depth) {
       icon: icon,
       viewUrl: file.getUrl(),
       downloadUrl: file.getDownloadUrl(),
-      thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800"
-    });
+      thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800",
+      snippet: snippet
+    };
+
+    fileItems.push(fileItem);
+
+    // ตรวจจับไฟล์เอกสารข้อตกลง PA และประเด็นท้าทาย
+    const fLower = (file.getName() + " " + folderName).toLowerCase();
+    if (fLower.includes("ข้อตกลง") || fLower.includes("ประเด็นท้าทาย") || fLower.includes("challenge") || fLower.includes("pa 1") || fLower.includes("pa1") || fLower.includes("วิจัย") || fLower.includes("นวัตกรรม")) {
+      result.challengeDocs.push({
+        id: file.getId(),
+        title: file.getName(),
+        folderName: folderName,
+        type: type,
+        viewUrl: file.getUrl(),
+        snippet: snippet
+      });
+    }
   }
 
   if (indicatorCode || fileItems.length > 0) {
