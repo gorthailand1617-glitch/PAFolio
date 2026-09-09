@@ -15,8 +15,7 @@ const PAFOLIO_CONFIG = {
   DEFAULT_THEME: "gold",
 
   // 🌐 Google Apps Script Web App URL สากล (ตัวเชื่อมต่อ Google Drive แบบสด)
-  // หากครูใส่ค่าในหน้าตั้งค่าบนคอมทำงาน ระบบจะบันทึกลงเครื่องและสามารถคัดลอกมาใส่ที่นี่ได้
-  APPS_SCRIPT_URL: "",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycby7k7vKoFG6uugmoqGenVCdWPVXVAfkcWuw7mKcPm8qJSaUmwtOFW_yaEmVAwUlma_Miw/exec",
 
   // 🔖 เลขเวอร์ชันระบบสำหรับจัดการ Cache สากล
   APP_VERSION: "2569.7.0",
