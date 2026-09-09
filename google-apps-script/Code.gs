@@ -607,11 +607,19 @@ function scanCertificates(rootFolder, targetFoldersToScan, result) {
         badgeIcon = "fa-certificate text-emerald-400";
       }
 
-      // ดึงปีการศึกษา
-      let fileYear = result.years && result.years[0] ? result.years[0] : "2569";
-      const yearMatch = (folderName + " " + cleanTitle).match(/(25\d{2}|6\d|7\d)/);
-      if (yearMatch) {
-        fileYear = yearMatch[1].length === 2 ? "25" + yearMatch[1] : yearMatch[1];
+      // ดึงปีการศึกษาให้สัมพันธ์กับรอบการประเมินอย่างถูกต้อง
+      // ป้องกันการตรวจจับวันที่เป็นปีผิดพลาด (เช่น วันที่ 25/03/67 กลายเป็น 2503, 25/05 กลายเป็น 2505, 25/07 กลายเป็น 2507)
+      let fileYear = result.year || (result.years && result.years[0] ? result.years[0] : "2569");
+      
+      // ตรวจหาปี พ.ศ. 4 หลักในช่วง ว.PA ที่เป็นไปได้จริง (2560 - 2579)
+      const fullYearMatch = (folderName + " " + cleanTitle).match(/\b(25[6-7]\d)\b/);
+      // หรือตรวจหาแบบมีคำนำหน้า เช่น PA68, ปี 68, พ.ศ. 68
+      const prefixYearMatch = (folderName + " " + cleanTitle).match(/(?:PA|ปี|พ\.ศ\.|ปีการศึกษา)\s*([6-7]\d)\b/i);
+
+      if (fullYearMatch) {
+        fileYear = fullYearMatch[1];
+      } else if (prefixYearMatch) {
+        fileYear = "25" + prefixYearMatch[1];
       }
 
       result.certificates.push({

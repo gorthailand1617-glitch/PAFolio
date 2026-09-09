@@ -1,102 +1,263 @@
 /**
  * PAFolio - e-Certificate & Awards Vault v5.0
  * ระบบคลังเกียรติบัตร โล่รางวัล และผลงานยกย่องเชิดชูเกียรติอัจฉริยะ
+ * ผูกตรงกับรอบปีการศึกษาที่ประเมิน (currentAcademicYear) และคัดกรองเฉพาะปีที่ถูกต้อง (พ.ศ. 2560 - 2579)
  */
 
 const CertificateVault = {
   activeCategory: 'all',
   searchQuery: '',
 
-  // ฐานข้อมูลเกียรติบัตรและรางวัลมาตรฐาน (Mock Baseline Data)
-  sampleCertificates: [
-    {
-      id: 'cert-1',
-      title: 'รางวัลชนะเลิศเหรียญทอง OBEC AWARDS (ครูผู้สอนยอดเยี่ยม)',
-      category: 'national',
-      categoryThai: 'ระดับชาติ / นานาชาติ',
-      levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-      badgeIcon: 'fa-trophy text-amber-400',
-      issuer: 'สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน (สพฐ.)',
-      year: '2568',
-      date: '15 สิงหาคม 2568',
-      imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
-      description: 'รางวัลทรงคุณค่า สพฐ. (OBEC AWARDS) ด้านนวัตกรรมการจัดการเรียนรู้เชิงรุก (Active Learning) ระดับมัธยมศึกษาตอนปลาย',
-      docUrl: '#'
-    },
-    {
-      id: 'cert-2',
-      title: 'รางวัลคุรุชนคนคุณธรรม "ดีเด่น" ระดับประเทศ',
-      category: 'national',
-      categoryThai: 'ระดับชาติ / นานาชาติ',
-      levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-      badgeIcon: 'fa-award text-amber-400',
-      issuer: 'สำนักงานเลขาธิการคุรุสภา',
-      year: '2567',
-      date: '16 มกราคม 2567',
-      imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
-      description: 'โครงการโรงเรียนคุณธรรม สพฐ. เพื่อยกย่องผู้ประพฤติปฏิบัติตนตามมาตรฐานวิชาชีพและจรรยาบรรณวิชาชีพครู',
-      docUrl: '#'
-    },
-    {
-      id: 'cert-3',
-      title: 'รางวัลนวัตกรรมการจัดการเรียนรู้ยอดเยี่ยม ระดับภาค',
-      category: 'regional',
-      categoryThai: 'ระดับภาค / เขตตรวจ',
-      levelBadge: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
-      badgeIcon: 'fa-medal text-teal-400',
-      issuer: 'ศูนย์ขับเคลื่อนนวัตกรรมการศึกษา ภาคตะวันออกเฉียงเหนือ',
-      year: '2568',
-      date: '20 กรกฎาคม 2568',
-      imageUrl: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=800&q=80',
-      description: 'การพัฒนารูปแบบการสอน PREM Model ร่วมกับ Thinking Whiteboard เพื่อส่งเสริมทักษะการเรียนรู้เชิงรุก',
-      docUrl: '#'
-    },
-    {
-      id: 'cert-4',
-      title: 'รางวัล "ครูดีในดวงใจ" ระดับเขตพื้นที่การศึกษา',
-      category: 'district',
-      categoryThai: 'ระดับเขตพื้นที่การศึกษา',
-      levelBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-      badgeIcon: 'fa-star text-blue-400',
-      issuer: 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น (สพม.ขอนแก่น)',
-      year: '2568',
-      date: '16 มกราคม 2568',
-      imageUrl: 'https://images.unsplash.com/photo-1579389083078-4e7018379f7e?auto=format&fit=crop&w=800&q=80',
-      description: 'ครูผู้มีจิตวิญญาณความเป็นครู ทุ่มเทเสียสละ และเป็นแบบอย่างที่ดีในการจัดการศึกษา',
-      docUrl: '#'
-    },
-    {
-      id: 'cert-5',
-      title: 'รางวัล "หนึ่งโรงเรียน หนึ่งนวัตกรรม" (ระดับเหรียญทอง)',
-      category: 'district',
-      categoryThai: 'ระดับเขตพื้นที่การศึกษา',
-      levelBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-      badgeIcon: 'fa-lightbulb text-blue-400',
-      issuer: 'สพม.ขอนแก่น ร่วมกับคุรุสภา',
-      year: '2567',
-      date: '10 กันยายน 2567',
-      imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
-      description: 'นวัตกรรมสื่อการสอนชุด Thinking Whiteboard เพื่อการแก้ปัญหาผลสัมฤทธิ์ทางการเรียนในศตวรรษที่ 21',
-      docUrl: '#'
-    },
-    {
-      id: 'cert-6',
-      title: 'รางวัลครูผู้มีผลงานการปฏิบัติหน้าที่ดีเด่น ประจำปี 2568',
-      category: 'school',
-      categoryThai: 'ระดับสถานศึกษา',
-      levelBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-      badgeIcon: 'fa-certificate text-emerald-400',
-      issuer: 'โรงเรียนเปรมติณสูลานนท์',
-      year: '2568',
-      date: '28 กุมภาพันธ์ 2568',
-      imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
-      description: 'การปฏิบัติงานวิชาการ การดูแลช่วยเหลือนักเรียน และการสร้างชื่อเสียงให้แก่สถานศึกษา',
-      docUrl: '#'
-    }
-  ],
+  // ตรวจสอบความถูกต้องของปีการศึกษา ว.PA (ต้องเป็น พ.ศ. 2560 - 2579 เท่านั้น)
+  // เพื่อป้องกันตัวเลขวันที่ เช่น 25/03 กลายเป็น 2503 หรือ 2505, 2507
+  isValidAcademicYear(yr) {
+    if (!yr) return false;
+    const str = String(yr).trim();
+    if (!/^\d{4}$/.test(str)) return false;
+    const num = parseInt(str, 10);
+    return num >= 2560 && num <= 2579;
+  },
 
-  // ดึงรายการเกียรติบัตรทั้งหมด (ดึงรูปภาพจริงจากโฟลเดอร์เกียรติบัตรใน Google Drive เป็นอันดับแรก)
-  getAllCertificates() {
+  // ทำความสะอาดและแปลงปีให้อยู่ในกรอบปีการศึกษาที่ประเมิน
+  sanitizeYear(yr, fallbackYear = '2569') {
+    if (this.isValidAcademicYear(yr)) {
+      return String(yr).trim();
+    }
+    // หากมี พ.ศ. 4 หลัก (2560 - 2579) ซ่อนอยู่ในข้อความ ให้ดึงออกมา
+    const match = String(yr || '').match(/\b(25[6-7]\d)\b/);
+    if (match && this.isValidAcademicYear(match[1])) {
+      return match[1];
+    }
+    return String(fallbackYear);
+  },
+
+  // ฐานข้อมูลเกียรติบัตรและรางวัลมาตรฐาน แยกตามรอบปีการศึกษาโดยเฉพาะ (ไม่ปะปนกัน)
+  sampleCertificatesByYear: {
+    '2570': [
+      {
+        id: 'cert-70-1',
+        title: 'รางวัลชนะเลิศเหรียญทอง OBEC AWARDS (ครูผู้สอนยอดเยี่ยม)',
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-trophy text-amber-400',
+        issuer: 'สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน (สพฐ.)',
+        year: '2570',
+        date: '15 สิงหาคม 2570',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: 'รางวัลทรงคุณค่า สพฐ. (OBEC AWARDS) ด้านนวัตกรรมการจัดการเรียนรู้เชิงรุก (Active Learning) ประจำปีการศึกษา 2570',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-70-2',
+        title: 'รางวัลคุรุชนคนคุณธรรม "ดีเด่นระดับประเทศ" ประจำปี 2570',
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-award text-amber-400',
+        issuer: 'สำนักงานเลขาธิการคุรุสภา',
+        year: '2570',
+        date: '16 มกราคม 2570',
+        imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
+        description: 'โครงการโรงเรียนคุณธรรม สพฐ. ยกย่องผู้ประพฤติปฏิบัติตนตามมาตรฐานวิชาชีพและจรรยาบรรณวิชาชีพครู',
+        docUrl: '#'
+      }
+    ],
+    '2569': [
+      {
+        id: 'cert-69-1',
+        title: 'รางวัลชนะเลิศเหรียญทอง OBEC AWARDS (ครูผู้สอนยอดเยี่ยม ด้านวิชาการ)',
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-trophy text-amber-400',
+        issuer: 'สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน (สพฐ.)',
+        year: '2569',
+        date: '15 สิงหาคม 2569',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: 'รางวัลทรงคุณค่า สพฐ. (OBEC AWARDS) ด้านนวัตกรรมการจัดการเรียนรู้เชิงรุก (Active Learning) ประจำปีการศึกษา 2569',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-69-2',
+        title: 'รางวัลคุรุชนคนคุณธรรม "ดีเด่นระดับประเทศ" ประจำปี 2569',
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-award text-amber-400',
+        issuer: 'สำนักงานเลขาธิการคุรุสภา',
+        year: '2569',
+        date: '16 มกราคม 2569',
+        imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
+        description: 'โครงการโรงเรียนคุณธรรม สพฐ. ยกย่องผู้ประพฤติปฏิบัติตนตามมาตรฐานวิชาชีพและจรรยาบรรณวิชาชีพครู',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-69-3',
+        title: 'รางวัลนวัตกรรมการจัดการเรียนรู้ยอดเยี่ยม ระดับภาค',
+        category: 'regional',
+        categoryThai: 'ระดับภาค / เขตตรวจ',
+        levelBadge: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
+        badgeIcon: 'fa-medal text-teal-400',
+        issuer: 'ศูนย์ขับเคลื่อนนวัตกรรมการศึกษา ภาคตะวันออกเฉียงเหนือ',
+        year: '2569',
+        date: '20 กรกฎาคม 2569',
+        imageUrl: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=800&q=80',
+        description: 'การพัฒนารูปแบบการสอน PREM Model ร่วมกับ Thinking Whiteboard เพื่อส่งเสริมทักษะการเรียนรู้เชิงรุก',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-69-4',
+        title: 'รางวัล "ครูดีในดวงใจ" ระดับเขตพื้นที่การศึกษา',
+        category: 'district',
+        categoryThai: 'ระดับเขตพื้นที่การศึกษา',
+        levelBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+        badgeIcon: 'fa-star text-blue-400',
+        issuer: 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น (สพม.ขอนแก่น)',
+        year: '2569',
+        date: '16 มกราคม 2569',
+        imageUrl: 'https://images.unsplash.com/photo-1579389083078-4e7018379f7e?auto=format&fit=crop&w=800&q=80',
+        description: 'ครูผู้มีจิตวิญญาณความเป็นครู ทุ่มเทเสียสละ และเป็นแบบอย่างที่ดีในการจัดการศึกษา',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-69-5',
+        title: 'รางวัล "หนึ่งโรงเรียน หนึ่งนวัตกรรม" (ระดับเหรียญทอง)',
+        category: 'district',
+        categoryThai: 'ระดับเขตพื้นที่การศึกษา',
+        levelBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+        badgeIcon: 'fa-lightbulb text-blue-400',
+        issuer: 'สพม.ขอนแก่น ร่วมกับคุรุสภา',
+        year: '2569',
+        date: '10 กันยายน 2569',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: 'นวัตกรรมสื่อการสอนชุด Thinking Whiteboard เพื่อการแก้ปัญหาผลสัมฤทธิ์ทางการเรียนในศตวรรษที่ 21',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-69-6',
+        title: 'รางวัลครูผู้มีผลงานการปฏิบัติหน้าที่ดีเด่น ประจำปี 2569',
+        category: 'school',
+        categoryThai: 'ระดับสถานศึกษา',
+        levelBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        badgeIcon: 'fa-certificate text-emerald-400',
+        issuer: 'โรงเรียนเปรมติณสูลานนท์',
+        year: '2569',
+        date: '28 กุมภาพันธ์ 2569',
+        imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
+        description: 'การปฏิบัติงานวิชาการ การดูแลช่วยเหลือนักเรียน และการสร้างชื่อเสียงให้แก่สถานศึกษา',
+        docUrl: '#'
+      }
+    ],
+    '2568': [
+      {
+        id: 'cert-68-1',
+        title: 'รางวัลชนะเลิศเหรียญทอง OBEC AWARDS (ครูผู้สอนยอดเยี่ยม ด้านการจัดการเรียนรู้)',
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-trophy text-amber-400',
+        issuer: 'สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน (สพฐ.)',
+        year: '2568',
+        date: '15 สิงหาคม 2568',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: 'รางวัลทรงคุณค่า สพฐ. (OBEC AWARDS) ระดับชาติ ด้านนวัตกรรมการจัดการเรียนรู้เชิงรุก ประจำปี 2568',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-68-2',
+        title: 'รางวัลนวัตกรรมการจัดการเรียนรู้ยอดเยี่ยม ระดับภาค ประจำปี 2568',
+        category: 'regional',
+        categoryThai: 'ระดับภาค / เขตตรวจ',
+        levelBadge: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
+        badgeIcon: 'fa-medal text-teal-400',
+        issuer: 'ศูนย์ขับเคลื่อนนวัตกรรมการศึกษา ภาคตะวันออกเฉียงเหนือ',
+        year: '2568',
+        date: '20 กรกฎาคม 2568',
+        imageUrl: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=800&q=80',
+        description: 'การพัฒนารูปแบบการสอน PREM Model ร่วมกับ Thinking Whiteboard ประจำปีการศึกษา 2568',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-68-3',
+        title: 'รางวัล "ครูดีในดวงใจ" ระดับเขตพื้นที่การศึกษา ประจำปี 2568',
+        category: 'district',
+        categoryThai: 'ระดับเขตพื้นที่การศึกษา',
+        levelBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+        badgeIcon: 'fa-star text-blue-400',
+        issuer: 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น (สพม.ขอนแก่น)',
+        year: '2568',
+        date: '16 มกราคม 2568',
+        imageUrl: 'https://images.unsplash.com/photo-1579389083078-4e7018379f7e?auto=format&fit=crop&w=800&q=80',
+        description: 'ครูผู้มีจิตวิญญาณความเป็นครู ทุ่มเทเสียสละ และเป็นแบบอย่างที่ดีในการจัดการศึกษา',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-68-4',
+        title: 'รางวัลครูผู้มีผลงานการปฏิบัติหน้าที่ดีเด่น ประจำปี 2568',
+        category: 'school',
+        categoryThai: 'ระดับสถานศึกษา',
+        levelBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        badgeIcon: 'fa-certificate text-emerald-400',
+        issuer: 'โรงเรียนเปรมติณสูลานนท์',
+        year: '2568',
+        date: '28 กุมภาพันธ์ 2568',
+        imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
+        description: 'การปฏิบัติงานวิชาการ การดูแลช่วยเหลือนักเรียน และการสร้างชื่อเสียงให้แก่สถานศึกษา',
+        docUrl: '#'
+      }
+    ],
+    '2567': [
+      {
+        id: 'cert-67-1',
+        title: 'รางวัลคุรุชนคนคุณธรรม "ดีเด่น" ระดับประเทศ ประจำปี 2567',
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-award text-amber-400',
+        issuer: 'สำนักงานเลขาธิการคุรุสภา',
+        year: '2567',
+        date: '16 มกราคม 2567',
+        imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
+        description: 'โครงการโรงเรียนคุณธรรม สพฐ. เพื่อยกย่องผู้ประพฤติปฏิบัติตนตามมาตรฐานวิชาชีพครู ประจำปี 2567',
+        docUrl: '#'
+      },
+      {
+        id: 'cert-67-2',
+        title: 'รางวัล "หนึ่งโรงเรียน หนึ่งนวัตกรรม" (ระดับเหรียญทอง) ประจำปี 2567',
+        category: 'district',
+        categoryThai: 'ระดับเขตพื้นที่การศึกษา',
+        levelBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+        badgeIcon: 'fa-lightbulb text-blue-400',
+        issuer: 'สพม.ขอนแก่น ร่วมกับคุรุสภา',
+        year: '2567',
+        date: '10 กันยายน 2567',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: 'นวัตกรรมสื่อการสอนชุด Thinking Whiteboard เพื่อการแก้ปัญหาผลสัมฤทธิ์ทางการเรียน',
+        docUrl: '#'
+      }
+    ],
+    '2566': [
+      {
+        id: 'cert-66-1',
+        title: 'รางวัลครูผู้สอนดีเด่น กลุ่มสาระการเรียนรู้การงานอาชีพ ประจำปี 2566',
+        category: 'school',
+        categoryThai: 'ระดับสถานศึกษา',
+        levelBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        badgeIcon: 'fa-certificate text-emerald-400',
+        issuer: 'โรงเรียนเปรมติณสูลานนท์',
+        year: '2566',
+        date: '20 กุมภาพันธ์ 2566',
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: 'ผลการปฏิบัติหน้าที่ด้านการจัดการเรียนรู้ยอดเยี่ยม ประจำปีการศึกษา 2566',
+        docUrl: '#'
+      }
+    ]
+  },
+
+  // ดึงรายการเกียรติบัตรที่สัมพันธ์กับ "รอบปีที่ประเมิน" (currentAcademicYear) เท่านั้น ไม่ปะปนกับปีอื่น
+  getAllCertificates(targetYear = null) {
+    const activeYear = String(targetYear || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2569'));
     let driveCerts = [];
     const seenIds = new Set();
 
@@ -104,14 +265,21 @@ const CertificateVault = {
     if (typeof DriveSync !== 'undefined' && DriveSync.syncedData) {
       if (Array.isArray(DriveSync.syncedData.certificates) && DriveSync.syncedData.certificates.length > 0) {
         DriveSync.syncedData.certificates.forEach(c => {
-          if (!seenIds.has(c.id)) {
-            seenIds.add(c.id);
-            driveCerts.push(c);
+          // ล้างค่าปีให้อยู่ในช่วงที่ถูกต้อง (กำจัด 2503, 2505, 2507)
+          const certYear = this.sanitizeYear(c.year, activeYear);
+          
+          // ⚠️ จุดสำคัญที่สุด: ต้องตรงกับรอบปีที่กำลังประเมิน (activeYear) เท่านั้น ไม่เอาของปีอื่นมาแสดง
+          if (certYear === activeYear) {
+            c.year = certYear;
+            if (!seenIds.has(c.id)) {
+              seenIds.add(c.id);
+              driveCerts.push(c);
+            }
           }
         });
       }
 
-      // 2. ตรวจสอบเพิ่มเติมในตัวชี้วัดทั้งหมด เผื่อมีโฟลเดอร์หรือไฟล์เกียรติบัตรแทรกอยู่
+      // 2. ตรวจสอบเพิ่มเติมในตัวชี้วัดเฉพาะของปีที่เลือก เผื่อมีโฟลเดอร์หรือไฟล์เกียรติบัตรแทรกอยู่
       if (DriveSync.syncedData.indicators) {
         Object.values(DriveSync.syncedData.indicators).forEach(ind => {
           const isCertFolder = ind.folderName && (
@@ -164,10 +332,10 @@ const CertificateVault = {
                     levelBadge: badge,
                     badgeIcon: icon,
                     issuer: `Google Drive (${ind.folderName || 'โฟลเดอร์เกียรติบัตร'})`,
-                    year: (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2569'),
-                    date: 'ซิงก์สดจากไดรฟ์',
+                    year: activeYear,
+                    date: 'รอบปีการศึกษา ' + activeYear,
                     imageUrl: file.thumbUrl || `https://drive.google.com/thumbnail?id=${file.id}&sz=w1200`,
-                    description: `ไฟล์ภาพเกียรติบัตรจริงจาก Google Drive โฟลเดอร์ [${ind.folderName}]`,
+                    description: `ไฟล์ภาพเกียรติบัตรจริงจาก Google Drive ประจำปีการศึกษา ${activeYear}`,
                     docUrl: file.viewUrl
                   });
                 }
@@ -178,13 +346,47 @@ const CertificateVault = {
       }
     }
 
-    // หากพบรูปเกียรติบัตรจริงจาก Google Drive ให้แสดงรูปจริงจากไดรฟ์เป็นหลัก 100%!
+    // หากพบรูปเกียรติบัตรจริงจาก Google Drive ของปีนั้น ให้แสดงรูปจริงจากไดรฟ์เป็นหลัก 100%!
     if (driveCerts.length > 0) {
       return driveCerts;
     }
 
-    // หากยังไม่ได้เชื่อมต่อไดรฟ์ ให้แสดง Baseline ตัวอย่าง
-    return [...this.sampleCertificates];
+    // หากยังไม่มีไฟล์ในไดรฟ์ ให้ดึงเกียรติบัตรมาตรฐานเฉพาะของ "รอบปีที่เลือก" (activeYear)
+    if (this.sampleCertificatesByYear[activeYear]) {
+      return [...this.sampleCertificatesByYear[activeYear]];
+    }
+
+    // Fallback สำหรับปีอื่นๆ ที่ไม่มีข้อมูลจำเพาะ ให้สร้างชุดข้อมูลของปีนั้นโดยตรง
+    return [
+      {
+        id: `cert-${activeYear}-1`,
+        title: `รางวัลชนะเลิศเหรียญทอง OBEC AWARDS ประจำปีการศึกษา ${activeYear}`,
+        category: 'national',
+        categoryThai: 'ระดับชาติ / นานาชาติ',
+        levelBadge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        badgeIcon: 'fa-trophy text-amber-400',
+        issuer: 'สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน (สพฐ.)',
+        year: activeYear,
+        date: `รอบปีการศึกษา ${activeYear}`,
+        imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+        description: `รางวัลทรงคุณค่า สพฐ. ด้านนวัตกรรมการจัดการเรียนรู้เชิงรุก ประจำรอบปี ${activeYear}`,
+        docUrl: '#'
+      },
+      {
+        id: `cert-${activeYear}-2`,
+        title: `รางวัลครูผู้สอนดีเด่น ประจำปีการศึกษา ${activeYear}`,
+        category: 'school',
+        categoryThai: 'ระดับสถานศึกษา',
+        levelBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        badgeIcon: 'fa-certificate text-emerald-400',
+        issuer: 'โรงเรียนเปรมติณสูลานนท์',
+        year: activeYear,
+        date: `รอบปีการศึกษา ${activeYear}`,
+        imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80',
+        description: `การปฏิบัติงานวิชาการ การพัฒนาผู้เรียน และการสร้างชื่อเสียงให้แก่สถานศึกษา รอบปี ${activeYear}`,
+        docUrl: '#'
+      }
+    ];
   },
 
   // กรองเกียรติบัตรตามหมวดหมู่และคำค้นหา
@@ -213,9 +415,14 @@ const CertificateVault = {
     const container = document.getElementById('certificate-vault-container');
     if (!container) return;
 
+    const activeYear = String((typeof currentAcademicYear !== 'undefined' && currentAcademicYear) ? currentAcademicYear : '2569');
     const certs = this.getFilteredCertificates();
     const countEl = document.getElementById('cert-count-badge');
-    if (countEl) countEl.innerText = `${certs.length} รายการ`;
+    if (countEl) countEl.innerText = `${certs.length} รายการ (รอบปี ${activeYear})`;
+
+    document.querySelectorAll('.cert-active-year-label').forEach(el => {
+      el.innerText = activeYear;
+    });
 
     if (certs.length === 0) {
       container.innerHTML = `
