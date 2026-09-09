@@ -23,7 +23,7 @@ const ROOT_FOLDER_ID = "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K";
 
 // 2. ข้อมูลคุณครูสำหรับใช้ตั้งชื่อโครงสร้างโฟลเดอร์อัตโนมัติ
 const TEACHER_NAME = "นายกรกฎ รัตนะโชติ";
-const ACADEMIC_YEARS = ["2568", "2567"]; // ปีการศึกษาที่ต้องการสร้างโฟลเดอร์
+const ACADEMIC_YEARS = ["2570", "2569", "2568", "2567", "2566"]; // ปีการศึกษาที่ต้องการสร้างโฟลเดอร์
 
 
 /**
@@ -207,7 +207,7 @@ function scanDriveRecursively(rootFolderId, filterYear) {
   }
 
   let yearFoldersFound = [];
-  const yearRegex = /(25\d{2}|6\d)/; // จับเลขปี เช่น 2567, 2568, 67, 68
+  const yearRegex = /(25\d{2}|6\d|7\d)/; // จับเลขปี เช่น 2566 - 2575 หรือ 66, 67, 68, 69, 70
 
   folderList.forEach(folder => {
     const name = folder.getName();
@@ -222,11 +222,14 @@ function scanDriveRecursively(rootFolderId, filterYear) {
   if (yearFoldersFound.length > 0) {
     if (filterYear) {
       const shortYear = (filterYear.length === 4) ? filterYear.substring(2) : filterYear;
-      targetFoldersToScan = yearFoldersFound.filter(f => 
-        f.getName().includes(filterYear) || 
-        f.getName().includes(shortYear) ||
-        f.getName().includes("PA" + shortYear)
-      );
+      targetFoldersToScan = yearFoldersFound.filter(f => {
+        const n = f.getName();
+        return n.includes(filterYear) || 
+               n.includes("PA" + shortYear) || 
+               n.includes("PA " + shortYear) ||
+               n.includes("PA" + filterYear) ||
+               n.includes(shortYear);
+      });
     }
     if (targetFoldersToScan.length === 0) {
       targetFoldersToScan = yearFoldersFound;
@@ -237,7 +240,7 @@ function scanDriveRecursively(rootFolderId, filterYear) {
 
   // 4. สแกนหาไฟล์ตัวชี้วัดและภาพกิจกรรม
   targetFoldersToScan.forEach(folder => {
-    traverseFolder(folder, result, 0);
+    traverseFolder(folder, result, 0, null);
   });
 
   return result;
@@ -329,11 +332,14 @@ function scanSystemAssets(rootFolder, result) {
 /**
  * ท่องไปในโฟลเดอร์ย่อยเพื่อแยกไฟล์และรูปภาพ
  */
-function traverseFolder(folder, result, depth) {
-  if (depth > 5) return;
+function traverseFolder(folder, result, depth, parentIndicatorCode) {
+  if (depth > 6) return;
 
   const folderName = folder.getName();
-  const indicatorCode = extractIndicatorCode(folderName);
+  // ตรวจหาว่าโฟลเดอร์นี้มีรหัสตัวชี้วัดในชื่อหรือไม่ (เช่น "1.1 สร้างและหรือพัฒนาหลักสูตร")
+  const detectedCode = extractIndicatorCode(folderName);
+  // หากไม่มีรหัสในชื่อโฟลเดอร์นี้ ให้สืบทอดมาจากโฟลเดอร์แม่ (เช่น โฟลเดอร์ "📄 เอกสารและหลักฐาน PDF" ภายใน 1.1)
+  const indicatorCode = detectedCode || parentIndicatorCode || null;
 
   const files = folder.getFiles();
   const fileItems = [];
@@ -407,6 +413,7 @@ function traverseFolder(folder, result, depth) {
     }
   }
 
+  // ผูกไฟล์เข้ากับตัวชี้วัด (ทั้งจากโฟลเดอร์แม่ หรือโฟลเดอร์เอกสารย่อย)
   if (indicatorCode || fileItems.length > 0) {
     const key = indicatorCode || folderName;
     if (!result.indicators[key]) {
@@ -421,10 +428,10 @@ function traverseFolder(folder, result, depth) {
       result.indicators[key].files = result.indicators[key].files.concat(fileItems);
     }
     
-    // บันทึก URL โฟลเดอร์เฉพาะตัวชี้วัดลงใน indicatorFolders โดยตรง
-    if (indicatorCode) {
-      if (!result.indicatorFolders[indicatorCode] || !result.indicatorFolders[indicatorCode].folderUrl) {
-        result.indicatorFolders[indicatorCode] = {
+    // บันทึก URL โฟลเดอร์เฉพาะตัวชี้วัด (เฉพาะเมื่อเป็นโฟลเดอร์หลักของตัวชี้วัดนั้นจริง ไม่บันทึกโฟลเดอร์ย่อย PDF ทับ)
+    if (detectedCode) {
+      if (!result.indicatorFolders[detectedCode] || !result.indicatorFolders[detectedCode].folderUrl) {
+        result.indicatorFolders[detectedCode] = {
           folderId: folder.getId(),
           folderUrl: folder.getUrl(),
           folderName: folderName
@@ -435,7 +442,7 @@ function traverseFolder(folder, result, depth) {
 
   const subFolders = folder.getFolders();
   while (subFolders.hasNext()) {
-    traverseFolder(subFolders.next(), result, depth + 1);
+    traverseFolder(subFolders.next(), result, depth + 1, indicatorCode);
   }
 }
 

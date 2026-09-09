@@ -11,7 +11,7 @@ const DriveSync = {
 
   // ค่าตั้งค่าการเชื่อมต่อปัจจุบัน
   config: {
-    folderId: localStorage.getItem('pafolio_drive_folder_id') || '',
+    folderId: localStorage.getItem('pafolio_drive_folder_id') || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K',
     appsScriptUrl: localStorage.getItem('pafolio_apps_script_url') || '',
     autoSync: localStorage.getItem('pafolio_auto_sync') !== 'false', // ค่าเริ่มต้นเปิด auto sync
     lastSyncTime: localStorage.getItem('pafolio_last_sync_time') || null
