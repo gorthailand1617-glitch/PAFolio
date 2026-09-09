@@ -4,7 +4,7 @@
  */
 
 const ThemeEngine = {
-  activeThemeId: localStorage.getItem('pafolio_active_theme') || 'emerald',
+  activeThemeId: localStorage.getItem('pafolio_active_theme') || 'gold',
 
   // รายการ 11 ธีมพรีเมียม
   themes: {

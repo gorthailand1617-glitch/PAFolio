@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ✨ Cache-Busting & Smart Version Migration: ตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ และรักษาโปรไฟล์ของครูไว้
-  const CURRENT_APP_VERSION = '2569.5.0';
+  const CURRENT_APP_VERSION = '2569.6.5';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.setItem('pafolio_active_year', '2569');
@@ -178,7 +178,7 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   let activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
   const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ'];
   if (badFolderIds.some(badId => activeAvatar && activeAvatar.includes(badId))) {
-    activeAvatar = teacher.avatarUrl || 'https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800';
+    activeAvatar = teacher.avatarUrl || 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800';
   }
   if (activeAvatar && !activeAvatar.includes('/drive/folders/')) {
     const avatarSrc = convertToGoogleDriveThumbnailUrl(activeAvatar, 'w800');
@@ -188,7 +188,7 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   // อัปเดตภาพปกแบนเนอร์ Hero (ดึงภาพปกเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้ภาพหลัก)
   let activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
   if (badFolderIds.some(badId => activeCover && activeCover.includes(badId))) {
-    activeCover = teacher.coverUrl || 'https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920';
+    activeCover = teacher.coverUrl || 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920';
   }
   if (activeCover && !activeCover.includes('/drive/folders/')) {
     const coverSrc = convertToGoogleDriveThumbnailUrl(activeCover, 'w1920');
