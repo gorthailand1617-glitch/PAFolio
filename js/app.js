@@ -110,6 +110,9 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   document.querySelectorAll('.teacher-school-label').forEach(el => el.innerText = teacher.school);
   document.querySelectorAll('.teacher-dept-label').forEach(el => el.innerText = teacher.learningArea);
   document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = teacher.avatarUrl);
+  if (teacher.coverUrl) {
+    document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = teacher.coverUrl);
+  }
   document.querySelectorAll('.expected-level-badge').forEach(el => el.innerText = expectedLevel);
   document.querySelectorAll('.current-year-label').forEach(el => el.innerText = `ปีการศึกษา ${currentAcademicYear}`);
 

@@ -235,32 +235,86 @@ function scanDriveRecursively(rootFolderId, filterYear) {
 }
 
 /**
- * สแกนหารูปโปรไฟล์และโลโก้ในโฟลเดอร์ Asset
+ * สแกนหารูปโปรไฟล์ ภาพปก และโลโก้อย่างชาญฉลาดรอบด้าน (Smart Asset Scanner)
  */
 function scanSystemAssets(rootFolder, result) {
-  const assetFolders = rootFolder.getFoldersByName("🖼️ 00_Assets_ภาพประจำตัวและโลโก้");
-  if (!assetFolders.hasNext()) return;
+  const checkAndAssignAsset = function(file, contextName) {
+    try {
+      const mime = file.getMimeType();
+      if (!mime.includes("image")) return;
+      
+      const fileName = file.getName().toLowerCase();
+      const ctx = (contextName + " " + fileName).toLowerCase();
+      const fileId = file.getId();
 
-  const assetFolder = assetFolders.next();
-  const sub = assetFolder.getFolders();
-  while (sub.hasNext()) {
-    const f = sub.next();
-    const name = f.getName().toLowerCase();
-    const files = f.getFiles();
-    while (files.hasNext()) {
-      const file = files.next();
-      if (file.getMimeType().includes("image")) {
-        const thumb = "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w1000";
-        if (name.includes("profile") || name.includes("โปรไฟล์")) {
-          if (!result.assets.profileUrl) result.assets.profileUrl = thumb;
-        } else if (name.includes("logo") || name.includes("โลโก้")) {
-          if (!result.assets.logoUrl) result.assets.logoUrl = thumb;
-        } else if (name.includes("banner") || name.includes("cover") || name.includes("ปก")) {
-          if (!result.assets.coverUrl) result.assets.coverUrl = thumb;
+      // พยายามเปิดสิทธิ์ Anyone with link เพื่อให้รูปแสดงบนเว็บได้ 100%
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch(e) {}
+
+      // รูปโปรไฟล์ (Profile / Avatar / ครู)
+      if (ctx.includes("profile") || ctx.includes("โปรไฟล์") || ctx.includes("avatar") || ctx.includes("รูปครู") || ctx.includes("ภาพประจำตัว")) {
+        if (!result.assets.profileUrl) {
+          result.assets.profileUrl = "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w800";
+        }
+      }
+      // ภาพปกแบนเนอร์ Hero (Banner / Cover / ปก)
+      else if (ctx.includes("banner") || ctx.includes("cover") || ctx.includes("ภาพปก") || ctx.includes("หน้าปก") || ctx.includes("แบนเนอร์") || ctx.includes("ปก")) {
+        if (!result.assets.coverUrl) {
+          result.assets.coverUrl = "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w1920";
+        }
+      }
+      // โลโก้โรงเรียน / ตราสัญลักษณ์ (Logo)
+      else if (ctx.includes("logo") || ctx.includes("โลโก้") || ctx.includes("ตราโรงเรียน") || ctx.includes("สัญลักษณ์")) {
+        if (!result.assets.logoUrl) {
+          result.assets.logoUrl = "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w600";
+        }
+      }
+    } catch (err) {
+      Logger.log("checkAndAssignAsset error: " + err);
+    }
+  };
+
+  // 1. ตรวจสอบไฟล์รูปภาพที่อาจวางอยู่ในโฟลเดอร์หลัก (Root Folder) โดยตรง
+  try {
+    const rootFiles = rootFolder.getFiles();
+    while (rootFiles.hasNext()) {
+      checkAndAssignAsset(rootFiles.next(), "root");
+    }
+  } catch(e) {}
+
+  // 2. ค้นหาโฟลเดอร์ Asset หรือโฟลเดอร์รูปภาพในโฟลเดอร์หลัก
+  try {
+    const subFolders = rootFolder.getFolders();
+    while (subFolders.hasNext()) {
+      const f = subFolders.next();
+      const folderName = f.getName().toLowerCase();
+
+      // ตรวจสอบโฟลเดอร์ที่เกี่ยวข้องกับ Assets / รูปภาพ / โปรไฟล์ / ปก / โลโก้
+      if (folderName.includes("asset") || folderName.includes("ภาพประจำตัว") || folderName.includes("00_") ||
+          folderName.includes("profile") || folderName.includes("โปรไฟล์") || 
+          folderName.includes("cover") || folderName.includes("ปก") || 
+          folderName.includes("logo") || folderName.includes("โลโก้") || folderName.includes("รูปภาพ")) {
+        
+        // ก. ตรวจสอบไฟล์ที่อยู่ในโฟลเดอร์นี้โดยตรง
+        const directFiles = f.getFiles();
+        while (directFiles.hasNext()) {
+          checkAndAssignAsset(directFiles.next(), folderName);
+        }
+
+        // ข. ตรวจสอบโฟลเดอร์ย่อยข้างใน (เช่น 01_รูปโปรไฟล์, 03_ภาพปก)
+        const innerFolders = f.getFolders();
+        while (innerFolders.hasNext()) {
+          const innerF = innerFolders.next();
+          const innerName = innerF.getName().toLowerCase();
+          const innerFiles = innerF.getFiles();
+          while (innerFiles.hasNext()) {
+            checkAndAssignAsset(innerFiles.next(), folderName + " " + innerName);
+          }
         }
       }
     }
-  }
+  } catch(e) {}
 }
 
 /**

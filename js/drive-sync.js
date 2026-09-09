@@ -98,10 +98,29 @@ const DriveSync = {
       }
       const totalImages = data.evidenceGallery ? data.evidenceGallery.length : 0;
 
-      // อัปเดตรูปโปรไฟล์หรือโลโก้จาก Google Drive (ถ้ามี)
+      // อัปเดตรูปโปรไฟล์, ภาพปก และโลโก้จาก Google Drive (ถ้ามี)
       if (data.assets) {
+        const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
+        let updatedAsset = false;
+
         if (data.assets.profileUrl) {
           document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = data.assets.profileUrl);
+          if (teacher) {
+            teacher.avatarUrl = data.assets.profileUrl;
+            updatedAsset = true;
+          }
+        }
+
+        if (data.assets.coverUrl) {
+          document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = data.assets.coverUrl);
+          if (teacher) {
+            teacher.coverUrl = data.assets.coverUrl;
+            updatedAsset = true;
+          }
+        }
+
+        if (updatedAsset && typeof saveStoredTeachers === 'function') {
+          saveStoredTeachers();
         }
       }
 
