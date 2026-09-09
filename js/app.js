@@ -33,12 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ✨ Cache-Busting & Smart Version Migration: ตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ และรักษาโปรไฟล์ของครูไว้
-  const CURRENT_APP_VERSION = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APP_VERSION) || '2569.7.0';
+  const CURRENT_APP_VERSION = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APP_VERSION) || '2569.8.5';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.setItem('pafolio_active_year', '2569');
+    localStorage.setItem('pafolio_active_theme', 'gold');
     localStorage.setItem('pafolio_app_version', CURRENT_APP_VERSION);
     currentAcademicYear = '2569';
+
+    // 🧹 ล้างแคชภาพเก่า (ชุดกากีเดิม 1Dyu3SQW) ที่อาจค้างในเบราว์เซอร์ เพื่อให้แสดงภาพสูทขาวและปกทองปี 2569 ตรงกันทุกเบราว์เซอร์
+    try {
+      const cached = localStorage.getItem('pafolio_custom_teachers');
+      if (cached && cached.includes('1Dyu3SQW')) {
+        localStorage.removeItem('pafolio_custom_teachers');
+      }
+    } catch (e) {}
   }
 
   // ✨ AI Auto-Heal: ตรวจสอบและแก้ไข Google Drive Folder ID อัตโนมัติ (Zero-Config)
@@ -74,6 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const cState = res.cloudState || (res.theme ? res : null);
           const lProfile = res.liveProfile || null;
           DriveSync.applyCloudState(cState, lProfile, true);
+          if (typeof DriveSync.updateStatusUI === 'function') {
+            DriveSync.updateStatusUI(true);
+          }
         }
       }).catch(err => console.warn('fetchCloudState error:', err));
     }
@@ -187,9 +199,11 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
 
   // อัปเดตรูปโปรไฟล์ครู (ดึงภาพเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้รูปหลัก)
   let activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
-  const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ'];
-  if (badFolderIds.some(badId => activeAvatar && activeAvatar.includes(badId))) {
-    activeAvatar = teacher.avatarUrl || 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800';
+  const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', '1Dyu3SQW'];
+  if (!activeAvatar || badFolderIds.some(badId => activeAvatar.includes(badId))) {
+    activeAvatar = 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800';
+    if (yearData) yearData.avatarUrl = activeAvatar;
+    if (teacher) teacher.avatarUrl = activeAvatar;
   }
   if (activeAvatar && !activeAvatar.includes('/drive/folders/')) {
     const avatarSrc = convertToGoogleDriveThumbnailUrl(activeAvatar, 'w800');
@@ -198,8 +212,10 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
 
   // อัปเดตภาพปกแบนเนอร์ Hero (ดึงภาพปกเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้ภาพหลัก)
   let activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
-  if (badFolderIds.some(badId => activeCover && activeCover.includes(badId))) {
-    activeCover = teacher.coverUrl || 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920';
+  if (!activeCover || badFolderIds.some(badId => activeCover.includes(badId))) {
+    activeCover = 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920';
+    if (yearData) yearData.coverUrl = activeCover;
+    if (teacher) teacher.coverUrl = activeCover;
   }
   if (activeCover && !activeCover.includes('/drive/folders/')) {
     const coverSrc = convertToGoogleDriveThumbnailUrl(activeCover, 'w1920');
@@ -2144,11 +2160,15 @@ function loadStoredTeachers() {
         const stored = parsed[key];
         const baseline = PAFOLIO_DATABASE[key];
 
-        if (stored.avatarUrl && stored.avatarUrl.includes('/drive/folders/')) {
-          stored.avatarUrl = baseline?.avatarUrl || PAFOLIO_DATABASE['teacher-korakot']?.avatarUrl || '';
+        const oldBrownPhotoId = '1Dyu3SQW';
+        const newWhiteSuitAvatar = 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800';
+        const newGoldCover = 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920';
+
+        if (stored.avatarUrl && (stored.avatarUrl.includes(oldBrownPhotoId) || stored.avatarUrl.includes('/drive/folders/'))) {
+          stored.avatarUrl = newWhiteSuitAvatar;
         }
-        if (stored.coverUrl && stored.coverUrl.includes('/drive/folders/')) {
-          stored.coverUrl = baseline?.coverUrl || PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
+        if (stored.coverUrl && (stored.coverUrl.includes(oldBrownPhotoId) || stored.coverUrl.includes('/drive/folders/'))) {
+          stored.coverUrl = newGoldCover;
         }
         if (!stored._hasCustomProfile) {
           stored.avatarUrl = baseline?.avatarUrl || (typeof PAFOLIO_CONFIG !== 'undefined' ? PAFOLIO_CONFIG.DEFAULT_AVATAR_URL : '');
@@ -2161,13 +2181,19 @@ function loadStoredTeachers() {
             if (!stored.years[y]) {
               stored.years[y] = baseline.years[y];
             } else {
+              if (stored.years[y].avatarUrl && stored.years[y].avatarUrl.includes(oldBrownPhotoId)) {
+                stored.years[y].avatarUrl = newWhiteSuitAvatar;
+              }
+              if (stored.years[y].coverUrl && stored.years[y].coverUrl.includes(oldBrownPhotoId)) {
+                stored.years[y].coverUrl = newGoldCover;
+              }
               if (!stored.years[y].indicatorSyntheses && baseline.years[y].indicatorSyntheses) {
                 stored.years[y].indicatorSyntheses = baseline.years[y].indicatorSyntheses;
               }
               if (!stored.years[y].gallery && baseline.years[y].gallery) {
                 stored.years[y].gallery = baseline.years[y].gallery;
               }
-              if (y === '2569' && !stored.years[y]._hasCustomProfile) {
+              if (y === '2569' && (!stored.years[y]._hasCustomProfile || (stored.years[y].avatarUrl && stored.years[y].avatarUrl.includes(oldBrownPhotoId)))) {
                 stored.years[y].avatarUrl = baseline.years[y].avatarUrl;
                 stored.years[y].coverUrl = baseline.years[y].coverUrl;
               } else {
