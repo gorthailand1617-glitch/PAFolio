@@ -298,6 +298,24 @@ const DriveSync = {
         }
       }
 
+      // อัปเดตภาระงานสอนตามตารางสอน (Teaching Load) จากไฟล์ข้อตกลง PA 1-ส โดยตรง (ห้ามคาดเดา)
+      if (data.teachingLoad && Array.isArray(data.teachingLoad) && data.teachingLoad.length > 0) {
+        const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
+        const currentYear = targetYear || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
+        if (teacher && teacher.years && teacher.years[currentYear]) {
+          teacher.years[currentYear].teachingLoad = data.teachingLoad;
+          if (data.totalHours) {
+            teacher.years[currentYear].totalHours = data.totalHours;
+          }
+          if (typeof saveStoredTeachers === 'function') {
+            saveStoredTeachers();
+          }
+          if (typeof updateHeaderAndProfile === 'function') {
+            updateHeaderAndProfile();
+          }
+        }
+      }
+
       // รีเฟรชส่วนการแสดงผลบนหน้าเว็บ
       if (typeof renderGallery === 'function') renderGallery();
       if (typeof renderIndicators === 'function') renderIndicators('all', '');

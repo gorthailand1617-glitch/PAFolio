@@ -307,7 +307,10 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     extractedChallenge: null,
     indicatorFolders: {},
     certificates: [],
-    certificateFolderUrl: ""
+    certificateFolderUrl: "",
+    teachingLoad: [],
+    totalHours: "",
+    pa1DocInfo: null
   };
 
   // 1. ตรวจสอบโฟลเดอร์ปีการศึกษา
@@ -369,6 +372,9 @@ function scanDriveRecursively(rootFolderId, filterYear) {
       result.liveProfile = JSON.parse(pContent);
     }
   } catch(err) {}
+
+  // 7. สแกนและสกัดข้อมูล "ภาระงานสอนตามตารางสอน" จากไฟล์ข้อตกลงในโฟลเดอร์ 01_แบบข้อตกลงในการพัฒนางาน (PA 1-ส) โดยตรง (ห้ามคาดเดา)
+  scanPA1TeachingLoad(targetFoldersToScan, result);
 
   return result;
 }
@@ -800,4 +806,224 @@ function createPAGoogleSheetSummary() {
 
   Logger.log("✅ สร้าง Google Sheet สำเร็จ: " + ss.getUrl());
 }
+
+/**
+ * =========================================================================
+ * สแกนและสกัดข้อมูล "ภาระงานสอนตามตารางสอน" จากโฟลเดอร์ 01_แบบข้อตกลงในการพัฒนางาน (PA 1-ส)
+ * ห้ามคาดเดา: ต้องสกัดจากเนื้อหาไฟล์จริงในโฟลเดอร์ของแต่ละปีการศึกษาเท่านั้น
+ * =========================================================================
+ */
+function scanPA1TeachingLoad(targetFoldersToScan, result) {
+  result.teachingLoad = result.teachingLoad || [];
+  result.totalHours = result.totalHours || "";
+
+  // ฟังก์ชันค้นหาโฟลเดอร์แบบข้อตกลง PA 1-ส แบบลึกสูงสุด 4 ชั้น
+  function findPA1Folder(folder, depth) {
+    if (depth > 4) return null;
+    const name = folder.getName();
+    if (name.includes("01_แบบข้อตกลงในการพัฒนางาน") || 
+        name.includes("PA 1-ส") || 
+        name.includes("PA1-ส") || 
+        name.includes("แบบข้อตกลงในการพัฒนางาน") ||
+        (name.includes("01") && name.includes("ข้อตกลง"))) {
+      return folder;
+    }
+    const subs = folder.getFolders();
+    while (subs.hasNext()) {
+      const found = findPA1Folder(subs.next(), depth + 1);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  for (let i = 0; i < targetFoldersToScan.length; i++) {
+    const yearFolder = targetFoldersToScan[i];
+    const paFolder = findPA1Folder(yearFolder, 0);
+
+    if (paFolder) {
+      Logger.log("📁 พบโฟลเดอร์ข้อตกลง PA 1-ส: " + paFolder.getName());
+      const files = paFolder.getFiles();
+
+      while (files.hasNext()) {
+        const file = files.next();
+        const fileName = file.getName();
+        const mime = file.getMimeType();
+
+        // 1. ตรวจสอบ Google Docs (แบบ ว.PA 1/ส)
+        if (mime === MimeType.GOOGLE_DOCS || mime === "application/vnd.google-apps.document") {
+          try {
+            const doc = DocumentApp.openById(file.getId());
+            const parsed = parsePA1Document(doc);
+            if (parsed && parsed.teachingLoad && parsed.teachingLoad.length > 0) {
+              result.teachingLoad = parsed.teachingLoad;
+              if (parsed.totalHours) result.totalHours = parsed.totalHours;
+              result.pa1DocInfo = {
+                id: file.getId(),
+                name: fileName,
+                url: "https://docs.google.com/document/d/" + file.getId() + "/edit"
+              };
+              Logger.log("✅ สกัดภาระงานสอนจริงจาก Google Doc สำเร็จ: " + fileName + " (" + result.teachingLoad.length + " วิชา)");
+              return;
+            }
+          } catch(e) {
+            Logger.log("⚠️ ไม่สามารถอ่าน Google Doc (" + fileName + "): " + e.message);
+          }
+        }
+
+        // 2. ตรวจสอบไฟล์ JSON ภาระงานสอน เช่น teaching_load.json หรือ pa1_data.json
+        if (fileName.toLowerCase().endsWith(".json")) {
+          try {
+            const content = file.getBlob().getDataAsString();
+            const parsed = JSON.parse(content);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              result.teachingLoad = parsed;
+              return;
+            } else if (parsed && parsed.teachingLoad && Array.isArray(parsed.teachingLoad)) {
+              result.teachingLoad = parsed.teachingLoad;
+              if (parsed.totalHours) result.totalHours = parsed.totalHours;
+              return;
+            }
+          } catch(e) {}
+        }
+      }
+    }
+  }
+
+  // 3. Fallback: ถ้ายังไม่พบแต่ใน pafolio_profile_live.json มีระบุไว้
+  if (result.liveProfile && result.liveProfile.teachingLoad && Array.isArray(result.liveProfile.teachingLoad) && result.liveProfile.teachingLoad.length > 0) {
+    result.teachingLoad = result.liveProfile.teachingLoad;
+    if (result.liveProfile.totalHours) result.totalHours = result.liveProfile.totalHours;
+    Logger.log("✅ ดึงภาระงานสอนจาก pafolio_profile_live.json");
+  }
+}
+
+/**
+ * ฟังก์ชันช่วยแยกแยะและสกัดตาราง/ข้อความภาระงานสอนจากเอกสาร PA 1-ส (Google Doc)
+ */
+function parsePA1Document(doc) {
+  const body = doc.getBody();
+  const tables = body.getTables();
+  const teachingLoad = [];
+  let totalHours = "";
+
+  // A. ค้นหาจาก Tables ในเอกสาร
+  for (let t = 0; t < tables.length; t++) {
+    const table = tables[t];
+    const numRows = table.getNumRows();
+    if (numRows < 2) continue;
+
+    let isTeachingTable = false;
+    let colSubject = -1;
+    let colGrade = -1;
+    let colHours = -1;
+    let colType = -1;
+
+    // ตรวจสอบ Header row (แถว 0 หรือ 1)
+    for (let r = 0; r < Math.min(2, numRows); r++) {
+      const row = table.getRow(r);
+      const numCells = row.getNumCells();
+      for (let c = 0; c < numCells; c++) {
+        const cellText = row.getCell(c).getText().trim().toLowerCase();
+        if (cellText.includes("กลุ่มสาระ") || cellText.includes("รายวิชา") || cellText.includes("วิชา") || cellText.includes("กิจกรรม")) {
+          colSubject = c;
+          isTeachingTable = true;
+        }
+        if (cellText.includes("ชั้น") || cellText.includes("ระดับชั้น")) {
+          colGrade = c;
+          isTeachingTable = true;
+        }
+        if (cellText.includes("ชั่วโมง") || cellText.includes("คาบ") || cellText.includes("จำนวนชั่วโมง")) {
+          colHours = c;
+          isTeachingTable = true;
+        }
+        if (cellText.includes("ประเภท") || cellText.includes("ลักษณะวิชา")) {
+          colType = c;
+        }
+      }
+      if (isTeachingTable) break;
+    }
+
+    if (isTeachingTable && colSubject !== -1) {
+      for (let r = 1; r < numRows; r++) {
+        const row = table.getRow(r);
+        const numCells = row.getNumCells();
+        if (numCells <= colSubject) continue;
+
+        const subjectText = row.getCell(colSubject).getText().trim();
+        if (!subjectText || subjectText.includes("รวม") || subjectText.includes("ลงชื่อ")) {
+          // แถวสรุปผลรวม
+          const fullRowText = row.getText();
+          const matchTotal = fullRowText.match(/([0-9]+(?:\.[0-9]+)?)\s*(?:ชั่วโมง|คาบ)/);
+          if (matchTotal && !totalHours) {
+            totalHours = matchTotal[1] + (fullRowText.includes("คาบ") ? " คาบ/สัปดาห์" : " ชั่วโมง/สัปดาห์");
+          }
+          continue;
+        }
+
+        let gradeText = (colGrade !== -1 && numCells > colGrade) ? row.getCell(colGrade).getText().trim() : "";
+        let hoursText = (colHours !== -1 && numCells > colHours) ? row.getCell(colHours).getText().trim() : "";
+        let typeText = (colType !== -1 && numCells > colType) ? row.getCell(colType).getText().trim() : "";
+
+        if (hoursText && /^[0-9]+(\.[0-9]+)?$/.test(hoursText)) {
+          hoursText += " ชั่วโมง/สัปดาห์";
+        }
+
+        if (subjectText.length > 2) {
+          teachingLoad.push({
+            subject: subjectText,
+            grade: gradeText || "ตามตารางสอน",
+            hours: hoursText || "ตามเกณฑ์",
+            type: typeText || "วิชาสอน"
+          });
+        }
+      }
+
+      if (teachingLoad.length > 0) {
+        return { teachingLoad: teachingLoad, totalHours: totalHours };
+      }
+    }
+  }
+
+  // B. หากไม่พบในตาราง ให้สแกนจาก Paragraphs (รายการข้อความ เช่น 1.1 ภาระงานสอนตามตารางสอน)
+  const fullText = body.getText();
+  const paSectionMatch = fullText.match(/ภาระงานสอนตามตารางสอน[\s\S]{1,1500}?(?=(?:1\.2|2\.|งานสนับสนุน|ส่วนที่ 2|$))/);
+  const targetText = paSectionMatch ? paSectionMatch[0] : fullText;
+
+  // ค้นหาชั่วโมงรวม
+  const totalMatch = targetText.match(/(?:รวมจำนวน|รวมทั้งสิ้น|รวม)\s*[:]?\s*([0-9]+(?:\.[0-9]+)?)\s*(ชั่วโมง|คาบ)(?:\s*\/\s*สัปดาห์)?/);
+  if (totalMatch) {
+    totalHours = totalMatch[1] + " " + totalMatch[2] + "/สัปดาห์";
+  }
+
+  const lines = targetText.split(/\r?\n/);
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    if ((trimmed.includes("รายวิชา") || trimmed.includes("วิชา") || trimmed.includes("กิจกรรม")) && 
+        (trimmed.includes("ชั่วโมง") || trimmed.includes("คาบ"))) {
+      
+      const hoursMatch = trimmed.match(/([0-9]+(?:\.[0-9]+)?)\s*(ชั่วโมง|คาบ)(?:\s*\/\s*สัปดาห์)?/);
+      const gradeMatch = trimmed.match(/(?:ชั้น|ระดับชั้น)\s*([^\s,]+)/);
+      const subjectMatch = trimmed.match(/(?:รายวิชา|วิชา)\s*([^,()0-9]+(?:\s*\([^\)]+\))?)/);
+
+      if (subjectMatch || hoursMatch) {
+        const subj = subjectMatch ? subjectMatch[1].trim() : trimmed.substring(0, 40);
+        const grd = gradeMatch ? gradeMatch[1].trim() : "ตามตารางสอน";
+        const hrs = hoursMatch ? (hoursMatch[1] + " " + hoursMatch[2] + "/สัปดาห์") : "";
+
+        if (subj && !subj.includes("ภาระงานสอน")) {
+          teachingLoad.push({
+            subject: subj,
+            grade: grd,
+            hours: hrs,
+            type: trimmed.includes("กิจกรรม") ? "กิจกรรมพัฒนาผู้เรียน" : "วิชาสอน"
+          });
+        }
+      }
+    }
+  });
+
+  return { teachingLoad: teachingLoad, totalHours: totalHours };
+}
+
 
