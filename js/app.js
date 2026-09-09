@@ -27,6 +27,18 @@ const BASE_INDICATOR_TEMPLATES = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ✨ AI Auto-Heal: ตรวจสอบและแก้ไข Google Drive Folder ID อัตโนมัติ (Zero-Config)
+  // หากพบ ID ที่เป็นโฟลเดอร์สคริปต์ (19mPdGDZ...) หรือค่าว่าง ให้ AI สลับเป็นโฟลเดอร์ ว.PA จริงทันที
+  const badFolderIds = ['19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE'];
+  const trueRootFolderId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+  const savedFolderId = (localStorage.getItem('pafolio_drive_folder_id') || '').trim();
+  if (!savedFolderId || badFolderIds.includes(savedFolderId)) {
+    localStorage.setItem('pafolio_drive_folder_id', trueRootFolderId);
+    if (typeof DriveSync !== 'undefined' && DriveSync.config) {
+      DriveSync.config.folderId = trueRootFolderId;
+    }
+  }
+
   // Load custom teachers from localStorage if any
   loadStoredTeachers();
   
@@ -708,36 +720,26 @@ function getIndicatorDriveUrl(indicatorCode = '', targetYear = null) {
     }
   }
 
-  // 4. กรณีที่ยังไม่มีโฟลเดอร์ตรง: สืบหาโฟลเดอร์หลักแล้วสร้าง Smart Scoped Search
-  // โดยค้นหาไฟล์/โฟลเดอร์ที่ตรงกับตัวชี้วัดนั้นๆ ในไดรฟ์ของครู (ไม่ส่งไปหน้าแรกของโฟลเดอร์หลัก)
+  // 4. กรณีที่ยังไม่มีโฟลเดอร์ตรง:
+  // หากมีรหัสตัวชี้วัด (เช่น "1.1") -> ใช้ Smart Google Drive Search ค้นหาโฟลเดอร์ของตัวชี้วัดนั้นโดยตรง (แบบครอบคลุมทั้งไดรฟ์)
+  // หมายเหตุ: ไม่ใช้ 'in parents' เพราะ Google Drive จะค้นหาเฉพาะชั้นลูกตรง (depth 1) แต่ตัวชี้วัดอยู่ลึก 3 ชั้น (วPA -> PA69 -> ด้านที่ 1 -> 1.1)
+  if (code) {
+    return `https://drive.google.com/drive/search?q=${encodeURIComponent(`type:folder name contains '${code}'`)}`;
+  }
+
   let rootFolderId = '';
   if (typeof DriveSync !== 'undefined' && DriveSync.config && DriveSync.config.folderId) {
     rootFolderId = DriveSync.config.folderId.trim();
   }
-  if (!rootFolderId) {
-    const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : null;
-    if (teacher && teacher.driveFolderId) {
-      rootFolderId = teacher.driveFolderId.trim();
-    }
+  if (!rootFolderId || rootFolderId === '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ') {
+    rootFolderId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
   }
 
-  if (rootFolderId) {
-    let cleanId = rootFolderId;
-    if (cleanId.includes('/folders/')) {
-      cleanId = cleanId.split('/folders/')[1].split('?')[0].split('/')[0];
-    }
-    if (code) {
-      // ค้นหาเจาะจงเฉพาะโฟลเดอร์หรือไฟล์ที่มีรหัสตัวชี้วัดนี้ภายในโฟลเดอร์หลัก
-      return `https://drive.google.com/drive/search?q='${cleanId}'+in+parents+name+contains+'${encodeURIComponent(code)}'`;
-    }
-    return `https://drive.google.com/drive/folders/${cleanId}`;
+  let cleanId = rootFolderId;
+  if (cleanId.includes('/folders/')) {
+    cleanId = cleanId.split('/folders/')[1].split('?')[0].split('/')[0];
   }
-
-  if (code) {
-    return `https://drive.google.com/drive/search?q=${encodeURIComponent('"' + code + '"')}`;
-  }
-
-  return 'https://drive.google.com/drive/my-drive';
+  return `https://drive.google.com/drive/folders/${cleanId}`;
 }
 
 // ตรวจสอบว่าตัวชี้วัดนี้มีโฟลเดอร์ตรงโดยเฉพาะหรือไม่
@@ -1166,6 +1168,46 @@ function saveDriveSyncSettings() {
   DriveSync.saveConfig(folderId, scriptUrl, true);
   closeDriveSyncModal();
   DriveSync.syncAndApply(currentAcademicYear, true);
+}
+
+// ✨ ฟังก์ชันให้ AI ตั้งค่าโฟลเดอร์ ว.PA และแก้ไขปัญหาให้อัตโนมัติ (Zero manual config)
+function aiAutoConfigureDrive() {
+  const trueFolderId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+  
+  if (typeof DriveSync !== 'undefined') {
+    DriveSync.config.folderId = trueFolderId;
+    localStorage.setItem('pafolio_drive_folder_id', trueFolderId);
+    DriveSync.updateStatusUI();
+  }
+
+  const folderInput = document.getElementById('drive-folder-id-input');
+  if (folderInput) {
+    folderInput.value = trueFolderId;
+  }
+
+  const feedbackEl = document.getElementById('drive-test-feedback');
+  if (feedbackEl) {
+    feedbackEl.classList.remove('hidden');
+    feedbackEl.className = 'mt-2 p-3.5 rounded-xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-900';
+    feedbackEl.innerHTML = `
+      <div class="font-bold flex items-center gap-1.5 text-emerald-800 mb-1">
+        <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i> AI ตั้งค่าโฟลเดอร์ ว.PA ให้สำเร็จ 100%!
+      </div>
+      <div class="text-[11px] text-emerald-800 leading-relaxed">
+        กำหนดโฟลเดอร์หลัก: <b>🟢 วPAครูกรกฎ รัตนะโชติ โรงเรียนเปรมติณสูลานนท์</b><br>
+        (Folder ID: <code class="font-mono bg-emerald-100 px-1 rounded font-bold">${trueFolderId}</code>)
+      </div>
+    `;
+  }
+
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast('✨ AI ตั้งค่าโฟลเดอร์ ว.PA ของครูให้เรียบร้อยแล้ว!', 'success', 3500);
+  }
+
+  // รีเฟรชการแสดงผลปุ่มเปิดไดรฟ์บนการ์ดทั้งหมด
+  if (typeof renderIndicators === 'function') {
+    renderIndicators('all', '');
+  }
 }
 
 // Folder Template Modal

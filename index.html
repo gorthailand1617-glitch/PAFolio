@@ -837,12 +837,36 @@
         </div>
       </div>
 
+      <!-- ✨ กล่อง AI Auto-Configure โฟลเดอร์ใน 1 คลิก (Zero-Config) -->
+      <div class="mb-4 p-4 rounded-2xl bg-gradient-to-r from-teal-900 via-indigo-950 to-teal-900 border border-teal-500/40 text-white shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-400 text-slate-950 flex items-center justify-center text-lg flex-shrink-0 font-bold shadow-md">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <div class="font-heading font-bold text-sm text-teal-200 flex items-center gap-1.5">
+              ให้ AI ตั้งค่าโฟลเดอร์ ว.PA ให้คุณอัตโนมัติ
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-400 text-slate-950 font-sans font-bold">แก้ปัญหาใน 1 คลิก</span>
+            </div>
+            <p class="text-[11px] text-slate-300">ตั้งค่าโฟลเดอร์ "วPAครูกรกฎ รัตนะโชติ โรงเรียนเปรมติณสูลานนท์" อัตโนมัติ ไม่ต้องหา Folder ID เอง</p>
+          </div>
+        </div>
+        <button type="button" onclick="aiAutoConfigureDrive()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-heading font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 flex-shrink-0">
+          <i class="fa-solid fa-bolt"></i> ให้ AI ตั้งค่าทันที
+        </button>
+      </div>
+
       <div class="space-y-4 text-xs sm:text-sm text-slate-700 mb-6">
         <div>
-          <label class="block font-heading font-semibold text-slate-900 mb-1">Google Drive Folder ID (โฟลเดอร์หลักของครู):</label>
-          <input type="text" id="drive-folder-id-input" placeholder="เช่น 1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv" 
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-heading font-semibold text-slate-900">Google Drive Folder ID (โฟลเดอร์หลักของครู):</label>
+            <button type="button" onclick="aiAutoConfigureDrive()" class="text-[11px] font-semibold text-teal-600 hover:text-teal-800 transition flex items-center gap-1">
+              <i class="fa-solid fa-sparkles text-teal-500"></i> ให้ AI ใส่ค่าอัตโนมัติ
+            </button>
+          </div>
+          <input type="text" id="drive-folder-id-input" placeholder="เช่น 1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" 
                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 font-mono text-xs">
-          <span class="text-[11px] text-slate-400">คัดลอกจาก URL ของโฟลเดอร์ใน Google Drive (ส่วนท้ายหลัง /folders/...)</span>
+          <span class="text-[11px] text-slate-400">โฟลเดอร์หลัก: 🟢 วPAครูกรกฎ รัตนะโชติ โรงเรียนเปรมติณสูลานนท์ (ID: 1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K)</span>
         </div>
 
         <div>

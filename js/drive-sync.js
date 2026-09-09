@@ -9,12 +9,33 @@ const DriveSync = {
   isSyncing: false,
   lastAutoSyncTimestamp: 0,
 
-  // ค่าตั้งค่าการเชื่อมต่อปัจจุบัน
+  // ค่าตั้งค่าการเชื่อมต่อปัจจุบัน (พร้อม AI Auto-Heal ป้องกันปัญหา Folder ID ผิดพลาด)
   config: {
-    folderId: localStorage.getItem('pafolio_drive_folder_id') || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K',
+    folderId: (function() {
+      const badIds = ['19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE'];
+      const trueId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+      const saved = (localStorage.getItem('pafolio_drive_folder_id') || '').trim();
+      if (!saved || badIds.includes(saved)) {
+        localStorage.setItem('pafolio_drive_folder_id', trueId);
+        return trueId;
+      }
+      return saved;
+    })(),
     appsScriptUrl: localStorage.getItem('pafolio_apps_script_url') || '',
     autoSync: localStorage.getItem('pafolio_auto_sync') !== 'false', // ค่าเริ่มต้นเปิด auto sync
     lastSyncTime: localStorage.getItem('pafolio_last_sync_time') || null
+  },
+
+  // ✨ ให้ AI ตั้งค่าและตรวจสอบโฟลเดอร์ ว.PA อัตโนมัติในคลิกเดียว (Zero-Config)
+  aiAutoConfigure() {
+    const trueId = '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+    this.config.folderId = trueId;
+    localStorage.setItem('pafolio_drive_folder_id', trueId);
+    this.updateStatusUI();
+    const input = document.getElementById('drive-folder-id-input');
+    if (input) input.value = trueId;
+    this.showToast('✨ AI กำหนดโฟลเดอร์ ว.PA ของครูเรียบร้อยแล้ว!', 'success', 3500);
+    return trueId;
   },
 
   // บันทึกการตั้งค่า
