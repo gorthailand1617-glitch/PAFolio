@@ -109,7 +109,7 @@ const DriveSync = {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
-          action: 'saveUniversalState',
+          action: 'saveCloudState',
           folderId: this.config.folderId,
           state: stateData,
           profile: teacherObj || null
@@ -1022,7 +1022,7 @@ const DriveSync = {
       };
 
       const payload = {
-        action: 'saveUniversalState',
+        action: 'saveProfile',
         folderId: this.config.folderId || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K',
         profile: profile,
         cloudState: cloudStateData
