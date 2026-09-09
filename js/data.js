@@ -13,17 +13,17 @@ const ACADEMIC_LEVELS = {
 };
 
 const PAFOLIO_DATABASE = {
-  // ครูท่านที่ 1: ครูกรกฎ รัตนะโชติ (โปรไฟล์เริ่มต้น)
+  // ครูท่านที่ 1: ครูกรกฎ รัตนะโช (โปรไฟล์เริ่มต้น)
   "teacher-korakot": {
     id: "teacher-korakot",
-    name: "นายกรกฎ รัตนะโชติ",
+    name: "นายกรกฎ รัตนะโช",
     position: "ครู",
     academicStanding: "ครูชำนาญการพิเศษ",
     school: "โรงเรียนเปรมติณสูลานนท์",
-    affiliation: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น",
+    affiliation: "องค์การบริหารส่วนจังหวัดขอนแก่น",
     learningArea: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
-    avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
-    coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
+    avatarUrl: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
+    coverUrl: "https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920",
     driveFolderId: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.ROOT_FOLDER_ID) || "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
     appsScriptUrl: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APPS_SCRIPT_URL) || "https://script.google.com/macros/s/AKfycby7k7vKoFG6uugmoqGenVCdWPVXVAfkcWuw7mKcPm8qJSaUmwtOFW_yaEmVAwUlma_Miw/exec",
     selectedYear: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_YEAR) || "2569",
@@ -173,8 +173,8 @@ const PAFOLIO_DATABASE = {
       "2569": {
         year: "2569",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2569 (รอบการประเมินปัจจุบัน)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
-        coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "หัวหน้างานขับเคลื่อนนวัตกรรมการเรียนรู้และเทคโนโลยีดิจิทัล",

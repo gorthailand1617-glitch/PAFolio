@@ -201,7 +201,7 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   let activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
   const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', '1Dyu3SQW'];
   if (!activeAvatar || badFolderIds.some(badId => activeAvatar.includes(badId))) {
-    activeAvatar = 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800';
+    activeAvatar = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
     if (yearData) yearData.avatarUrl = activeAvatar;
     if (teacher) teacher.avatarUrl = activeAvatar;
   }
@@ -213,7 +213,7 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   // อัปเดตภาพปกแบนเนอร์ Hero (ดึงภาพปกเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้ภาพหลัก)
   let activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
   if (!activeCover || badFolderIds.some(badId => activeCover.includes(badId))) {
-    activeCover = 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920';
+    activeCover = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920';
     if (yearData) yearData.coverUrl = activeCover;
     if (teacher) teacher.coverUrl = activeCover;
   }
@@ -2161,8 +2161,8 @@ function loadStoredTeachers() {
         const baseline = PAFOLIO_DATABASE[key];
 
         const oldBrownPhotoId = '1Dyu3SQW';
-        const newWhiteSuitAvatar = 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800';
-        const newGoldCover = 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920';
+        const newWhiteSuitAvatar = (typeof PAFOLIO_CONFIG !== 'undefined' && PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+        const newGoldCover = (typeof PAFOLIO_CONFIG !== 'undefined' && PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920';
 
         if (stored.avatarUrl && (stored.avatarUrl.includes(oldBrownPhotoId) || stored.avatarUrl.includes('/drive/folders/'))) {
           stored.avatarUrl = newWhiteSuitAvatar;
