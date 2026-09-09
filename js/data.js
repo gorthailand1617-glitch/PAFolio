@@ -22,7 +22,7 @@ const PAFOLIO_DATABASE = {
     school: "โรงเรียนเปรมติณสูลานนท์",
     affiliation: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น",
     learningArea: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
-    avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w600",
+    avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
     coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
     driveFolderId: "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
     appsScriptUrl: "",
@@ -31,8 +31,8 @@ const PAFOLIO_DATABASE = {
       "2570": {
         year: "2570",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2570 (แผนพัฒนาต่อเนื่อง)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K&sz=w800",
-        coverUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&auto=format&fit=crop&q=80",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "ประธานคณะกรรมการขับเคลื่อนนวัตกรรมการเรียนรู้ AI & Green Education",
@@ -173,8 +173,8 @@ const PAFOLIO_DATABASE = {
       "2569": {
         year: "2569",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2569 (รอบการประเมินปัจจุบัน)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K&sz=w800",
-        coverUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&auto=format&fit=crop&q=80",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "หัวหน้างานขับเคลื่อนนวัตกรรมการเรียนรู้และเทคโนโลยีดิจิทัล",
@@ -213,12 +213,12 @@ const PAFOLIO_DATABASE = {
         },
         scores: { domain1: 38.5, domain2: 19.5, domain3: 20, challenge: 19, total: 97 },
         gallery: [
-          { title: "บรรยากาศการจัดกิจกรรมโครงงานเป็นฐานร่วมกับ Adaptive Fading Scaffolding ปี 2569", caption: "นักเรียนชั้น ม.3 ลงมือปฏิบัติกิจกรรมโครงงานอาชีพโดยมีครูคอยโค้ชและปรับลดการช่วยเหลือ", badge: "ด้านที่ 1", thumbUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1600&auto=format&fit=crop&q=80", date: "กรกฎาคม 2569" },
-          { title: "การลงมือปฏิบัติโครงงานและการเรียนรู้แบบนำตนเอง 2569", caption: "นักเรียนร่วมกันวางแผน จัดการ และสร้างสรรค์โครงงานอาชีพเป็นทีมอย่างเป็นระบบ", badge: "ประเด็นท้าทาย", thumbUrl: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=1600&auto=format&fit=crop&q=80", date: "สิงหาคม 2569" },
-          { title: "การวัดและประเมินผลโครงงานตามสภาพจริงด้วยเกณฑ์รูบริกส์", caption: "ครูตรวจประเมินชิ้นงานโครงงานและทักษะการปฏิบัติงานร่วมกับเกณฑ์รูบริกส์", badge: "ด้านที่ 1", thumbUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&auto=format&fit=crop&q=80", date: "กันยายน 2569" },
-          { title: "ระบบดูแลช่วยเหลือผู้เรียน Students Support System (SSS)", caption: "การคัดกรอง SDQ และการประสานงานช่วยเหลือผู้เรียนร่วมกับผู้ปกครอง", badge: "ด้านที่ 2", thumbUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1600&auto=format&fit=crop&q=80", date: "ตุลาคม 2569" },
-          { title: "การขับเคลื่อนชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC นวัตกรรมโครงงาน)", caption: "การประชุมแลกเปลี่ยนเรียนรู้กับคณะครูกลุ่มสาระการเรียนรู้และฝ่ายวิชาการ", badge: "ด้านที่ 3", thumbUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1600&auto=format&fit=crop&q=80", date: "พฤศจิกายน 2569" },
-          { title: "การจัดทำระบบสารสนเทศรายวิชาการงานอาชีพ ม.3", caption: "การชี้แจงโครงสร้างหน่วยการเรียนรู้และระบบสารสนเทศแก่นักเรียน ม.3", badge: "ด้านที่ 1 & 2", thumbUrl: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&auto=format&fit=crop&q=80", date: "มิถุนายน 2569" }
+          { title: "แผนการสอนและกระบวนการจัดการเรียนรู้นวัตกรรม AFS ปี 2569", caption: "นักเรียนชั้น ม.3 ลงมือปฏิบัติกิจกรรมโครงงานอาชีพโดยมีครูคอยโค้ชและปรับลดการช่วยเหลือ", badge: "ประเด็นท้าทาย", thumbUrl: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w1600", date: "15 กรกฎาคม 2569" },
+          { title: "การลงมือปฏิบัติโครงงานและการเรียนรู้แบบนำตนเอง 2569", caption: "นักเรียนร่วมกันวางแผน จัดการ และสร้างสรรค์โครงงานอาชีพเป็นทีมอย่างเป็นระบบ", badge: "ด้านที่ 1", thumbUrl: "https://drive.google.com/thumbnail?id=1pebgAgPRx_AA8St_hrfGGf4RMbiaafP0&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1pebgAgPRx_AA8St_hrfGGf4RMbiaafP0&sz=w1600", date: "14 มิถุนายน 2569" },
+          { title: "กิจกรรมการเรียนรู้เชิงรุกในชั้นเรียน ม.3", caption: "บรรยากาศการทำกิจกรรมกลุ่มและการทดลองชิ้นงานโครงงาน", badge: "ตัวชี้วัด 1.3", thumbUrl: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w1600", date: "สิงหาคม 2569" },
+          { title: "ระบบข้อมูลสารสนเทศผู้เรียนและรายวิชาการงานอาชีพ", caption: "การบันทึกผลการพัฒนาคุณภาพผู้เรียนและสถิติ ปพ.5 ออนไลน์", badge: "ตัวชี้วัด 2.1", thumbUrl: "https://drive.google.com/thumbnail?id=1gQXs_llNXOWTXJ_pu_bNOUcJhwKoOrs4&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1gQXs_llNXOWTXJ_pu_bNOUcJhwKoOrs4&sz=w1600", date: "พฤศจิกายน 2569" },
+          { title: "การขับเคลื่อนชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC)", caption: "การประชุมแลกเปลี่ยนเรียนรู้กับคณะครูกลุ่มสาระการเรียนรู้และฝ่ายวิชาการ", badge: "ตัวชี้วัด 3.2", thumbUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w1600", date: "กันยายน 2569" },
+          { title: "ภาพกิจกรรมและผลงานพัฒนาวิชาชีพครูประจำปี 2569", caption: "การเข้าร่วมอบรมและพัฒนาตนเองอย่างต่อเนื่องเพื่อนำมาพัฒนานักเรียน", badge: "ด้านที่ 3", thumbUrl: "https://drive.google.com/thumbnail?id=1fe80GrNslBXCle27EQb8HXivJu-veka1&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1fe80GrNslBXCle27EQb8HXivJu-veka1&sz=w1600", date: "สิงหาคม 2569" }
         ],
         indicatorSyntheses: {
           "1.1": {
@@ -317,7 +317,7 @@ const PAFOLIO_DATABASE = {
         year: "2568",
         status: "รอบการประเมินปัจจุบัน (2567-2568)",
         avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
-        coverUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1920&auto=format&fit=crop&q=80",
+        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "ผู้ดูแลระบบ Students Support System (SSS)",
@@ -459,8 +459,8 @@ const PAFOLIO_DATABASE = {
       "2567": {
         year: "2567",
         status: "รอบการประเมิน 2566-2567 (ผ่านเกณฑ์ดีเยี่ยม 95.5 คะแนน)",
-        avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
-        coverUrl: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1920&auto=format&fit=crop&q=80",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
         roles: [
           "หัวหน้างานพัฒนาหลักสูตรสถานศึกษา",
           "กรรมการประเมินวิชาการและงานประกันคุณภาพ",

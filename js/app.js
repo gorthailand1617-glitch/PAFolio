@@ -28,10 +28,11 @@ const BASE_INDICATOR_TEMPLATES = [
 
 document.addEventListener('DOMContentLoaded', () => {
   // ✨ Cache-Busting & Auto-Migration: ล้างแคชเก่าที่ค้างอยู่ในเครื่องอื่น และตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ
-  const CURRENT_APP_VERSION = '2569.3.2';
+  const CURRENT_APP_VERSION = '2569.4.0';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.removeItem('pafolio_custom_teachers');
+    localStorage.removeItem('pafolio_user_profile');
     localStorage.setItem('pafolio_active_year', '2569');
     localStorage.setItem('pafolio_app_version', CURRENT_APP_VERSION);
     currentAcademicYear = '2569';
@@ -166,14 +167,21 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   document.querySelectorAll('.teacher-dept-label').forEach(el => el.innerText = teacher.learningArea);
 
   // อัปเดตรูปโปรไฟล์ครู (ดึงภาพเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้รูปหลัก)
-  const activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
+  let activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
+  const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ'];
+  if (badFolderIds.some(badId => activeAvatar && activeAvatar.includes(badId))) {
+    activeAvatar = teacher.avatarUrl || 'https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800';
+  }
   if (activeAvatar && !activeAvatar.includes('/drive/folders/')) {
     const avatarSrc = convertToGoogleDriveThumbnailUrl(activeAvatar, 'w800');
     document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = avatarSrc);
   }
 
   // อัปเดตภาพปกแบนเนอร์ Hero (ดึงภาพปกเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้ภาพหลัก)
-  const activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
+  let activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
+  if (badFolderIds.some(badId => activeCover && activeCover.includes(badId))) {
+    activeCover = teacher.coverUrl || 'https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920';
+  }
   if (activeCover && !activeCover.includes('/drive/folders/')) {
     const coverSrc = convertToGoogleDriveThumbnailUrl(activeCover, 'w1920');
     document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = coverSrc);
@@ -503,143 +511,156 @@ function renderGallery(filter = 'all') {
   });
 }
 
-// ================= คลังภาพและเอกสารมาตรฐาน 15 ตัวชี้วัด ว9/2564 =================
+// ================= คลังภาพและเอกสารมาตรฐาน 15 ตัวชี้วัด ว9/2564 (ภาพจริงจาก Google Drive ครูกรกฎ) =================
 const INDICATOR_CURATED_MEDIA = {
   "1.1": {
     images: [
-      { title: "การพัฒนาหลักสูตรรายวิชาและโครงสร้างสาระการเรียนรู้", url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&auto=format&fit=crop&q=80", caption: "การวิเคราะห์โครงสร้างหลักสูตรและจัดทำคำอธิบายรายวิชา" },
-      { title: "ผังมโนทัศน์หน่วยการเรียนรู้", url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&auto=format&fit=crop&q=80", caption: "การออกแบบโครงสร้างหน่วยและสมรรถนะการเรียนรู้ตามมาตรฐาน" }
+      { title: "การพัฒนาโครงสร้างหลักสูตรและรายวิชาการงานอาชีพ", url: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w1600", caption: "การวิเคราะห์มาตรฐานการเรียนรู้ ตัวชี้วัด และการบูรณาการกระบวนการนวัตกรรม AFS" },
+      { title: "ผังมโนทัศน์หน่วยการเรียนรู้และโครงสร้างรายวิชา", url: "images/ai_thai_teacher_classroom.jpg", fullUrl: "images/ai_thai_teacher_classroom.jpg", caption: "การออกแบบโครงสร้างหน่วยการเรียนรู้และสมรรถนะสำคัญของผู้เรียน" }
     ],
     sampleDocs: [
-      { title: "หลักสูตรกลุ่มสาระการเรียนรู้และคำอธิบายรายวิชา.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.4 MB" },
-      { title: "โครงสร้างหน่วยการเรียนรู้และกำหนดการสอน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB" }
+      { title: "หลักสูตรกลุ่มสาระการเรียนรู้การงานอาชีพและคำอธิบายรายวิชา.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "โครงสร้างหน่วยการเรียนรู้และกำหนดการจัดการเรียนรู้ 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.2": {
     images: [
-      { title: "การออกแบบแผนการจัดการเรียนรู้เชิงรุก (Active Learning)", url: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=1600&auto=format&fit=crop&q=80", caption: "แผนการจัดการเรียนรู้เชิงรุกเน้นผู้เรียนเป็นสำคัญ" },
-      { title: "กระบวนการจัดการเรียนรู้เน้นการปฏิบัติ", url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80", caption: "การจำลองสถานการณ์จริงเพื่อฝึกทักษะการคิดวิเคราะห์" }
+      { title: "การออกแบบแผนการจัดการเรียนรู้เชิงรุก (Active Learning)", url: "https://drive.google.com/thumbnail?id=1pebgAgPRx_AA8St_hrfGGf4RMbiaafP0&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1pebgAgPRx_AA8St_hrfGGf4RMbiaafP0&sz=w1600", caption: "แผนการจัดการเรียนรู้ตามรูปแบบการเรียนการสอนโครงงานร่วมกับนวัตกรรม AFS" },
+      { title: "บันทึกหลังการจัดการเรียนรู้และสะท้อนคิด", url: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w1600", caption: "การบันทึกผลการจัดกิจกรรมและการปรับแผนตามความพร้อมของผู้เรียน" }
     ],
     sampleDocs: [
-      { title: "แผนการจัดการเรียนรู้เชิงรุก (Active Learning).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.5 MB" },
-      { title: "บันทึกหลังการจัดการเรียนรู้และสะท้อนผล.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.2 MB" }
+      { title: "แผนการจัดการเรียนรู้ Active Learning โครงงานนวัตกรรม AFS ม.3.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.2 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "บันทึกสะท้อนคิดหลังการจัดการเรียนรู้และแนวทางพัฒนา.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.5 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.3": {
     images: [
-      { title: "บรรยากาศการจัดกิจกรรม Active Learning", url: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1600&auto=format&fit=crop&q=80", caption: "นักเรียนลงมือปฏิบัติกิจกรรมกลุ่มและการแก้ปัญหาเป็นทีม" },
-      { title: "การระดมความคิดด้วย Thinking Whiteboard", url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&auto=format&fit=crop&q=80", caption: "การแลกเปลี่ยนเรียนรู้และนำเสนอผลงานกลุ่ม" }
+      { title: "บรรยากาศการจัดกิจกรรม Active Learning ในชั้นเรียน", url: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w1600", caption: "นักเรียนชั้น ม.3 ลงมือปฏิบัติกิจกรรมกลุ่มและการสร้างสรรค์โครงงานอาชีพ" },
+      { title: "การลงมือปฏิบัติโครงงานและการแก้ปัญหาเป็นทีม", url: "https://drive.google.com/thumbnail?id=1qpBFS7zcsxVnOIm7YiA2KfnFP-BZLOEm&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1qpBFS7zcsxVnOIm7YiA2KfnFP-BZLOEm&sz=w1600", caption: "นักเรียนร่วมกันวางแผน จัดการ และสร้างสรรค์ชิ้นงานด้วยตนเอง" }
     ],
     sampleDocs: [
-      { title: "ใบกิจกรรมการเรียนรู้และแบบบันทึกงานกลุ่ม.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.6 MB" },
-      { title: "ภาพถ่ายและบันทึกกิจกรรมการเรียนรู้เชิงรุก.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.1 MB" }
+      { title: "ใบกิจกรรมการเรียนรู้แบบโครงงานและแบบบันทึกงานกลุ่ม.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.1 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "รายงานประเมินทักษะการเรียนรู้แบบนำตนเอง (SDL Report).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.4 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.4": {
     images: [
-      { title: "สื่อนวัตกรรมดิจิทัลและ AI ช่วยสอน", url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80", caption: "การประยุกต์ใช้แพลตฟอร์มดิจิทัลและ AI ในห้องเรียน" },
-      { title: "สื่อการสอนมัลติมีเดียแบบมีปฏิสัมพันธ์", url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1600&auto=format&fit=crop&q=80", caption: "บทเรียน Micro-learning และเครื่องมือสร้างสรรค์นวัตกรรม" }
+      { title: "สื่อนวัตกรรมดิจิทัลและชุดเครื่องมือ Scaffolding Toolkit", url: "https://drive.google.com/thumbnail?id=159xFHNfT7f2V1KnbEXpnGZdMgSP79s6x&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=159xFHNfT7f2V1KnbEXpnGZdMgSP79s6x&sz=w1600", caption: "การประยุกต์ใช้แพลตฟอร์มดิจิทัลและเครื่องมือสนับสนุนการเรียนรู้" },
+      { title: "ห้องเรียนออนไลน์และสื่อมัลติมีเดียเสริมการเรียนรู้", url: "images/ai_thai_teacher_innovation.jpg", fullUrl: "images/ai_thai_teacher_innovation.jpg", caption: "แหล่งเรียนรู้ดิจิทัลและบทเรียนแบบ Anywhere Anytime" }
     ],
     sampleDocs: [
-      { title: "รายงานการพัฒนาสื่อนวัตกรรมและเทคโนโลยีการสอน.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.9 MB" },
-      { title: "คู่มือการใช้สื่อนวัตกรรมและลิงก์เข้าสู่บทเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.4 MB" }
+      { title: "รายงานการสร้างและพัฒนาสื่อนวัตกรรมการจัดการเรียนรู้ AFS.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "คู่มือการใช้สื่อนวัตกรรมดิจิทัลและลิงก์เข้าสู่บทเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.5": {
     images: [
-      { title: "การวัดและประเมินผลตามสภาพจริง", url: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1600&auto=format&fit=crop&q=80", caption: "การประเมินชิ้นงานและทักษะด้วยเกณฑ์รูบริกส์ (Rubrics)" },
-      { title: "ระบบสารสนเทศคะแนนและการสะท้อนผล", url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&auto=format&fit=crop&q=80", caption: "การวิเคราะห์ผลสัมฤทธิ์ทางการเรียนและการให้ข้อมูลย้อนกลับ" }
+      { title: "การวัดและประเมินผลตามสภาพจริง (Authentic Assessment)", url: "https://drive.google.com/thumbnail?id=1qpBFS7zcsxVnOIm7YiA2KfnFP-BZLOEm&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1qpBFS7zcsxVnOIm7YiA2KfnFP-BZLOEm&sz=w1600", caption: "การตรวจประเมินชิ้นงานโครงงานและทักษะการปฏิบัติงานด้วยเกณฑ์รูบริกส์" },
+      { title: "การประเมินตนเองและสะท้อนผลการเรียนรู้ของผู้เรียน", url: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w1600", caption: "นักเรียนสะท้อนคิดประเมินความก้าวหน้าและการแก้ปัญหาโครงงาน" }
     ],
     sampleDocs: [
-      { title: "เครื่องมือวัดและประเมินผลพร้อมเกณฑ์รูบริกส์.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.1 MB" },
-      { title: "ตารางวิเคราะห์ผลสัมฤทธิ์และผลการประเมิน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.5 MB" }
+      { title: "เครื่องมือวัดผลประเมินผลและเกณฑ์การให้คะแนนรูบริกส์ (Rubrics).pdf", type: "pdf", icon: "fa-file-pdf", size: "2.4 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "ตารางวิเคราะห์ผลการประเมินและค่าความเที่ยงตรง IOC.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.7 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.6": {
     images: [
-      { title: "การวิจัยในชั้นเรียนเพื่อแก้ไขปัญหา", url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&auto=format&fit=crop&q=80", caption: "การศึกษา วิเคราะห์ สังเคราะห์เพื่อพัฒนาการเรียนรู้" },
-      { title: "เล่มรายงานวิจัยในชั้นเรียน 5 บท", url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&auto=format&fit=crop&q=80", caption: "รายงานวิจัยในชั้นเรียนฉบับสมบูรณ์และการเผยแพร่" }
+      { title: "การวิจัยในชั้นเรียนเพื่อพัฒนาทักษะการเรียนรู้แบบนำตนเอง", url: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1e9hefnGj95LS0xD0t3YYLy6MvsQXZ2EJ&sz=w1600", caption: "การศึกษา วิเคราะห์ สังเคราะห์ผลการใช้นวัตกรรม AFS" },
+      { title: "เอกสารรายงานผลการวิจัยและ Best Practice", url: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w1600", caption: "รายงานผลการพัฒนานวัตกรรมการจัดการเรียนรู้ฉบับสมบูรณ์" }
     ],
     sampleDocs: [
-      { title: "รายงานการวิจัยในชั้นเรียน 5 บทฉบับสมบูรณ์.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.8 MB" },
-      { title: "บทคัดย่อและบทสรุปผู้บริหารงานวิจัย.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.1 MB" }
+      { title: "รายงานการวิจัยในชั้นเรียน 5 บท ฉบับสมบูรณ์ ปีการศึกษา 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "5.4 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "บทคัดย่อและเอกสารสังเคราะห์ผลการพัฒนาผู้เรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.3 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.7": {
     images: [
-      { title: "บรรยากาศห้องเรียนส่งเสริมการเรียนรู้", url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1600&auto=format&fit=crop&q=80", caption: "การจัดสภาพแวดล้อมที่เอื้อต่อการคิดริเริ่มและปลอดภัย" }
+      { title: "การจัดสภาพแวดล้อมและบรรยากาศห้องเรียนส่งเสริมการเรียนรู้", url: "https://drive.google.com/thumbnail?id=1Xr6bAFRKn4CDjsOApz7x3GxeIfF-vGd9&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1Xr6bAFRKn4CDjsOApz7x3GxeIfF-vGd9&sz=w1600", caption: "การจัดห้องปฏิบัติการเรียนรู้ให้ปลอดภัย สะอาด เอื้อต่อการคิดริเริ่มสร้างสรรค์" },
+      { title: "บรรยากาศการเรียนรู้เชิงบวกและการมีส่วนร่วม", url: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=10XtsW5rzTG1bwu6PoOTnt7JMuhJ7Eu5&sz=w1600", caption: "สร้างความอบอุ่น เป็นกันเอง กระตุ้นให้นักเรียนกล้าซักถามและทดลองสิ่งใหม่" }
     ],
     sampleDocs: [
-      { title: "บันทึกการจัดบรรยากาศและมุมส่งเสริมการเรียนรู้.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB" }
+      { title: "บันทึกการจัดสภาพแวดล้อมและมุมส่งเสริมการเรียนรู้ห้องปฏิบัติการ.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.2 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "ผลการประเมินความพึงพอใจต่อบรรยากาศการเรียนรู้.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.4 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "1.8": {
     images: [
-      { title: "การพัฒนาคุณลักษณะที่ดีของผู้เรียน", url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1600&auto=format&fit=crop&q=80", caption: "กิจกรรมโฮมรูม การอบรมคุณธรรม จริยธรรม และ AI Ethics" }
+      { title: "กิจกรรมโฮมรูมและการปลูกฝังคุณธรรม จริยธรรม", url: "https://drive.google.com/thumbnail?id=1nm8lWXsaMlMLGitXaZVtiZNiAEsB2En4&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1nm8lWXsaMlMLGitXaZVtiZNiAEsB2En4&sz=w1600", caption: "การอบรมคุณลักษณะอันพึงประสงค์ วินัย ความรับผิดชอบ และจรรยาบรรณดิจิทัล" },
+      { title: "การให้คำปรึกษาและการแนะแนวผู้เรียนรายบุคคล", url: "images/ai_thai_teacher_guidance.jpg", fullUrl: "images/ai_thai_teacher_guidance.jpg", caption: "การส่งเสริมให้นักเรียนเป็นคนดี มีจิตสาธารณะ และมีเป้าหมายในชีวิต" }
     ],
     sampleDocs: [
-      { title: "แบบประเมินคุณลักษณะอันพึงประสงค์และบันทึกโฮมรูม.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.7 MB" }
+      { title: "แบบประเมินคุณลักษณะอันพึงประสงค์ 8 ประการ ปี 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.1 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "บันทึกกิจกรรมโฮมรูมและกิจกรรมเสริมสร้างคุณธรรมจริยธรรม.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "2.1": {
     images: [
-      { title: "ระบบสารสนเทศนักเรียนและ ปพ.5 ดิจิทัล", url: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1600&auto=format&fit=crop&q=80", caption: "การจัดทำฐานข้อมูลผลการเรียน สถิติการมาเรียน สารสนเทศรายวิชา" }
+      { title: "ระบบสารสนเทศนักเรียนและ ปพ.5 ดิจิทัล", url: "https://drive.google.com/thumbnail?id=1gQXs_llNXOWTXJ_pu_bNOUcJhwKoOrs4&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1gQXs_llNXOWTXJ_pu_bNOUcJhwKoOrs4&sz=w1600", caption: "การจัดทำฐานข้อมูลผลการเรียน สถิติการมาเรียน และสารสนเทศรายวิชาอย่างเป็นระบบ" },
+      { title: "การรายงานข้อมูลสารสนเทศแก่ผู้บริหารและผู้เกี่ยวข้อง", url: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1600", caption: "การนำสารสนเทศไปใช้วางแผนพัฒนาคุณภาพการจัดการเรียนรู้" }
     ],
     sampleDocs: [
-      { title: "แบบบันทึกผลการพัฒนาคุณภาพผู้เรียน (ปพ.5).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.2 MB" },
-      { title: "รายงานสารสนเทศรายวิชาและสถิติชั้นเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB" }
+      { title: "แบบบันทึกผลการพัฒนาคุณภาพผู้เรียน (ปพ.5) ดิจิทัล 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.5 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "รายงานสารสนเทศรายวิชาและสถิติการเข้าเรียนออนไลน์.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "2.2": {
     images: [
-      { title: "ระบบดูแลช่วยเหลือผู้เรียนเชิงรุก", url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80", caption: "การคัดกรอง SDQ การเยี่ยมบ้าน และการส่งเสริมศักยภาพรายบุคคล" }
+      { title: "ระบบดูแลช่วยเหลือผู้เรียนและการคัดกรอง SDQ", url: "https://drive.google.com/thumbnail?id=1nm8lWXsaMlMLGitXaZVtiZNiAEsB2En4&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1nm8lWXsaMlMLGitXaZVtiZNiAEsB2En4&sz=w1600", caption: "การประเมินพฤติกรรม SDQ คัดกรองรายบุคคล และการเยี่ยมบ้านนักเรียน" },
+      { title: "การให้คำปรึกษาและติดตามช่วยเหลือนักเรียนกลุ่มเสี่ยง", url: "images/ai_thai_teacher_guidance.jpg", fullUrl: "images/ai_thai_teacher_guidance.jpg", caption: "การประสานความร่วมมือเพื่อช่วยเหลือนักเรียนให้ได้รับการสนับสนุนตรงจุด" }
     ],
     sampleDocs: [
-      { title: "สรุปผลการคัดกรอง SDQ และแบบบันทึกการเยี่ยมบ้าน.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.6 MB" },
-      { title: "รายงานการดำเนินงานระบบดูแลช่วยเหลือนักเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.5 MB" }
+      { title: "สรุปผลการคัดกรองแบบประเมิน SDQ และการเยี่ยมบ้าน 100%.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.9 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "รายงานการดำเนินงานระบบดูแลช่วยเหลือนักเรียน (SSS).pdf", type: "pdf", icon: "fa-file-pdf", size: "2.1 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "2.3": {
     images: [
-      { title: "การปฏิบัติงานวิชาการและงานสถานศึกษา", url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1600&auto=format&fit=crop&q=80", caption: "คำสั่งปฏิบัติหน้าที่และผลการบริหารงานวิชาการโรงเรียน" }
+      { title: "การปฏิบัติงานฝ่ายบริหารงานวิชาการและงานสถานศึกษา", url: "https://drive.google.com/thumbnail?id=173amy74R1ujDfrvZF5sDmua4jVP_f-M&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=173amy74R1ujDfrvZF5sDmua4jVP_f-M&sz=w1600", caption: "การดำเนินงานตามคำสั่งมอบหมายหน้าที่ราชการ งานวิชาการ และกิจกรรมสำคัญของโรงเรียน" },
+      { title: "รายงานการประเมินตนเองของสถานศึกษา (SAR)", url: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w1600", caption: "การจัดทำรายงานคุณภาพการศึกษาและการประกันคุณภาพภายใน" }
     ],
     sampleDocs: [
-      { title: "คำสั่งปฏิบัติหน้าที่ราชการและงานฝ่ายวิชาการ.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB" },
-      { title: "รายงานผลการปฏิบัติงานตามคำสั่งและงานที่ได้รับมอบหมาย.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.3 MB" }
+      { title: "คำสั่งแต่งตั้งและมอบหมายหน้าที่ราชการฝ่ายบริหารงานวิชาการ.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.2 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "รายงานสรุปผลการปฏิบัติหน้าที่ราชการและฝ่ายวิชาการ 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.1 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "2.4": {
     images: [
-      { title: "การประสานความร่วมมือผู้ปกครองและเครือข่าย", url: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1600&auto=format&fit=crop&q=80", caption: "การประชุมผู้ปกครองชั้นเรียน (Classroom Meeting) และภาคีเครือข่าย" }
+      { title: "การประชุมผู้ปกครองชั้นเรียน (Classroom Meeting)", url: "https://drive.google.com/thumbnail?id=1bYywqjS4jbW3U5vMgT9lrCYS8c3Nt3wG&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1bYywqjS4jbW3U5vMgT9lrCYS8c3Nt3wG&sz=w1600", caption: "การสร้างความเข้าใจและร่วมมือกับผู้ปกครองในการพัฒนาการเรียนรู้และพฤติกรรม" },
+      { title: "การประสานภาคีเครือข่ายและแหล่งเรียนรู้ในชุมชน", url: "https://drive.google.com/thumbnail?id=173amy74R1ujDfrvZF5sDmua4jVP_f-M&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=173amy74R1ujDfrvZF5sDmua4jVP_f-M&sz=w1600", caption: "การเชื่อมโยงความร่วมมือกับชุมชนในการสนับสนุนการจัดการเรียนรู้ของผู้เรียน" }
     ],
     sampleDocs: [
-      { title: "บันทึกการประชุมผู้ปกครองชั้นเรียนและการสร้างเครือข่าย.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.0 MB" }
+      { title: "บันทึกการประชุมผู้ปกครองชั้นเรียนและผลสะท้อนคิด.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.3 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "บันทึกความร่วมมือและภาพกิจกรรมเครือข่ายชุมชน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "3.1": {
     images: [
-      { title: "การพัฒนาตนเองอย่างต่อเนื่อง (ID Plan)", url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&auto=format&fit=crop&q=80", caption: "การเข้าร่วมอบรมเชิงปฏิบัติการ เทคโนโลยี AI และการพัฒนาวิชาชีพ" }
+      { title: "การพัฒนาตนเองอย่างต่อเนื่องและรวมวุฒิบัตรการอบรม", url: "https://drive.google.com/thumbnail?id=1fe80GrNslBXCle27EQb8HXivJu-veka1&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1fe80GrNslBXCle27EQb8HXivJu-veka1&sz=w1600", caption: "การเข้าร่วมอบรมเชิงปฏิบัติการ การใช้เทคโนโลยี AI และการพัฒนาวิชาชีพครู" },
+      { title: "ภาพการเข้าร่วมกิจกรรมพัฒนาวิชาชีพและสัมมนาวิชาการ", url: "https://drive.google.com/thumbnail?id=1fIMtnTSqOvFVhEwnvcR_UWxjHV_Msmi5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1fIMtnTSqOvFVhEwnvcR_UWxjHV_Msmi5&sz=w1600", caption: "การแลกเปลี่ยนเรียนรู้และเพิ่มพูนสมรรถนะการจัดการเรียนรู้ยุคดิจิทัล" }
     ],
     sampleDocs: [
-      { title: "แผนพัฒนาตนเองรายบุคคล (ID Plan) และรายงานการอบรม.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.1 MB" },
-      { title: "รวมวุฒิบัตรและเกียรติบัตรการพัฒนาวิชาชีพ.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.5 MB" }
+      { title: "แผนพัฒนาตนเองรายบุคคล (ID Plan) ประจำปีการศึกษา 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.2 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "รวมวุฒิบัตรและเกียรติบัตรการพัฒนาวิชาชีพครู 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "5.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "3.2": {
     images: [
-      { title: "การเป็นผู้นำชุมชนการเรียนรู้ทางวิชาชีพ (PLC)", url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1600&auto=format&fit=crop&q=80", caption: "การประชุม PLC เพื่อแลกเปลี่ยนเรียนรู้และแก้ไขปัญหาการจัดการเรียนรู้" }
+      { title: "การขับเคลื่อนชุมชนการเรียนรู้ทางวิชาชีพ (PLC นวัตกรรม AFS)", url: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1TbStAJqtw3b4gQe5X-mk9pKwL6JI4OqP&sz=w1600", caption: "การประชุม PLC เพื่อสะท้อนคิด แลกเปลี่ยนปัญหา และออกแบบการจัดการเรียนรู้ร่วมกัน" },
+      { title: "ภาพการประชุม PLC และการวิพากษ์แผนการสอน", url: "https://drive.google.com/thumbnail?id=1fIMtnTSqOvFVhEwnvcR_UWxjHV_Msmi5&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1fIMtnTSqOvFVhEwnvcR_UWxjHV_Msmi5&sz=w1600", caption: "การร่วมมือระหว่างเพื่อนครูกลุ่มสาระการงานอาชีพและฝ่ายวิชาการ" }
     ],
     sampleDocs: [
-      { title: "บันทึกชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC Logbook).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.7 MB" },
-      { title: "แบบสะท้อนคิดและรายงานผลลัพธ์จากกระบวนการ PLC.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.6 MB" }
+      { title: "บันทึกชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC Logbook) 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.1 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "แบบสรุปผลการแก้ปัญหาการเรียนรู้จากกระบวนการ PLC.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   },
   "3.3": {
     images: [
-      { title: "การนำผลการพัฒนามาสร้างสรรค์นวัตกรรม", url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600&auto=format&fit=crop&q=80", caption: "การเผยแพร่นวัตกรรมการจัดการเรียนรู้และเป็นแบบอย่างทางวิชาการ" }
+      { title: "การนำผลการพัฒนามาสร้างสรรค์นวัตกรรม AFS และ Best Practice", url: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w800", fullUrl: "https://drive.google.com/thumbnail?id=1FJVTnnmBxxz5bw6OXTWhGAbfAhwOEg9z&sz=w1600", caption: "การสังเคราะห์เป็นแนวปฏิบัติที่ดีและนำมาพัฒนาผู้เรียนอย่างเป็นรูปธรรม" },
+      { title: "การเผยแพร่นวัตกรรมและขยายผลสู่เพื่อนครู", url: "images/ai_thai_teacher_plc.jpg", fullUrl: "images/ai_thai_teacher_plc.jpg", caption: "การเป็นวิทยากรและแบ่งปันองค์ความรู้การจัดกิจกรรม Active Learning" }
     ],
     sampleDocs: [
-      { title: "รายงานการเผยแพร่นวัตกรรมและการขยายผลสู่เพื่อนครู.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.3 MB" }
+      { title: "รายงานวิธีปฏิบัติที่เป็นเลิศ (Best Practice) นวัตกรรม AFS 2569.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.6 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" },
+      { title: "เอกสารสรุปการเผยแพร่ผลงานและการขยายผลสู่เพื่อนครู.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.5 MB", viewUrl: "https://drive.google.com/drive/folders/1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K" }
     ]
   }
 };
