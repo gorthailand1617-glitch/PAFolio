@@ -607,6 +607,12 @@ function openDriveSyncModal() {
   document.getElementById('drive-folder-id-input').value = DriveSync.config.folderId;
   document.getElementById('apps-script-url-input').value = DriveSync.config.appsScriptUrl;
 
+  const feedbackEl = document.getElementById('drive-test-feedback');
+  if (feedbackEl) {
+    feedbackEl.classList.add('hidden');
+    feedbackEl.innerHTML = '';
+  }
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
   document.body.style.overflow = 'hidden';
@@ -621,9 +627,64 @@ function closeDriveSyncModal() {
   }
 }
 
+async function testDriveSyncConnection() {
+  const folderId = document.getElementById('drive-folder-id-input').value.trim();
+  const scriptUrl = document.getElementById('apps-script-url-input').value.trim();
+  const feedbackEl = document.getElementById('drive-test-feedback');
+  const testBtn = document.getElementById('drive-test-btn');
+
+  if (!feedbackEl) return;
+  feedbackEl.classList.remove('hidden');
+
+  if (!scriptUrl) {
+    feedbackEl.className = 'mt-2 p-3 rounded-xl text-xs bg-rose-50 border border-rose-200 text-rose-800';
+    feedbackEl.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-500 mr-1.5"></i> กรุณากรอก Google Apps Script Web App URL ก่อนทดสอบ';
+    return;
+  }
+
+  if (testBtn) {
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังทดสอบ...';
+  }
+
+  feedbackEl.className = 'mt-2 p-3 rounded-xl text-xs bg-sky-50 border border-sky-200 text-sky-800';
+  feedbackEl.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin text-sky-500 mr-1.5"></i> กำลังส่งคำขอทดสอบไปยัง Google Apps Script...';
+
+  const result = await DriveSync.testConnection(folderId, scriptUrl);
+
+  if (testBtn) {
+    testBtn.disabled = false;
+    testBtn.innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> ทดสอบการเชื่อมต่อ';
+  }
+
+  if (result.ok) {
+    feedbackEl.className = 'mt-2 p-3.5 rounded-xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-900';
+    feedbackEl.innerHTML = `
+      <div class="font-bold flex items-center gap-1.5 text-emerald-800 mb-1">
+        <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i> ${result.message}
+      </div>
+      <div class="text-[11px] text-emerald-700">ระบบพร้อมใช้งาน! คุณสามารถกดปุ่ม "บันทึกและซิงก์ข้อมูล" ด้านล่างได้เลย</div>
+    `;
+  } else {
+    feedbackEl.className = 'mt-2 p-3.5 rounded-xl text-xs bg-rose-50 border border-rose-200 text-rose-950 space-y-1.5';
+    let formattedMsg = (result.message || '').replace(/\n/g, '<br>');
+    feedbackEl.innerHTML = `
+      <div class="font-bold flex items-center gap-1.5 text-rose-800">
+        <i class="fa-solid fa-triangle-exclamation text-rose-600 text-sm"></i> ทดสอบไม่สำเร็จ
+      </div>
+      <div class="text-[11px] leading-relaxed text-rose-900 font-sans">${formattedMsg}</div>
+    `;
+  }
+}
+
 function saveDriveSyncSettings() {
-  const folderId = document.getElementById('drive-folder-id-input').value;
-  const scriptUrl = document.getElementById('apps-script-url-input').value;
+  const folderId = document.getElementById('drive-folder-id-input').value.trim();
+  let scriptUrl = document.getElementById('apps-script-url-input').value.trim();
+
+  // ปรับแก้เบื้องต้นหากผู้ใช้เผลอวาง URL หน้า Editor
+  if (scriptUrl.includes('/edit')) {
+    scriptUrl = scriptUrl.replace(/\/edit.*$/, '/exec');
+  }
 
   DriveSync.saveConfig(folderId, scriptUrl, true);
   closeDriveSyncModal();

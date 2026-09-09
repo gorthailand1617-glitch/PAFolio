@@ -38,9 +38,15 @@ const DriveSync = {
     }
 
     try {
-      let fetchUrl = this.config.appsScriptUrl;
+      let fetchUrl = this.config.appsScriptUrl.trim();
+      
+      // ตรวจสอบเบื้องต้นกรณีผู้ใช้เผลอวาง URL หน้าแก้ไขสคริปต์
+      if (fetchUrl.includes('/edit')) {
+        console.warn('[DriveSync] URL appears to be an editor URL instead of Web App execution URL.');
+      }
+
       const params = new URLSearchParams();
-      if (this.config.folderId) params.append('folderId', this.config.folderId);
+      if (this.config.folderId) params.append('folderId', this.config.folderId.trim());
       if (year) params.append('year', year);
 
       if (fetchUrl.includes('?')) {
@@ -64,8 +70,78 @@ const DriveSync = {
       }
     } catch (err) {
       console.error('[DriveSync Error]', err);
-      this.updateStatusUI(false, err.message);
-      return { status: 'error', message: err.message };
+      let friendlyMessage = err.message || '';
+      if (err.name === 'TypeError' || friendlyMessage.toLowerCase().includes('failed to fetch')) {
+        friendlyMessage = 'Failed to fetch (สาเหตุหลัก: Apps Script ยังไม่ได้ตั้งค่า "Who has access / ผู้มีสิทธิ์เข้าถึง: Anyone / ทุกคน" หรือยังไม่ได้ใช้ URL ที่ลงท้ายด้วย /exec)';
+      }
+      this.updateStatusUI(false, friendlyMessage);
+      return { status: 'error', message: friendlyMessage, rawError: err };
+    }
+  },
+
+  // ทดสอบการเชื่อมต่อ Apps Script และ Google Drive พร้อมระบุปัญหาแบบละเอียด
+  async testConnection(folderId, scriptUrl) {
+    const cleanUrl = (scriptUrl || '').trim();
+    const cleanFolderId = (folderId || '').trim();
+
+    if (!cleanUrl) {
+      return { ok: false, message: 'กรุณากรอก Google Apps Script Web App URL ก่อนทดสอบ' };
+    }
+
+    if (!cleanUrl.startsWith('https://script.google.com/macros/s/')) {
+      return { 
+        ok: false, 
+        message: 'รูปแบบ URL ไม่ถูกต้อง: URL Web App ต้องขึ้นต้นด้วย https://script.google.com/macros/s/... (ไม่ใช่ URL หน้าแก้ไขสคริปต์)' 
+      };
+    }
+
+    if (!cleanUrl.endsWith('/exec') && !cleanUrl.includes('/exec?')) {
+      return {
+        ok: false,
+        message: 'URL ต้องลงท้ายด้วย /exec (หากลงท้ายด้วย /edit หรือ /dev เบราว์เซอร์จะไม่สามารถเชื่อมต่อได้)'
+      };
+    }
+
+    try {
+      let testUrl = cleanUrl;
+      const params = new URLSearchParams();
+      if (cleanFolderId) params.append('folderId', cleanFolderId);
+      testUrl += (testUrl.includes('?') ? '&' : '?') + params.toString();
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const res = await fetch(testUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        return { ok: false, message: `เซิร์ฟเวอร์ตอบกลับสถานะ HTTP ${res.status}: ${res.statusText}` };
+      }
+
+      const json = await res.json();
+      if (json.status === 'success') {
+        const folderName = json.data?.folderName || 'โฟลเดอร์หลัก';
+        const yearsCount = json.data?.years?.length || 0;
+        return { 
+          ok: true, 
+          message: `เชื่อมต่อสำเร็จ 100%! พบโฟลเดอร์ "${folderName}" (ข้อมูลปีการศึกษา: ${yearsCount} รอบ)`,
+          data: json.data 
+        };
+      } else {
+        return { ok: false, message: json.message || 'Apps Script ส่งข้อผิดพลาดกลับมา' };
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        return { ok: false, message: 'การเชื่อมต่อหมดเวลา (Timeout 15 วินาที) กรุณาตรวจสอบอินเทอร์เน็ตหรือ Apps Script' };
+      }
+      if (err.name === 'TypeError' || (err.message && err.message.toLowerCase().includes('failed to fetch'))) {
+        return {
+          ok: false,
+          isCorsError: true,
+          message: 'เกิดข้อผิดพลาด "Failed to fetch" (CORS Policy Blocked)\n\nวิธีแก้ไขด่วน:\n1. ไปที่ Google Apps Script ของคุณ\n2. คลิก "การทำให้ใช้งานได้" (Deploy) > "การทำให้ใช้งานได้ใหม่" (New deployment)\n3. ตรง "ผู้มีสิทธิ์เข้าถึง" (Who has access) ต้องเลือกเป็น "ทุกคน" (Anyone) เท่านั้น!\n4. กด Deploy แล้วคัดลอก URL ที่ลงท้ายด้วย /exec มาใหม่อีกครั้ง'
+        };
+      }
+      return { ok: false, message: `เกิดข้อผิดพลาด: ${err.message}` };
     }
   },
 
