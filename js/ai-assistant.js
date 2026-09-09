@@ -206,9 +206,12 @@ const AIAssistant = {
     const allText = (detectedFiles.join(' ') + ' ' + aggregatedSnippets).toLowerCase();
 
     // ก. วิเคราะห์โมเดลนวัตกรรม
-    let modelType = 'PREM';
+    let modelType = 'AFS';
     let topicName = '';
-    if (allText.includes('stem') || allText.includes('5e')) {
+    if (allText.includes('scaffolding') || allText.includes('ปรับลด') || allText.includes('fading') || currentYear === '2569') {
+      modelType = 'AFS';
+      topicName = 'การพัฒนารูปแบบการเรียนการสอนแบบใช้โครงงานเป็นฐานร่วมกับเทคนิคการสนับสนุนแบบปรับลด (Adaptive Fading Scaffolding) เพื่อส่งเสริมทักษะการเรียนรู้แบบนำตนเอง ในรายวิชาการงานอาชีพ สำหรับนักเรียนชั้นมัธยมศึกษาปีที่ ๓ โรงเรียนเปรมติณสูลานนท์';
+    } else if (allText.includes('stem') || allText.includes('5e')) {
       modelType = 'STEM';
       topicName = 'การจัดการเรียนรู้แบบ STEM Education (5E) ร่วมกับเทคโนโลยีดิจิทัล';
     } else if (allText.includes('pbl') || allText.includes('โครงงาน')) {
@@ -222,7 +225,10 @@ const AIAssistant = {
       topicName = 'รูปแบบการจัดการเรียนรู้ PREM Model ร่วมกับ Thinking Whiteboard';
     } else {
       // ตรวจสอบตามรอบปีการศึกษา
-      if (currentYear === '2567') {
+      if (currentYear === '2569') {
+        modelType = 'AFS';
+        topicName = 'การพัฒนารูปแบบการเรียนการสอนแบบใช้โครงงานเป็นฐานร่วมกับเทคนิคการสนับสนุนแบบปรับลด (Adaptive Fading Scaffolding) เพื่อส่งเสริมทักษะการเรียนรู้แบบนำตนเอง ในรายวิชาการงานอาชีพ สำหรับนักเรียนชั้นมัธยมศึกษาปีที่ ๓ โรงเรียนเปรมติณสูลานนท์';
+      } else if (currentYear === '2567') {
         modelType = 'PBL';
         topicName = 'การพัฒนาการจัดการเรียนรู้แบบโครงงานเป็นฐาน (Project-Based Learning: PBL)';
       } else if (currentYear === '2566') {
@@ -235,17 +241,20 @@ const AIAssistant = {
     }
 
     // ข. วิเคราะห์ระดับชั้นและกลุ่มเป้าหมาย
-    let grade = 'มัธยมศึกษาปีที่ 6';
-    let gradeShort = 'ม.6';
-    if (allText.includes('ม.5') || allText.includes('มัธยมศึกษาปีที่ 5')) {
+    let grade = (currentYear === '2569' || modelType === 'AFS') ? 'มัธยมศึกษาปีที่ 3' : 'มัธยมศึกษาปีที่ 6';
+    let gradeShort = (currentYear === '2569' || modelType === 'AFS') ? 'ม.3' : 'ม.6';
+    if (allText.includes('ม.3') || allText.includes('มัธยมศึกษาปีที่ 3')) {
+      grade = 'มัธยมศึกษาปีที่ 3';
+      gradeShort = 'ม.3';
+    } else if (allText.includes('ม.5') || allText.includes('มัธยมศึกษาปีที่ 5')) {
       grade = 'มัธยมศึกษาปีที่ 5';
       gradeShort = 'ม.5';
     } else if (allText.includes('ม.4') || allText.includes('มัธยมศึกษาปีที่ 4')) {
       grade = 'มัธยมศึกษาปีที่ 4';
       gradeShort = 'ม.4';
-    } else if (allText.includes('ม.3') || allText.includes('มัธยมศึกษาปีที่ 3')) {
-      grade = 'มัธยมศึกษาปีที่ 3';
-      gradeShort = 'ม.3';
+    } else if (allText.includes('ม.6') || allText.includes('มัธยมศึกษาปีที่ 6')) {
+      grade = 'มัธยมศึกษาปีที่ 6';
+      gradeShort = 'ม.6';
     } else if (allText.includes('ม.2') || allText.includes('มัธยมศึกษาปีที่ 2')) {
       grade = 'มัธยมศึกษาปีที่ 2';
       gradeShort = 'ม.2';
@@ -256,7 +265,9 @@ const AIAssistant = {
 
     // ค. วิเคราะห์กลุ่มสาระ / รายวิชา
     let subjectName = learningArea;
-    if (allText.includes('ง33101')) {
+    if (currentYear === '2569' || modelType === 'AFS' || allText.includes('ง23101')) {
+      subjectName = 'รายวิชาการงานอาชีพ สำหรับนักเรียนชั้นมัธยมศึกษาปีที่ 3';
+    } else if (allText.includes('ง33101')) {
       subjectName = 'รายวิชาการงานอาชีพ (ง33101) เรื่อง “ทักษะการจัดการในการทำงาน”';
     } else if (allText.includes('ง32101')) {
       subjectName = 'รายวิชาการงานอาชีพ (ง32101) การประดิษฐ์และเทคโนโลยีผลิตภัณฑ์ท้องถิ่น';
@@ -274,7 +285,14 @@ const AIAssistant = {
 
     // 3. สังเคราะห์โมเดลขั้นตอนวิจัย 5 บท (5-Chapter Research Steps)
     let steps = [];
-    if (modelType === 'PREM') {
+    if (modelType === 'AFS') {
+      steps = [
+        { letter: "A", title: "Anchor & Direct Modeling", nameThai: "การสร้างจุดยึดโยงปัญหาและสาธิตโดยตรง", color: "teal", description: "กำหนดสถานการณ์ปัญหาจริงในชีวิตประจำวันเพื่อกระตุ้นความสนใจ สาธิตทักษะและให้การสนับสนุนระดับสูง (High Scaffolding)" },
+        { letter: "F", title: "Facilitated Team Coaching", nameThai: "การโค้ชและปรับลดการสนับสนุนตามความพร้อม", color: "cyan", description: "นักเรียนร่วมกันวางแผนโครงงานเป็นทีม ครูทำหน้าที่โค้ชกระบวนการคิด และค่อยๆ ปรับลดระดับการช่วยเหลือลง (Fading Scaffolding)" },
+        { letter: "S", title: "Self-Directed Project", nameThai: "การลงมือปฏิบัติโครงงานแบบนำตนเอง", color: "amber", description: "ผู้เรียนลงมือสร้างสรรค์โครงงานชิ้นงานจริง แก้ปัญหาเฉพาะหน้า และบริหารจัดการงานด้วยตนเองอย่างอิสระ" },
+        { letter: "D", title: "Demonstration & Reflection", nameThai: "การจัดแสดงผลงานและสะท้อนคิดประเมินตนเอง", color: "emerald", description: "จัดแสดงและนำเสนอผลงานโครงงานสู่สาธารณะ ประเมินตนเองตามสภาพจริง และสะท้อนคิดกระบวนการเรียนรู้" }
+      ];
+    } else if (modelType === 'PREM') {
       steps = [
         { letter: "P", title: "Problem Situation", nameThai: "สถานการณ์ปัญหาในชีวิตจริง", color: "teal", description: "จัดสถานการณ์ปัญหาจริงในชุมชนหรือชีวิตประจำวัน กระตุ้นความอยากรู้ ท้าทายความคิด และนำไปสู่การตั้งคำถามหลัก" },
         { letter: "R", title: "Real Experience", nameThai: "ประสบการณ์ตรงและการสืบค้น", color: "cyan", description: "เปิดโอกาสให้ผู้เรียนสืบค้นข้อมูลจากแหล่งเรียนรู้หลากหลาย รวบรวมข้อมูล ทดลอง และเชื่อมโยงสู่แนวคิดใหม่" },

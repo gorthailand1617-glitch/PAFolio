@@ -1962,21 +1962,75 @@
     </div>
   </div>
 
-  <!-- ================= FLOATING HOME BUTTON ================= -->
-  <aside id="floating-home-container" class="fixed bottom-6 right-6 z-40 transition-all duration-500 opacity-0 pointer-events-none translate-y-4 no-print">
+  <!-- ================= FLOATING ACTION & SPEED-DIAL 15 INDICATORS MENU ================= -->
+  <aside id="floating-home-container" class="fixed bottom-6 right-6 z-40 transition-all duration-500 opacity-0 pointer-events-none translate-y-4 no-print flex flex-col items-end">
+    
+    <!-- Expanded Speed-Dial 15 Indicators Menu -->
+    <div id="floating-indicators-menu" class="hidden mb-3 w-[340px] sm:w-[440px] max-h-[82vh] overflow-y-auto bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.65)] p-4 text-white transition-all duration-300 transform scale-95 opacity-0 origin-bottom-right">
+      
+      <!-- Menu Header -->
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 flex items-center justify-center text-white text-sm shadow-md">
+            <i class="fa-solid fa-compass"></i>
+          </div>
+          <div>
+            <div class="font-heading font-bold text-sm text-slate-100 flex items-center gap-1.5">
+              <span>ทางลัด 15 ตัวชี้วัด PA</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/40">15 ข้อ</span>
+            </div>
+            <div class="text-[10px] text-teal-300/80">คลิกเพื่อดูรายละเอียด สไลด์ภาพ และเอกสารไดรฟ์</div>
+          </div>
+        </div>
+        <button onclick="toggleFloatingMenu(false)" title="ปิดเมนู" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Quick Scroll to Top / Home Button -->
+      <button onclick="scrollToHomePage(); toggleFloatingMenu(false);" class="w-full mb-3.5 flex items-center justify-between py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-teal-500/20 via-primary-600/30 to-indigo-500/20 hover:from-teal-500/30 hover:to-indigo-500/30 border border-teal-500/40 text-teal-200 text-xs font-semibold shadow-sm transition hover:scale-[1.01] active:scale-95 group">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-teal-500/30 flex items-center justify-center text-teal-300 text-xs group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-house"></i>
+          </div>
+          <span>เลื่อนกลับสู่หน้าแรกสุด (Home / Top)</span>
+        </div>
+        <i class="fa-solid fa-arrow-up text-[11px] text-teal-300 group-hover:-translate-y-0.5 transition-transform"></i>
+      </button>
+
+      <!-- Dynamic Indicators List Container (Rendered by JS) -->
+      <div id="floating-indicators-list" class="space-y-1">
+        <!-- Rendered by renderFloatingIndicatorsMenu() -->
+      </div>
+
+      <!-- Quick Section Links -->
+      <div class="mt-3.5 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <span class="text-[10px] text-slate-500">ข้ามไปหัวข้อ:</span>
+        <div class="flex items-center gap-2 text-[11px]">
+          <a href="#challenge" onclick="toggleFloatingMenu(false)" class="text-amber-300 hover:underline">ประเด็นท้าทาย</a>
+          <span class="text-slate-600">•</span>
+          <a href="#certificate-vault" onclick="toggleFloatingMenu(false)" class="text-amber-300 hover:underline">เกียรติบัตร</a>
+          <span class="text-slate-600">•</span>
+          <a href="#gallery" onclick="toggleFloatingMenu(false)" class="text-teal-300 hover:underline">ภาพกิจกรรม</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Floating Trigger Button -->
     <button id="floating-home-btn" 
-            onclick="scrollToHomePage()" 
-            title="กลับไปที่หน้าแรก (Home)"
-            aria-label="กลับไปที่หน้าแรก"
-            class="group flex items-center gap-2.5 px-3.5 py-2.5 sm:px-5 sm:py-3.5 bg-gradient-to-r from-teal-600 via-primary-700 to-indigo-700 hover:from-teal-500 hover:via-primary-600 hover:to-indigo-600 text-white rounded-full shadow-[0_10px_30px_rgba(15,23,42,0.4)] hover:shadow-[0_15px_35px_rgba(13,148,136,0.55)] border border-white/25 backdrop-blur-xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-400">
-      <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs sm:text-sm shadow-inner group-hover:rotate-12 transition-transform duration-300">
-        <i class="fa-solid fa-house"></i>
+            onclick="toggleFloatingMenu()" 
+            title="คลิกเพื่อแตกเป็น 15 ตัวชี้วัด หรือเลื่อนกลับหน้าแรก"
+            aria-label="เมนูทางลัด 15 ตัวชี้วัดและหน้าแรก"
+            class="group flex items-center gap-2.5 px-4 py-3 sm:px-5 sm:py-3.5 bg-gradient-to-r from-teal-600 via-primary-700 to-indigo-700 hover:from-teal-500 hover:via-primary-600 hover:to-indigo-600 text-white rounded-full shadow-[0_10px_30px_rgba(15,23,42,0.45)] hover:shadow-[0_15px_35px_rgba(13,148,136,0.6)] border border-white/25 backdrop-blur-xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer">
+      <div id="floating-btn-icon-box" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs sm:text-sm shadow-inner group-hover:rotate-12 transition-transform duration-300">
+        <i id="floating-btn-icon" class="fa-solid fa-layer-group"></i>
       </div>
       <div class="flex flex-col text-left">
-        <span class="text-[11px] sm:text-xs font-bold font-heading tracking-wide uppercase leading-tight text-white group-hover:text-teal-200 transition-colors">หน้าแรก</span>
-        <span class="hidden sm:inline text-[10px] text-teal-200/90 leading-none">กลับสู่ด้านบน</span>
+        <span id="floating-btn-title" class="text-[11px] sm:text-xs font-bold font-heading tracking-wide uppercase leading-tight text-white group-hover:text-teal-200 transition-colors">15 ตัวชี้วัด & หน้าแรก</span>
+        <span id="floating-btn-subtitle" class="hidden sm:inline text-[10px] text-teal-200/90 leading-none">คลิกเพื่อเลือกตัวชี้วัด</span>
       </div>
-      <i class="fa-solid fa-arrow-up text-xs text-teal-200 group-hover:text-white group-hover:-translate-y-1 transition-transform duration-300 ml-0.5"></i>
+      <i id="floating-btn-chevron" class="fa-solid fa-chevron-up text-xs text-teal-200 group-hover:text-white transition-transform duration-300 ml-0.5"></i>
     </button>
   </aside>
 

@@ -1812,6 +1812,15 @@ function setupEventListeners() {
       if (typeof PresentationDeck !== 'undefined' && PresentationDeck.isOpen) {
         PresentationDeck.close();
       }
+      toggleFloatingMenu(false);
+    }
+  });
+
+  // Click outside to close floating indicators menu
+  document.addEventListener('click', (e) => {
+    const floatingContainer = document.getElementById('floating-home-container');
+    if (isFloatingMenuOpen && floatingContainer && !floatingContainer.contains(e.target)) {
+      toggleFloatingMenu(false);
     }
   });
 
@@ -1839,6 +1848,7 @@ function setupEventListeners() {
     } else {
       floatingHomeContainer.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
       floatingHomeContainer.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      if (isFloatingMenuOpen) toggleFloatingMenu(false);
     }
   };
 
@@ -1854,6 +1864,127 @@ function scrollToHomePage() {
     top: 0,
     behavior: 'smooth'
   });
+}
+
+// ================= FLOATING SPEED-DIAL 15 INDICATORS MENU =================
+let isFloatingMenuOpen = false;
+
+function toggleFloatingMenu(forceState) {
+  const menu = document.getElementById('floating-indicators-menu');
+  const icon = document.getElementById('floating-btn-icon');
+  const title = document.getElementById('floating-btn-title');
+  const subtitle = document.getElementById('floating-btn-subtitle');
+  const chevron = document.getElementById('floating-btn-chevron');
+  if (!menu) return;
+
+  isFloatingMenuOpen = (typeof forceState === 'boolean') ? forceState : !isFloatingMenuOpen;
+
+  if (isFloatingMenuOpen) {
+    renderFloatingIndicatorsMenu();
+    menu.classList.remove('hidden');
+    // small timeout for smooth CSS animation
+    requestAnimationFrame(() => {
+      menu.classList.remove('scale-95', 'opacity-0');
+      menu.classList.add('scale-100', 'opacity-100');
+    });
+    if (icon) {
+      icon.className = 'fa-solid fa-xmark text-rose-300';
+    }
+    if (title) title.textContent = 'ปิดเมนูลัด';
+    if (subtitle) subtitle.textContent = 'คลิกเพื่อซ่อน';
+    if (chevron) chevron.className = 'fa-solid fa-chevron-down text-xs text-rose-300';
+  } else {
+    menu.classList.remove('scale-100', 'opacity-100');
+    menu.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+      if (!isFloatingMenuOpen) menu.classList.add('hidden');
+    }, 200);
+    if (icon) {
+      icon.className = 'fa-solid fa-layer-group';
+    }
+    if (title) title.textContent = '15 ตัวชี้วัด & หน้าแรก';
+    if (subtitle) subtitle.textContent = 'คลิกเพื่อเลือกตัวชี้วัด';
+    if (chevron) chevron.className = 'fa-solid fa-chevron-up text-xs text-teal-200';
+  }
+}
+
+function renderFloatingIndicatorsMenu() {
+  const container = document.getElementById('floating-indicators-list');
+  if (!container) return;
+
+  const domainStyles = {
+    'domain-1': {
+      title: 'ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)',
+      dotColor: 'bg-teal-400',
+      titleColor: 'text-teal-300',
+      itemBg: 'bg-teal-950/40 hover:bg-teal-800/50',
+      border: 'border-teal-500/30 hover:border-teal-400/60',
+      badge: 'bg-teal-500/20 text-teal-300 border-teal-500/40'
+    },
+    'domain-2': {
+      title: 'ด้านที่ 2 การส่งเสริมและสนับสนุน (4 ตัวชี้วัด)',
+      dotColor: 'bg-sky-400',
+      titleColor: 'text-sky-300',
+      itemBg: 'bg-sky-950/40 hover:bg-sky-800/50',
+      border: 'border-sky-500/30 hover:border-sky-400/60',
+      badge: 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+    },
+    'domain-3': {
+      title: 'ด้านที่ 3 การพัฒนาตนเองและวิชาชีพ (3 ตัวชี้วัด)',
+      dotColor: 'bg-indigo-400',
+      titleColor: 'text-indigo-300',
+      itemBg: 'bg-indigo-950/40 hover:bg-indigo-800/50',
+      border: 'border-indigo-500/30 hover:border-indigo-400/60',
+      badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+    }
+  };
+
+  let html = '';
+  ['domain-1', 'domain-2', 'domain-3'].forEach(dId => {
+    const list = BASE_INDICATOR_TEMPLATES.filter(i => i.domainId === dId);
+    const style = domainStyles[dId];
+    html += `
+      <div class="mb-3">
+        <div class="flex items-center gap-1.5 text-[11px] font-bold ${style.titleColor} mb-1.5 px-1">
+          <span class="w-2 h-2 rounded-full ${style.dotColor}"></span>
+          <span>${style.title}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          ${list.map(ind => `
+            <button type="button" 
+                    onclick="openIndicatorModalByCode('${ind.code}')" 
+                    title="${ind.code} ${ind.title}"
+                    class="group text-left p-2 rounded-xl ${style.itemBg} border ${style.border} transition-all duration-200 flex items-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer">
+              <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold font-mono ${style.badge} border flex-shrink-0 group-hover:scale-105 transition-transform">
+                ${ind.code}
+              </span>
+              <span class="text-[11px] text-slate-200 group-hover:text-white font-medium truncate leading-tight">
+                ${ind.title}
+              </span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function openIndicatorModalByCode(code) {
+  toggleFloatingMenu(false);
+  const ind = BASE_INDICATOR_TEMPLATES.find(i => i.code === code);
+  if (ind) {
+    const teacher = getActiveTeacher();
+    const expectedLevel = getExpectedLevel(teacher.academicStanding);
+    const domains = [
+      { id: 'domain-1', number: 1, title: 'ด้านที่ 1: ด้านการจัดการเรียนรู้', subtitle: 'การสร้างและพัฒนาหลักสูตร การออกแบบกิจกรรม สื่อ นวัตกรรม และการวัดผล', color: 'teal', total: 8 },
+      { id: 'domain-2', number: 2, title: 'ด้านที่ 2: ด้านการส่งเสริมและสนับสนุนการจัดการเรียนรู้', subtitle: 'การจัดทำข้อมูลสารสนเทศ ระบบดูแลช่วยเหลือผู้เรียน และงานพัฒนาสถานศึกษา', color: 'sky', total: 4 },
+      { id: 'domain-3', number: 3, title: 'ด้านที่ 3: ด้านการพัฒนาตนเองและวิชาชีพ', subtitle: 'การพัฒนาตนเองทางวิชาชีพ การมีส่วนร่วมในชุมชน PLC และการขยายผลนวัตกรรม', color: 'indigo', total: 3 }
+    ];
+    const domain = domains.find(d => d.id === ind.domainId);
+    openIndicatorModal(ind, teacher, expectedLevel, domain);
+  }
 }
 
 // ================= AI ASSISTANT CONTROLLERS =================
