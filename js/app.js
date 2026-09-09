@@ -1828,6 +1828,32 @@ function setupEventListeners() {
       });
     });
   }
+
+  // Floating Home Button & Scroll Tracker
+  const floatingHomeContainer = document.getElementById('floating-home-container');
+  const updateFloatingHomeVisibility = () => {
+    if (!floatingHomeContainer) return;
+    if (window.scrollY > 180) {
+      floatingHomeContainer.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      floatingHomeContainer.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+    } else {
+      floatingHomeContainer.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+      floatingHomeContainer.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+    }
+  };
+
+  window.addEventListener('scroll', updateFloatingHomeVisibility, { passive: true });
+  updateFloatingHomeVisibility();
+}
+
+/**
+ * Smoothly scrolls the window to the very top (Home / Hero)
+ */
+function scrollToHomePage() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 }
 
 // ================= AI ASSISTANT CONTROLLERS =================
