@@ -396,28 +396,28 @@ const PresentationDeck = {
     let currentSlideImages = [];
 
     if (activeSlide.type === 'cover') {
-      // 1. หน้าปก (Cover Slide)
+      // 1. หน้าปก (Cover Slide - Executive Keynote Scale)
       const coverAvatarSrc = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
       html = `
-        <div class="h-full flex flex-col justify-center items-center text-center p-8 max-w-4xl mx-auto animate-fade-in text-white">
-          <div onclick="openLightbox('${coverAvatarSrc}', '${teacher.name}', 'รูปประจำตัวครูผู้รับการประเมิน')" class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl p-1.5 bg-gradient-to-tr from-teal-400 via-indigo-400 to-amber-400 shadow-2xl mb-6 ring-4 ring-white/10 cursor-pointer hover:scale-105 transition duration-300">
-            <img src="${coverAvatarSrc}" alt="${teacher.name}" class="w-full h-full object-cover rounded-[20px]">
+        <div class="h-full flex flex-col justify-center items-center text-center p-4 sm:p-8 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div onclick="openLightbox('${coverAvatarSrc}', '${teacher.name}', 'รูปประจำตัวครูผู้รับการประเมิน')" class="w-44 h-44 sm:w-56 sm:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 rounded-3xl sm:rounded-[36px] p-2 sm:p-2.5 bg-gradient-to-tr from-teal-400 via-indigo-400 to-amber-400 shadow-2xl mb-6 ring-4 sm:ring-8 ring-white/10 cursor-pointer hover:scale-105 transition duration-300">
+            <img src="${coverAvatarSrc}" alt="${teacher.name}" class="w-full h-full object-cover rounded-[22px] sm:rounded-[28px] shadow-inner">
           </div>
-          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/40 text-xs sm:text-sm font-semibold mb-4 shadow-sm">
+          <div class="inline-flex items-center gap-2.5 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/40 text-sm sm:text-base lg:text-lg font-bold mb-4 shadow-sm">
             <i class="fa-solid fa-award text-amber-400"></i> การประเมินผลการพัฒนางานตามข้อตกลง (ว.PA)
           </div>
-          <h1 class="text-3xl sm:text-5xl font-bold font-heading text-white mb-3 tracking-tight">
+          <h1 class="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black font-heading text-white mb-3 tracking-tight drop-shadow-md">
             ${teacher.name}
           </h1>
-          <p class="text-lg sm:text-2xl text-teal-300 font-medium mb-6">
+          <p class="text-xl sm:text-3xl lg:text-4xl xl:text-5xl text-teal-300 font-semibold mb-8">
             ตำแหน่ง ${teacher.position} วิทยฐานะ${teacher.academicStanding}
           </p>
-          <div class="flex flex-wrap justify-center gap-3 text-xs sm:text-sm text-slate-300 mb-8">
-            <span class="px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10"><i class="fa-solid fa-school text-teal-400 mr-2"></i>${teacher.school}</span>
-            <span class="px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10"><i class="fa-solid fa-book-open text-amber-400 mr-2"></i>${teacher.learningArea}</span>
-            <span class="px-4 py-2 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold"><i class="fa-regular fa-calendar-check mr-2"></i>รอบปีการศึกษา ${currentAcademicYear}</span>
+          <div class="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm sm:text-base lg:text-xl text-slate-200 mb-8">
+            <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/10 shadow-sm"><i class="fa-solid fa-school text-teal-400 mr-2.5"></i>${teacher.school}</span>
+            <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/10 shadow-sm"><i class="fa-solid fa-book-open text-amber-400 mr-2.5"></i>${teacher.learningArea}</span>
+            <span class="px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-2xl sm:rounded-3xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold shadow-sm"><i class="fa-regular fa-calendar-check mr-2.5"></i>รอบปีการศึกษา ${currentAcademicYear}</span>
           </div>
-          <div class="text-xs text-slate-400 flex items-center gap-2">
+          <div class="text-xs sm:text-sm lg:text-base text-slate-400 flex items-center gap-2.5 font-light">
             <i class="fa-solid fa-shield-halved text-teal-400"></i> มาตรฐานตำแหน่งและวิทยฐานะ ว9/2564 สำนักงาน ก.ค.ศ.
           </div>
         </div>
@@ -425,54 +425,54 @@ const PresentationDeck = {
     } else if (activeSlide.type === 'profile') {
       // 2. แนะนำตัว & ภาระงานสอน
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 text-xs font-bold mb-2">ข้อมูลทั่วไป & ภาระงานสอน</div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-6">ประวัติผู้รับการประเมินและภาระงานตามมาตรฐานตำแหน่ง</h2>
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-teal-500/20 text-teal-300 text-xs sm:text-sm font-bold mb-2">ข้อมูลทั่วไป & ภาระงานสอน</div>
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 lg:mb-8">ประวัติผู้รับการประเมินและภาระงานตามมาตรฐานตำแหน่ง</h2>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col justify-between">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            <div class="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col justify-between shadow-xl">
               <div>
-                <h3 class="font-heading font-bold text-lg text-teal-300 mb-4 flex items-center gap-2">
-                  <i class="fa-solid fa-user-check"></i> หน้าที่ที่ได้รับมอบหมายพิเศษ
+                <h3 class="font-heading font-bold text-xl sm:text-2xl lg:text-3xl text-teal-300 mb-5 flex items-center gap-2.5">
+                  <i class="fa-solid fa-user-check text-teal-400"></i> หน้าที่ที่ได้รับมอบหมายพิเศษ
                 </h3>
-                <div class="space-y-2.5 text-xs sm:text-sm">
+                <div class="space-y-3 sm:space-y-4 text-sm sm:text-base lg:text-lg">
                   ${(yearData.roles || ['หัวหน้าฝ่ายบริหารงานวิชาการ', 'ผู้ดูแลระบบสารสนเทศ', 'ครูที่ปรึกษา']).map(r => `
-                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-                      <i class="fa-solid fa-circle-check text-emerald-400 flex-shrink-0"></i>
+                    <div class="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <i class="fa-solid fa-circle-check text-emerald-400 text-lg flex-shrink-0"></i>
                       <span>${r}</span>
                     </div>
                   `).join('')}
                 </div>
               </div>
-              <div class="mt-6 pt-4 border-t border-white/10 text-xs text-slate-300">
+              <div class="mt-6 pt-5 border-t border-white/10 text-xs sm:text-sm lg:text-base text-slate-300">
                 สังกัด: ${teacher.affiliation || 'สพม.ขอนแก่น'} · ${teacher.school}
               </div>
             </div>
 
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col justify-between">
+            <div class="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col justify-between shadow-xl">
               <div>
-                <div class="flex justify-between items-center mb-4">
-                  <h3 class="font-heading font-bold text-lg text-amber-300 flex items-center gap-2">
-                    <i class="fa-solid fa-chalkboard-user"></i> ภาระงานสอนรายสัปดาห์
+                <div class="flex justify-between items-center mb-5">
+                  <h3 class="font-heading font-bold text-xl sm:text-2xl lg:text-3xl text-amber-300 flex items-center gap-2.5">
+                    <i class="fa-solid fa-chalkboard-user text-amber-400"></i> ภาระงานสอนรายสัปดาห์
                   </h3>
-                  <span class="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-bold">
+                  <span class="px-4 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-400/30 text-sm sm:text-base font-extrabold">
                     ${yearData.totalHours || '22 คาบ/สัปดาห์'}
                   </span>
                 </div>
-                <div class="space-y-2 text-xs sm:text-sm max-h-[220px] overflow-y-auto pr-1">
+                <div class="space-y-3 sm:space-y-3.5 text-sm sm:text-base lg:text-lg max-h-[300px] overflow-y-auto pr-1">
                   ${(yearData.teachingLoad || [
                     { subject: "การงานอาชีพ", grade: "ม.6", hours: "4 คาบ/สัปดาห์" },
                     { subject: "ผลิตภัณฑ์งานช่าง", grade: "ม.2", hours: "4 คาบ/สัปดาห์" }
                   ]).map(load => `
-                    <div class="flex justify-between items-center p-2.5 rounded-xl bg-white/5 border border-white/5">
+                    <div class="flex justify-between items-center p-3 sm:p-3.5 rounded-xl bg-white/5 border border-white/5">
                       <span>• ${load.subject} (${load.grade})</span>
                       <span class="font-bold text-teal-300">${load.hours}</span>
                     </div>
                   `).join('')}
                 </div>
               </div>
-              <div class="mt-4 pt-3 border-t border-white/10 text-xs text-emerald-300 font-semibold flex items-center gap-1.5">
-                <i class="fa-solid fa-circle-check"></i> ภาระงานสอนครบถ้วนตามเกณฑ์ ก.ค.ศ. กำหนด
+              <div class="mt-6 pt-5 border-t border-white/10 text-xs sm:text-sm lg:text-base text-emerald-300 font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-base"></i> ภาระงานสอนครบถ้วนตามเกณฑ์ ก.ค.ศ. กำหนด
               </div>
             </div>
           </div>
@@ -508,23 +508,23 @@ const PresentationDeck = {
       }
 
       html = `
-        <div class="h-full flex flex-col justify-center p-4 sm:p-8 max-w-6xl mx-auto animate-fade-in text-white w-full">
+        <div class="h-full flex flex-col justify-center p-3 sm:p-6 lg:p-8 max-w-7xl xl:max-w-[1650px] w-full mx-auto animate-fade-in text-white">
           <!-- Header Bar -->
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
-            <div class="flex items-center gap-3">
-              <span class="px-3.5 py-1.5 rounded-xl bg-teal-500 text-slate-950 font-heading font-bold text-sm shadow-md">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 lg:mb-6 pb-3 lg:pb-4 border-b border-white/10">
+            <div class="flex items-center gap-3 sm:gap-4">
+              <span class="px-4 py-2 rounded-2xl bg-teal-500 text-slate-950 font-heading font-extrabold text-base sm:text-lg shadow-md">
                 ตัวชี้วัด ${ind.code}
               </span>
-              <h2 class="text-xl sm:text-2xl font-bold font-heading text-white">
+              <h2 class="text-xl sm:text-3xl lg:text-4xl font-bold font-heading text-white">
                 ${ind.title}
               </h2>
             </div>
-            <div class="flex items-center gap-2 text-xs">
-              <span class="px-3 py-1 rounded-lg bg-white/10 text-slate-300 border border-white/10">
+            <div class="flex items-center gap-2.5 text-xs sm:text-sm">
+              <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-slate-200 border border-white/10">
                 <i class="fa-solid fa-crosshairs text-amber-400 mr-1.5"></i>ระดับที่คาดหวัง: <strong>${expectedLevel}</strong>
               </span>
               ${driveFiles.length > 0 ? `
-                <span class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold flex items-center gap-1.5">
+                <span class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold flex items-center gap-1.5">
                   <i class="fa-brands fa-google-drive"></i> ไดรฟ์ซิงก์ ${driveFiles.length} ไฟล์
                 </span>
               ` : ''}
@@ -532,36 +532,36 @@ const PresentationDeck = {
           </div>
 
           <!-- Main Content Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             <!-- Left Column: Academic Text Content -->
-            <div class="lg:col-span-7 space-y-3.5">
-              <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2 flex items-center gap-1.5">
-                  <i class="fa-solid fa-file-pen text-teal-400"></i> การดำเนินการตามมาตรฐานวิทยฐานะ (${teacher.academicStanding})
+            <div class="lg:col-span-7 space-y-4 lg:space-y-5">
+              <div class="p-6 sm:p-7 lg:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+                <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-teal-300 mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-file-pen text-teal-400 text-base"></i> การดำเนินการตามมาตรฐานวิทยฐานะ (${teacher.academicStanding})
                 </h4>
-                <p class="text-xs sm:text-sm leading-relaxed text-slate-200">
+                <p class="text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed text-slate-100 font-light">
                   ${workDesc}
                 </p>
               </div>
 
-              <div class="p-5 rounded-3xl bg-emerald-950/50 border border-emerald-500/30 backdrop-blur-md">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-300 mb-2 flex items-center gap-1.5">
-                  <i class="fa-solid fa-award text-emerald-400"></i> ผลลัพธ์ที่เกิดขึ้นกับผู้เรียน
+              <div class="p-6 sm:p-7 lg:p-8 rounded-3xl bg-emerald-950/60 border border-emerald-500/30 backdrop-blur-md shadow-xl">
+                <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-300 mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-award text-emerald-400 text-base"></i> ผลลัพธ์ที่เกิดขึ้นกับผู้เรียน
                 </h4>
-                <p class="text-xs sm:text-sm leading-relaxed text-slate-200 whitespace-pre-line">
+                <p class="text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed text-slate-100 whitespace-pre-line font-light">
                   ${outcomeDesc}
                 </p>
               </div>
 
               ${driveFiles.length > 0 ? `
-                <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5 text-xs">
-                  <div class="font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 text-xs sm:text-sm">
+                  <div class="font-semibold text-slate-300 mb-2.5 flex items-center gap-2">
                     <i class="fa-solid fa-folder-open text-teal-400"></i> เอกสารหลักฐานในโฟลเดอร์ Google Drive (${driveFiles.length} รายการ):
                   </div>
                   <div class="flex flex-wrap gap-2">
                     ${driveFiles.slice(0, 4).map(f => `
-                      <a href="${f.viewUrl}" target="_blank" class="px-2.5 py-1 rounded-lg bg-teal-900/60 hover:bg-teal-800 text-teal-200 border border-teal-500/40 text-[11px] font-medium flex items-center gap-1 transition">
-                        <i class="fa-solid ${f.icon || 'fa-file'}"></i> <span class="max-w-[140px] truncate">${f.title}</span>
+                      <a href="${f.viewUrl}" target="_blank" class="px-3 py-1.5 rounded-xl bg-teal-900/60 hover:bg-teal-800 text-teal-200 border border-teal-500/40 text-xs sm:text-sm font-medium flex items-center gap-1.5 transition">
+                        <i class="fa-solid ${f.icon || 'fa-file'}"></i> <span class="max-w-[180px] truncate">${f.title}</span>
                       </a>
                     `).join('')}
                   </div>
@@ -570,7 +570,7 @@ const PresentationDeck = {
             </div>
 
             <!-- Right Column: Smooth Multi-Image Rotating Carousel (3-5+ Images) -->
-            <div class="lg:col-span-5 space-y-3">
+            <div class="lg:col-span-5 space-y-4">
               <!-- Carousel Main Frame -->
               <div class="relative rounded-3xl overflow-hidden bg-slate-950 border border-teal-500/30 shadow-2xl group aspect-[4/3] select-none"
                    onmouseenter="PresentationDeck.pauseCarousel()"
@@ -585,17 +585,17 @@ const PresentationDeck = {
                       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                       
                       <!-- Top Source Badge -->
-                      <div class="absolute top-3 left-3 px-3 py-1 rounded-full bg-teal-950/85 text-teal-300 border border-teal-400/40 text-[11px] font-semibold backdrop-blur-md flex items-center gap-1.5 shadow-sm">
+                      <div class="absolute top-3.5 left-3.5 px-3.5 py-1.5 rounded-full bg-teal-950/85 text-teal-300 border border-teal-400/40 text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 shadow-sm">
                         <i class="fa-brands fa-google-drive text-amber-400"></i> ${img.source || 'ภาพจาก Google Drive'}
                       </div>
 
                       <!-- Bottom Caption Overlay -->
-                      <div class="absolute bottom-4 left-3 right-3 text-xs text-white/95 z-10">
-                        <div class="font-bold font-heading line-clamp-1 flex items-center gap-1.5">
-                          <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                      <div class="absolute bottom-4 left-4 right-4 text-sm text-white/95 z-10">
+                        <div class="font-bold font-heading line-clamp-1 flex items-center gap-2 text-base sm:text-lg">
+                          <span class="w-2 h-2 rounded-full bg-teal-400"></span>
                           <span>${img.title || ind.title}</span>
                         </div>
-                        <div class="text-[11px] text-slate-300 font-light line-clamp-1 mt-0.5">
+                        <div class="text-xs sm:text-sm text-slate-300 font-light line-clamp-2 mt-1">
                           ${img.caption || 'ภาพหลักฐานร่องรอยการจัดการเรียนรู้จริง'}
                         </div>
                       </div>
@@ -604,7 +604,7 @@ const PresentationDeck = {
                 </div>
 
                 <!-- Top Right Counter Badge (e.g. 1 / 4) -->
-                <div class="absolute top-3 right-3 px-2.5 py-1 rounded-xl bg-slate-900/85 text-white/90 border border-white/15 text-[11px] font-semibold backdrop-blur-md z-20 flex items-center gap-1.5 shadow-md">
+                <div class="absolute top-3.5 right-3.5 px-3 py-1.5 rounded-xl bg-slate-900/85 text-white/90 border border-white/15 text-xs sm:text-sm font-semibold backdrop-blur-md z-20 flex items-center gap-1.5 shadow-md">
                   <i class="fa-solid fa-images text-teal-400"></i>
                   <span id="pres-carousel-counter">1 / ${evidenceImages.length}</span>
                 </div>
@@ -612,11 +612,11 @@ const PresentationDeck = {
                 <!-- Previous / Next Overlay Navigation Buttons -->
                 ${evidenceImages.length > 1 ? `
                   <button onclick="event.stopPropagation(); PresentationDeck.prevCarouselImage()" 
-                          class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-teal-500 hover:text-slate-950 text-white border border-white/20 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition duration-300 z-30 shadow-lg cursor-pointer">
+                          class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-teal-500 hover:text-slate-950 text-white border border-white/20 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition duration-300 z-30 shadow-lg cursor-pointer">
                     <i class="fa-solid fa-chevron-left"></i>
                   </button>
                   <button onclick="event.stopPropagation(); PresentationDeck.nextCarouselImage()" 
-                          class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-teal-500 hover:text-slate-950 text-white border border-white/20 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition duration-300 z-30 shadow-lg cursor-pointer">
+                          class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-teal-500 hover:text-slate-950 text-white border border-white/20 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition duration-300 z-30 shadow-lg cursor-pointer">
                     <i class="fa-solid fa-chevron-right"></i>
                   </button>
                 ` : ''}
@@ -624,7 +624,7 @@ const PresentationDeck = {
                 <!-- Click to Zoom Lightbox Button (Center on Hover) -->
                 <div onclick="PresentationDeck.openActiveCarouselLightbox()" 
                      class="absolute inset-0 z-20 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 bg-teal-950/20 backdrop-blur-[1px] transition duration-300">
-                  <span class="px-4 py-2 rounded-2xl bg-slate-900/90 text-white border border-teal-400 text-xs font-semibold flex items-center gap-2 shadow-2xl hover:scale-105 transition">
+                  <span class="px-5 py-2.5 rounded-2xl bg-slate-900/90 text-white border border-teal-400 text-sm font-bold flex items-center gap-2 shadow-2xl hover:scale-105 transition">
                     <i class="fa-solid fa-magnifying-glass-plus text-teal-400"></i> คลิกดูภาพขยาย
                   </span>
                 </div>
@@ -634,7 +634,7 @@ const PresentationDeck = {
                   <div class="absolute bottom-1.5 left-0 right-0 z-30 flex justify-center items-center gap-1.5 py-1">
                     ${evidenceImages.map((_, idx) => `
                       <button onclick="event.stopPropagation(); PresentationDeck.setCarouselIndex(${idx})" 
-                              class="pres-carousel-dot h-1.5 rounded-full transition-all duration-300 cursor-pointer ${idx === 0 ? 'w-6 bg-teal-400' : 'w-2 bg-white/40 hover:bg-white/80'}"></button>
+                              class="pres-carousel-dot h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === 0 ? 'w-8 bg-teal-400' : 'w-2.5 bg-white/40 hover:bg-white/80'}"></button>
                     `).join('')}
                   </div>
                 ` : ''}
@@ -642,10 +642,10 @@ const PresentationDeck = {
 
               <!-- Thumbnails Navigation Strip Below (Up to 5 images) -->
               ${evidenceImages.length > 1 ? `
-                <div class="grid grid-cols-4 sm:grid-cols-5 gap-2 pt-0.5">
+                <div class="grid grid-cols-4 sm:grid-cols-5 gap-2.5 pt-1">
                   ${evidenceImages.slice(0, 5).map((img, idx) => `
                     <div onclick="PresentationDeck.setCarouselIndex(${idx})" 
-                         class="pres-carousel-thumb aspect-[16/10] rounded-xl overflow-hidden bg-slate-900 border transition cursor-pointer relative ${idx === 0 ? 'border-teal-400 ring-2 ring-teal-400/50 opacity-100' : 'border-white/10 opacity-60 hover:opacity-100'}">
+                         class="pres-carousel-thumb aspect-[16/10] rounded-2xl overflow-hidden bg-slate-900 border transition cursor-pointer relative ${idx === 0 ? 'border-teal-400 ring-2 ring-teal-400/50 opacity-100' : 'border-white/10 opacity-60 hover:opacity-100'}">
                       <img src="${img.thumbUrl || img.fullUrl}" class="w-full h-full object-cover">
                       <div class="absolute inset-0 bg-slate-950/10 hover:bg-transparent"></div>
                     </div>
@@ -662,40 +662,40 @@ const PresentationDeck = {
     else if (activeSlide.type === 'res-problem') {
       // 18 (2.1). สภาพปัญหา ที่มา และความสำคัญ
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 1: สภาพปัญหา 1/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             1. สภาพปัญหา ที่มา และความสำคัญของการวิจัยในชั้นเรียน
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-4">
-              <h3 class="font-heading font-bold text-base text-teal-300 flex items-center gap-2">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            <div class="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-4 shadow-xl">
+              <h3 class="font-heading font-bold text-lg sm:text-xl lg:text-2xl text-teal-300 flex items-center gap-2.5">
                 <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> สภาพปัญหาและช่องว่างการเรียนรู้ (Problem Gap)
               </h3>
-              <p class="text-xs sm:text-sm leading-relaxed text-slate-200">
+              <p class="text-sm sm:text-base lg:text-lg leading-relaxed text-slate-200 font-light">
                 จากการจัดการเรียนรู้ใน${challenge.subject || 'รายวิชาที่รับผิดชอบ'} พบว่าผู้เรียนยังต้องพัฒนาทักษะการเรียนรู้เชิงรุก การคิดวิเคราะห์ขั้นตอนการแก้ปัญหา และการทำงานร่วมกันเป็นทีมอย่างเป็นระบบ ส่งผลให้ผลสัมฤทธิ์และชิ้นงานยังไม่บรรลุเกณฑ์มาตรฐานในระดับดีเยี่ยม
               </p>
-              <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-xs text-amber-200">
+              <div class="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-xs sm:text-sm lg:text-base text-amber-200">
                 • <strong>เป้าหมายการแก้ปัญหา:</strong> ${challenge.coreObjective || 'พัฒนานวัตกรรมการสอนเพื่อยกระดับผลสัมฤทธิ์และสมรรถนะผู้เรียน'}
               </div>
             </div>
 
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-4">
-              <h3 class="font-heading font-bold text-base text-teal-300 flex items-center gap-2">
+            <div class="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-4 shadow-xl">
+              <h3 class="font-heading font-bold text-lg sm:text-xl lg:text-2xl text-teal-300 flex items-center gap-2.5">
                 <i class="fa-solid fa-users text-teal-400"></i> บริบทกลุ่มเป้าหมายการวิจัย (Target Group)
               </h3>
-              <div class="space-y-3 text-xs sm:text-sm">
-                <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-                  <i class="fa-solid fa-graduation-cap text-teal-400 text-lg"></i>
+              <div class="space-y-4 text-sm sm:text-base lg:text-lg">
+                <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <i class="fa-solid fa-graduation-cap text-teal-400 text-xl"></i>
                   <div>
                     <div class="font-bold text-white">ประชากรและกลุ่มเป้าหมาย:</div>
                     <div class="text-slate-300">${challenge.targetGroup || teacher.school}</div>
                   </div>
                 </div>
-                <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-                  <i class="fa-regular fa-calendar-check text-amber-400 text-lg"></i>
+                <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <i class="fa-regular fa-calendar-check text-amber-400 text-xl"></i>
                   <div>
                     <div class="font-bold text-white">ระยะเวลาดำเนินการวิจัย:</div>
                     <div class="text-slate-300">ภาคเรียนที่ 1 และ 2 ปีการศึกษา ${currentAcademicYear}</div>
@@ -709,40 +709,40 @@ const PresentationDeck = {
     } else if (activeSlide.type === 'res-objective') {
       // 19 (2.2). วัตถุประสงค์ สมมติฐาน และขอบเขต
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 1: วัตถุประสงค์ 2/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             2. วัตถุประสงค์ สมมติฐาน และขอบเขตการวิจัย
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="p-6 rounded-3xl bg-teal-950/60 border border-teal-500/30 backdrop-blur-md">
-              <div class="w-10 h-10 rounded-2xl bg-teal-500 text-slate-950 font-bold flex items-center justify-center mb-3">1</div>
-              <h3 class="font-heading font-bold text-base text-teal-200 mb-2">วัตถุประสงค์เชิงปริมาณ</h3>
-              <p class="text-xs text-slate-300 leading-relaxed">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div class="p-6 sm:p-8 rounded-3xl bg-teal-950/60 border border-teal-500/30 backdrop-blur-md shadow-xl">
+              <div class="w-12 h-12 rounded-2xl bg-teal-500 text-slate-950 font-bold flex items-center justify-center text-lg mb-4 shadow-md">1</div>
+              <h3 class="font-heading font-bold text-lg sm:text-xl text-teal-200 mb-3">วัตถุประสงค์เชิงปริมาณ</h3>
+              <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light">
                 ${challenge.metrics?.quantitative?.details || 'เพื่อให้นักเรียนไม่น้อยกว่าร้อยละ 80 มีผลสัมฤทธิ์และทักษะผ่านเกณฑ์ที่กำหนด'}
               </p>
             </div>
 
-            <div class="p-6 rounded-3xl bg-indigo-950/60 border border-indigo-500/30 backdrop-blur-md">
-              <div class="w-10 h-10 rounded-2xl bg-indigo-500 text-white font-bold flex items-center justify-center mb-3">2</div>
-              <h3 class="font-heading font-bold text-base text-indigo-200 mb-2">วัตถุประสงค์เชิงคุณภาพ</h3>
-              <p class="text-xs text-slate-300 leading-relaxed">
+            <div class="p-6 sm:p-8 rounded-3xl bg-indigo-950/60 border border-indigo-500/30 backdrop-blur-md shadow-xl">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500 text-white font-bold flex items-center justify-center text-lg mb-4 shadow-md">2</div>
+              <h3 class="font-heading font-bold text-lg sm:text-xl text-indigo-200 mb-3">วัตถุประสงค์เชิงคุณภาพ</h3>
+              <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light">
                 ${challenge.metrics?.qualitative?.details || 'เพื่อให้ผู้เรียนเกิดทักษะการทำงานร่วมกันเป็นทีม การคิดวิเคราะห์แก้ปัญหา และมีคุณลักษณะอันพึงประสงค์ระดับดีเยี่ยม'}
               </p>
             </div>
 
-            <div class="p-6 rounded-3xl bg-amber-950/60 border border-amber-500/30 backdrop-blur-md">
-              <div class="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 font-bold flex items-center justify-center mb-3">3</div>
-              <h3 class="font-heading font-bold text-base text-amber-200 mb-2">สมมติฐานการวิจัย</h3>
-              <p class="text-xs text-slate-300 leading-relaxed">
+            <div class="p-6 sm:p-8 rounded-3xl bg-amber-950/60 border border-amber-500/30 backdrop-blur-md shadow-xl">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-lg mb-4 shadow-md">3</div>
+              <h3 class="font-heading font-bold text-lg sm:text-xl text-amber-200 mb-3">สมมติฐานการวิจัย</h3>
+              <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-light">
                 ผู้เรียนที่ได้รับการจัดการเรียนรู้ตามรูปแบบ ${challenge.topic || 'นวัตกรรม'} จะมีคะแนนผลสัมฤทธิ์และทักษะหลังเรียนสูงกว่าก่อนเรียนอย่างมีนัยสำคัญทางสถิติที่ระดับ .05
               </p>
             </div>
           </div>
 
-          <div class="mt-5 p-4 rounded-2xl bg-white/10 text-xs text-slate-300 flex flex-wrap justify-between gap-3">
+          <div class="mt-6 p-4 sm:p-5 rounded-2xl bg-white/10 text-xs sm:text-sm lg:text-base text-slate-200 flex flex-wrap justify-between gap-4">
             <span><strong>ตัวแปรต้น:</strong> ${challenge.topic || 'รูปแบบการจัดการเรียนรู้นวัตกรรม'}</span>
             <span><strong>ตัวแปรตาม:</strong> ผลสัมฤทธิ์ทางการเรียน, ทักษะและสมรรถนะ, ชิ้นงานโครงงาน</span>
           </div>
@@ -751,47 +751,47 @@ const PresentationDeck = {
     } else if (activeSlide.type === 'res-literature') {
       // 20 (2.3). เอกสารและงานวิจัยที่เกี่ยวข้อง (Theoretical Foundation)
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 2: ทฤษฎีและเอกสารที่เกี่ยวข้อง 3/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             3. เอกสาร ทฤษฎี และงานวิจัยที่เกี่ยวข้อง
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
-            <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-base mb-3 font-bold">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-6">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+              <div class="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-xl mb-4 font-bold">
                 <i class="fa-solid fa-shapes"></i>
               </div>
-              <h3 class="font-heading font-bold text-sm text-teal-300 mb-2">1. Constructivism & Active Learning</h3>
-              <p class="text-xs text-slate-300 leading-relaxed font-light">
+              <h3 class="font-heading font-bold text-base sm:text-lg lg:text-xl text-teal-300 mb-3">1. Constructivism & Active Learning</h3>
+              <p class="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-light">
                 ทฤษฎีการสร้างความรู้ด้วยตนเองของ Piaget & Vygotsky เน้นให้ผู้เรียนลงมือปฏิบัติ (Hands-on) ผ่านสถานการณ์จริง เพื่อสร้างองค์ความรู้ใหม่ด้วยตนเอง
               </p>
             </div>
 
-            <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-base mb-3 font-bold">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl mb-4 font-bold">
                 <i class="fa-solid fa-compass"></i>
               </div>
-              <h3 class="font-heading font-bold text-sm text-indigo-300 mb-2">2. Competency-Based Learning</h3>
-              <p class="text-xs text-slate-300 leading-relaxed font-light">
+              <h3 class="font-heading font-bold text-base sm:text-lg lg:text-xl text-indigo-300 mb-3">2. Competency-Based Learning</h3>
+              <p class="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-light">
                 แนวคิดการจัดการเรียนรู้ฐานสมรรถนะ มุ่งพัฒนาทักษะกระบวนการ การคิดวิเคราะห์ การแก้ปัญหา และการนำไปประยุกต์ใช้ในชีวิตจริง
               </p>
             </div>
 
-            <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-base mb-3 font-bold">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl mb-4 font-bold">
                 <i class="fa-solid fa-layer-group"></i>
               </div>
-              <h3 class="font-heading font-bold text-sm text-amber-300 mb-2">3. Scaffolding & Innovation Process</h3>
-              <p class="text-xs text-slate-300 leading-relaxed font-light">
+              <h3 class="font-heading font-bold text-base sm:text-lg lg:text-xl text-amber-300 mb-3">3. Scaffolding & Innovation Process</h3>
+              <p class="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-light">
                 การใช้สื่อและนวัตกรรมเป็นเครื่องมือเสริมต่อการเรียนรู้ (Scaffolding) เพื่อจัดโครงสร้างกระบวนการคิดในการปฏิบัติงานอย่างเป็นระบบ
               </p>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-teal-950/60 border border-teal-500/40 text-xs text-teal-200">
+          <div class="p-4 sm:p-5 rounded-2xl bg-teal-950/60 border border-teal-500/40 text-xs sm:text-sm lg:text-base text-teal-200">
             <i class="fa-solid fa-book-bookmark text-amber-400 mr-2"></i> <strong>สังเคราะห์สู่นวัตกรรม:</strong> ผสานทฤษฎีการสร้างความรู้และกระบวนการเรียนรู้เชิงรุก สู่ <strong>${challenge.topic || 'รูปแบบนวัตกรรมการจัดการเรียนรู้'}</strong>
           </div>
         </div>
@@ -807,29 +807,29 @@ const PresentationDeck = {
       ];
 
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: กรอบแนวคิดนวัตกรรม 4/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-2 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-2 text-white">
             4. กรอบแนวคิดและขั้นตอนนวัตกรรมการเรียนรู้ (${modelName})
           </h2>
-          <p class="text-xs sm:text-sm text-teal-300 mb-5">${challenge.topic || 'รูปแบบการจัดการเรียนรู้เพื่อพัฒนาผลสัมฤทธิ์'}</p>
+          <p class="text-sm sm:text-lg lg:text-xl text-teal-300 mb-6 font-medium">${challenge.topic || 'รูปแบบการจัดการเรียนรู้เพื่อพัฒนาผลสัมฤทธิ์'}</p>
 
-          <div class="grid grid-cols-2 sm:grid-cols-${Math.min(stepsList.length, 4)} gap-4 mb-6">
+          <div class="grid grid-cols-2 sm:grid-cols-${Math.min(stepsList.length, 4)} gap-4 sm:gap-6 mb-6">
             ${stepsList.map(s => `
-              <div class="p-5 rounded-3xl bg-white/10 border border-teal-500/30 backdrop-blur-md hover:border-teal-400 transition flex flex-col justify-between">
+              <div class="p-6 sm:p-7 rounded-3xl bg-white/10 border border-teal-500/30 backdrop-blur-md hover:border-teal-400 transition flex flex-col justify-between shadow-xl">
                 <div>
-                  <div class="w-10 h-10 rounded-2xl bg-teal-400 text-slate-950 font-bold font-heading flex items-center justify-center text-base mb-3 shadow-md">${s.letter}</div>
-                  <div class="font-bold font-heading text-xs text-teal-200">${s.title}</div>
-                  <div class="text-[11px] text-amber-200 mt-0.5">${s.nameThai}</div>
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-teal-400 text-slate-950 font-bold font-heading flex items-center justify-center text-xl sm:text-2xl mb-4 shadow-md">${s.letter}</div>
+                  <div class="font-bold font-heading text-sm sm:text-base lg:text-lg text-teal-200">${s.title}</div>
+                  <div class="text-xs sm:text-sm text-amber-200 mt-1 font-medium">${s.nameThai}</div>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-2 line-clamp-3 leading-relaxed font-light">${s.description || ''}</p>
+                <p class="text-xs sm:text-sm lg:text-base text-slate-200 mt-3 line-clamp-4 leading-relaxed font-light">${s.description || ''}</p>
               </div>
             `).join('')}
           </div>
 
-          <div class="p-4 rounded-2xl bg-teal-950/60 border border-teal-500/40 text-xs text-teal-200 flex items-center justify-between">
+          <div class="p-4 sm:p-5 rounded-2xl bg-teal-950/60 border border-teal-500/40 text-xs sm:text-sm lg:text-base text-teal-200 flex items-center justify-between">
             <span><i class="fa-solid fa-lightbulb text-amber-400 mr-2"></i>จุดเน้นนวัตกรรม: <strong>${challenge.topic || 'รูปแบบการจัดการเรียนรู้'}</strong> มุ่งสร้างทักษะและผลสัมฤทธิ์ตามมาตรฐาน</span>
             <span class="font-semibold text-white">Active Learning 100%</span>
           </div>
@@ -839,37 +839,37 @@ const PresentationDeck = {
       // 22 (2.5). ระเบียบวิธีวิจัยและวงจรการปฏิบัติการ PAOR
       const modelName = challenge.steps ? challenge.steps.map(s => s.letter).join('') + ' Model' : (challenge.topic || 'นวัตกรรมการสอน');
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: ระเบียบวิธีวิจัย 5/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             5. ระเบียบวิธีวิจัยและวงจรการวิจัยเชิงปฏิบัติการ (PA Action Research)
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-3">
-              <h3 class="font-heading font-bold text-base text-teal-300 flex items-center gap-2">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-5">
+            <div class="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-4 shadow-xl">
+              <h3 class="font-heading font-bold text-lg sm:text-xl lg:text-2xl text-teal-300 flex items-center gap-2.5">
                 <i class="fa-solid fa-flask-vial text-teal-400"></i> รูปแบบการวิจัย (Research Design)
               </h3>
-              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              <p class="text-sm sm:text-base lg:text-lg text-slate-200 leading-relaxed font-light">
                 การวิจัยเชิงปฏิบัติการในชั้นเรียน (Classroom Action Research: CAR) แบบกลุ่มทดลองกลุ่มเดียว มีการทดสอบก่อนเรียนและหลังเรียน (One-Group Pretest-Posttest Design)
               </p>
-              <div class="p-3 rounded-2xl bg-white/5 text-xs text-slate-300">
+              <div class="p-4 rounded-2xl bg-white/5 text-xs sm:text-sm lg:text-base text-slate-200">
                 • <strong>สัญลักษณ์แบบแผน:</strong> O1 &nbsp;→&nbsp; X &nbsp;→&nbsp; O2<br>
                 (O1 = Pre-test, X = ${modelName}, O2 = Post-test)
               </div>
             </div>
 
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-3">
-              <h3 class="font-heading font-bold text-base text-indigo-300 flex items-center gap-2">
+            <div class="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md space-y-4 shadow-xl">
+              <h3 class="font-heading font-bold text-lg sm:text-xl lg:text-2xl text-indigo-300 flex items-center gap-2.5">
                 <i class="fa-solid fa-arrows-spin text-indigo-400"></i> วงจรการปฏิบัติการ 4 ขั้น (PAOR Cycle)
               </h3>
-              <div class="grid grid-cols-2 gap-2.5 text-xs">
-                <div class="p-3 rounded-2xl bg-indigo-950/40 border border-indigo-500/30"><strong>1. Plan (วางแผน):</strong> ออกแบบแผนการจัดการเรียนรู้และสื่อ</div>
-                <div class="p-3 rounded-2xl bg-indigo-950/40 border border-indigo-500/30"><strong>2. Act (ปฏิบัติ):</strong> จัดการเรียนรู้ตามแผนในชั้นเรียนจริง</div>
-                <div class="p-3 rounded-2xl bg-indigo-950/40 border border-indigo-500/30"><strong>3. Observe (สังเกต):</strong> สังเกตพฤติกรรมและเก็บรวบรวมข้อมูล</div>
-                <div class="p-3 rounded-2xl bg-indigo-950/40 border border-indigo-500/30"><strong>4. Reflect (สะท้อนคิด):</strong> PLC ร่วมสะท้อนคิดปรับปรุง</div>
+              <div class="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm lg:text-base">
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/30"><strong>1. Plan (วางแผน):</strong> ออกแบบแผนการจัดการเรียนรู้และสื่อ</div>
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/30"><strong>2. Act (ปฏิบัติ):</strong> จัดการเรียนรู้ตามแผนในชั้นเรียนจริง</div>
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/30"><strong>3. Observe (สังเกต):</strong> สังเกตพฤติกรรมและเก็บรวบรวมข้อมูล</div>
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/30"><strong>4. Reflect (สะท้อนคิด):</strong> PLC ร่วมสะท้อนคิดปรับปรุง</div>
               </div>
             </div>
           </div>
@@ -879,44 +879,44 @@ const PresentationDeck = {
       // 23 (2.6). เครื่องมือวิจัยและการหาคุณภาพเครื่องมือ IOC
       const modelName = challenge.steps ? challenge.steps.map(s => s.letter).join('') + ' Model' : (challenge.topic || 'นวัตกรรมการสอน');
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 3: เครื่องมือวิจัย 6/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             6. เครื่องมือวิจัยและการตรวจสอบคุณภาพเครื่องมือ (IOC)
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
-            <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="text-xs font-bold text-teal-300 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-file-lines text-teal-400"></i> แผนการจัดการเรียนรู้
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-5">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+              <div class="text-sm sm:text-base font-bold text-teal-300 mb-3 flex items-center gap-2.5">
+                <i class="fa-solid fa-file-lines text-teal-400 text-lg"></i> แผนการจัดการเรียนรู้
               </div>
-              <p class="text-xs text-slate-200 leading-relaxed font-light">
+              <p class="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-light">
                 แผนการจัดการเรียนรู้ตามรูปแบบ ${modelName} ผ่านการประเมินความเหมาะสมจากผู้เชี่ยวชาญ ค่าเฉลี่ย 4.82 (ระดับมากที่สุด)
               </p>
             </div>
 
-            <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="text-xs font-bold text-indigo-300 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-indigo-400"></i> แบบทดสอบวัดผลสัมฤทธิ์
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+              <div class="text-sm sm:text-base font-bold text-indigo-300 mb-3 flex items-center gap-2.5">
+                <i class="fa-solid fa-list-check text-indigo-400 text-lg"></i> แบบทดสอบวัดผลสัมฤทธิ์
               </div>
-              <p class="text-xs text-slate-200 leading-relaxed font-light">
+              <p class="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-light">
                 แบบทดสอบปรนัย 4 ตัวเลือก ค่าความยากง่าย (p) ระหว่าง 0.45 - 0.72 อำนาจจำแนก (r) ระหว่าง 0.35 - 0.65 ความเชื่อมั่น (KR-20) เท่ากับ 0.89
               </p>
             </div>
 
-            <div class="p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="text-xs font-bold text-amber-300 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-star-half-stroke text-amber-400"></i> แบบประเมินทักษะ Rubrics
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl">
+              <div class="text-sm sm:text-base font-bold text-amber-300 mb-3 flex items-center gap-2.5">
+                <i class="fa-solid fa-star-half-stroke text-amber-400 text-lg"></i> แบบประเมินทักษะ Rubrics
               </div>
-              <p class="text-xs text-slate-200 leading-relaxed font-light">
+              <p class="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-light">
                 แบบประเมินทักษะและแบบประเมินชิ้นงานโครงงาน มีค่าดัชนีความสอดคล้อง IOC ระหว่าง 0.80 - 1.00 ทุกข้อ
               </p>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-xs text-emerald-200 flex items-center justify-between">
+          <div class="p-4 sm:p-5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-xs sm:text-sm lg:text-base text-emerald-200 flex items-center justify-between">
             <span><i class="fa-solid fa-user-check text-emerald-400 mr-2"></i> ผู้เชี่ยวชาญตรวจสอบคุณภาพ 3 ท่าน: ศึกษานิเทศก์ชำนาญการพิเศษ, ครูเชี่ยวชาญ, และอาจารย์มหาวิทยาลัย</span>
             <span class="font-bold text-white">IOC สมบูรณ์</span>
           </div>
@@ -935,57 +935,57 @@ const PresentationDeck = {
       const qualActual = challenge.metrics?.qualitative?.actual || 'ระดับดีเยี่ยม';
 
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 4: ผลการวิเคราะห์ข้อมูล 7/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             7. ผลการวิเคราะห์ข้อมูลและผลสัมฤทธิ์ทางการเรียน
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-5 items-center">
-            <div class="md:col-span-7 bg-white/10 p-5 rounded-3xl border border-white/10 text-xs">
-              <div class="font-bold text-teal-300 mb-3 flex items-center justify-between">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 mb-5 items-center">
+            <div class="md:col-span-7 bg-white/10 p-6 sm:p-8 rounded-3xl border border-white/10 text-xs sm:text-sm lg:text-base shadow-xl">
+              <div class="font-bold text-teal-300 mb-4 flex items-center justify-between text-base sm:text-lg">
                 <span>ตารางเปรียบเทียบพัฒนาการผู้เรียน (ก่อนเรียน vs หลังเรียน)</span>
-                <span class="text-emerald-400 font-semibold">รอบปี ${currentAcademicYear}</span>
+                <span class="text-emerald-400 font-semibold text-xs sm:text-sm">รอบปี ${currentAcademicYear}</span>
               </div>
               <table class="w-full text-left">
                 <thead>
-                  <tr class="border-b border-white/20 text-slate-300 pb-2">
-                    <th class="py-1.5">มิติทักษะ / ตัวชี้วัด</th>
-                    <th class="py-1.5 text-center">ก่อนเรียน (Pre)</th>
-                    <th class="py-1.5 text-center">หลังเรียน (Post)</th>
-                    <th class="py-1.5 text-right text-emerald-400">ความก้าวหน้า</th>
+                  <tr class="border-b border-white/20 text-slate-300 pb-3 text-xs sm:text-sm">
+                    <th class="py-2">มิติทักษะ / ตัวชี้วัด</th>
+                    <th class="py-2 text-center">ก่อนเรียน (Pre)</th>
+                    <th class="py-2 text-center">หลังเรียน (Post)</th>
+                    <th class="py-2 text-right text-emerald-400">ความก้าวหน้า</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10">
+                <tbody class="divide-y divide-white/10 text-xs sm:text-sm lg:text-base">
                   ${sdl.labels.map((lbl, idx) => `
                     <tr>
-                      <td class="py-2 text-slate-200">${lbl}</td>
-                      <td class="py-2 text-center text-slate-400">${sdl.preTest[idx]}%</td>
-                      <td class="py-2 text-center font-bold text-teal-300">${sdl.postTest[idx]}%</td>
-                      <td class="py-2 text-right font-bold text-emerald-400">+${sdl.postTest[idx] - sdl.preTest[idx]}%</td>
+                      <td class="py-2.5 sm:py-3 text-slate-200">${lbl}</td>
+                      <td class="py-2.5 sm:py-3 text-center text-slate-400">${sdl.preTest[idx]}%</td>
+                      <td class="py-2.5 sm:py-3 text-center font-bold text-teal-300">${sdl.postTest[idx]}%</td>
+                      <td class="py-2.5 sm:py-3 text-right font-bold text-emerald-400">+${sdl.postTest[idx] - sdl.preTest[idx]}%</td>
                     </tr>
                   `).join('')}
                 </tbody>
               </table>
             </div>
 
-            <div class="md:col-span-5 space-y-4">
-              <div class="p-5 rounded-3xl bg-emerald-950/70 border border-emerald-500/40">
-                <div class="text-xs uppercase font-bold text-emerald-300">ผลการบรรลุเป้าหมายเชิงปริมาณ</div>
-                <div class="text-3xl font-bold font-heading text-white mt-1">${quantActual}</div>
-                <div class="text-xs text-slate-300 mt-1">เป้าหมายที่ตั้งไว้: ${quantTarget}</div>
+            <div class="md:col-span-5 space-y-4 sm:space-y-5">
+              <div class="p-6 sm:p-7 rounded-3xl bg-emerald-950/70 border border-emerald-500/40 shadow-xl">
+                <div class="text-xs sm:text-sm uppercase font-bold text-emerald-300">ผลการบรรลุเป้าหมายเชิงปริมาณ</div>
+                <div class="text-4xl sm:text-5xl lg:text-6xl font-black font-heading text-white mt-1">${quantActual}</div>
+                <div class="text-xs sm:text-sm text-slate-300 mt-1.5">เป้าหมายที่ตั้งไว้: ${quantTarget}</div>
               </div>
-              <div class="p-5 rounded-3xl bg-teal-950/70 border border-teal-500/40">
-                <div class="text-xs uppercase font-bold text-teal-300">ผลการประเมินเชิงคุณภาพ</div>
-                <div class="text-2xl font-bold font-heading text-white mt-1">${qualActual}</div>
-                <div class="text-xs text-slate-300 mt-1">${challenge.metrics?.qualitative?.details || 'ผู้เรียนมีทักษะและสมรรถนะระดับดีเยี่ยม'}</div>
+              <div class="p-6 sm:p-7 rounded-3xl bg-teal-950/70 border border-teal-500/40 shadow-xl">
+                <div class="text-xs sm:text-sm uppercase font-bold text-teal-300">ผลการประเมินเชิงคุณภาพ</div>
+                <div class="text-2xl sm:text-3xl lg:text-4xl font-bold font-heading text-white mt-1">${qualActual}</div>
+                <div class="text-xs sm:text-sm text-slate-300 mt-1.5">${challenge.metrics?.qualitative?.details || 'ผู้เรียนมีทักษะและสมรรถนะระดับดีเยี่ยม'}</div>
               </div>
             </div>
           </div>
 
-          <div class="p-3.5 rounded-2xl bg-white/10 text-xs text-slate-300 text-center">
+          <div class="p-4 rounded-2xl bg-white/10 text-xs sm:text-sm lg:text-base text-slate-300 text-center">
             <i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i> ผลการทดสอบทางสถิติพบว่า คะแนนหลังเรียนสูงกว่าก่อนเรียนอย่างมีนัยสำคัญทางสถิติที่ระดับ .05
           </div>
         </div>
@@ -993,47 +993,47 @@ const PresentationDeck = {
     } else if (activeSlide.type === 'res-discussion') {
       // 25 (2.8). การอภิปรายผล ประโยชน์ และการขยายผล PLC
       html = `
-        <div class="h-full flex flex-col justify-center p-6 sm:p-10 max-w-5xl mx-auto animate-fade-in text-white">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2">
+        <div class="h-full flex flex-col justify-center p-4 sm:p-8 lg:p-10 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold mb-2">
             ส่วนที่ 2 · ประเด็นท้าทาย (บทที่ 5: การอภิปรายผลและการขยายผล 8/8) · ปีการศึกษา ${currentAcademicYear}
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold font-heading mb-4 text-white">
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-bold font-heading mb-6 text-white">
             8. การอภิปรายผล ประโยชน์ที่ได้รับ และการขยายผลในชุมชน PLC
           </h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="w-10 h-10 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-lg mb-3">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-6">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-xl mb-4">
                 <i class="fa-solid fa-brain"></i>
               </div>
-              <h3 class="font-heading font-bold text-base text-teal-300 mb-2">การอภิปรายผลการวิจัย</h3>
-              <p class="text-xs text-slate-200 leading-relaxed">
+              <h3 class="font-heading font-bold text-lg sm:text-xl text-teal-300 mb-2">การอภิปรายผลการวิจัย</h3>
+              <p class="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-light">
                 การที่ผู้เรียนมีผลสัมฤทธิ์และทักษะสูงขึ้น เกิดจากกระบวนการจัดการเรียนรู้ตาม ${challenge.topic || 'นวัตกรรม'} ซึ่งเน้นให้ผู้เรียนลงมือปฏิบัติจริงและจัดระบบความคิดได้อย่างมีแบบแผน
               </p>
             </div>
 
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-lg mb-3">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl mb-4">
                 <i class="fa-solid fa-trophy"></i>
               </div>
-              <h3 class="font-heading font-bold text-base text-indigo-300 mb-2">ประโยชน์และผลลัพธ์</h3>
-              <p class="text-xs text-slate-200 leading-relaxed">
+              <h3 class="font-heading font-bold text-lg sm:text-xl text-indigo-300 mb-2">ประโยชน์และผลลัพธ์</h3>
+              <p class="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-light">
                 ผู้เรียนได้พัฒนาสมรรถนะสำคัญ ทักษะชีวิต และการคิดแก้ปัญหา ชิ้นงานและผลงานของผู้เรียนสามารถนำไปต่อยอดใช้ประโยชน์ได้จริง
               </p>
             </div>
 
-            <div class="p-6 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md">
-              <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-lg mb-3">
+            <div class="p-6 sm:p-8 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-md shadow-xl space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl mb-4">
                 <i class="fa-solid fa-share-nodes"></i>
               </div>
-              <h3 class="font-heading font-bold text-base text-amber-300 mb-2">การขยายผลผ่าน PLC</h3>
-              <p class="text-xs text-slate-200 leading-relaxed">
+              <h3 class="font-heading font-bold text-lg sm:text-xl text-amber-300 mb-2">การขยายผลผ่าน PLC</h3>
+              <p class="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-light">
                 ได้นำผลการวิจัยและคู่มือการสอนไปแลกเปลี่ยนเรียนรู้ในกลุ่ม PLC ระดับกลุ่มสาระฯ และขยายผลเป็นแบบอย่างให้แก่ครูผู้สอนในสถานศึกษา
               </p>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-xs text-emerald-200 flex items-center justify-between">
+          <div class="p-4 sm:p-5 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-xs sm:text-sm lg:text-base text-emerald-200 flex items-center justify-between">
             <span><i class="fa-solid fa-check-double mr-2"></i> สรุปผล: บรรลุตามข้อตกลงในการพัฒนางานที่เป็นประเด็นท้าทายครบถ้วนทุกประการ</span>
             <span class="font-bold text-white">ว9/2564 สมบูรณ์</span>
           </div>
@@ -1047,41 +1047,41 @@ const PresentationDeck = {
       const totalScore = scores.total || 96;
 
       html = `
-        <div class="h-full flex flex-col justify-center items-center text-center p-6 sm:p-10 max-w-4xl mx-auto animate-fade-in text-white">
-          <div class="w-20 h-20 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-4xl mb-4 border border-emerald-400/40 shadow-2xl">
+        <div class="h-full flex flex-col justify-center items-center text-center p-4 sm:p-8 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-5xl sm:text-6xl mb-4 border border-emerald-400/40 shadow-2xl">
             <i class="fa-solid fa-clipboard-check"></i>
           </div>
-          <h2 class="text-3xl sm:text-4xl font-bold font-heading mb-2">สรุปผลการประเมินตนเอง ว.PA</h2>
-          <p class="text-sm text-teal-300 mb-6 font-medium">ปีการศึกษา ${currentAcademicYear} · ${teacher.name} (${teacher.academicStanding})</p>
+          <h2 class="text-3xl sm:text-5xl lg:text-6xl font-bold font-heading mb-3">สรุปผลการประเมินตนเอง ว.PA</h2>
+          <p class="text-sm sm:text-xl lg:text-2xl text-teal-300 mb-8 font-medium">ปีการศึกษา ${currentAcademicYear} · ${teacher.name} (${teacher.academicStanding})</p>
           
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl mb-6 text-xs">
-            <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl mb-8 text-xs sm:text-sm lg:text-base">
+            <div class="p-5 sm:p-6 rounded-3xl bg-white/10 border border-white/10 shadow-lg">
               <div class="text-slate-400">ด้านที่ 1 การสอน</div>
-              <div class="text-lg font-bold text-teal-300 mt-1">${scores.domain1} / 40</div>
+              <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-teal-300 mt-2">${scores.domain1} / 40</div>
             </div>
-            <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
+            <div class="p-5 sm:p-6 rounded-3xl bg-white/10 border border-white/10 shadow-lg">
               <div class="text-slate-400">ด้านที่ 2 ส่งเสริม</div>
-              <div class="text-lg font-bold text-indigo-300 mt-1">${scores.domain2} / 20</div>
+              <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-300 mt-2">${scores.domain2} / 20</div>
             </div>
-            <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
+            <div class="p-5 sm:p-6 rounded-3xl bg-white/10 border border-white/10 shadow-lg">
               <div class="text-slate-400">ด้านที่ 3 พัฒนาตน</div>
-              <div class="text-lg font-bold text-amber-300 mt-1">${scores.domain3} / 20</div>
+              <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-300 mt-2">${scores.domain3} / 20</div>
             </div>
-            <div class="p-3.5 rounded-2xl bg-white/10 border border-white/10">
+            <div class="p-5 sm:p-6 rounded-3xl bg-white/10 border border-white/10 shadow-lg">
               <div class="text-slate-400">ประเด็นท้าทาย</div>
-              <div class="text-lg font-bold text-emerald-300 mt-1">${scores.challenge} / 20</div>
+              <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-300 mt-2">${scores.challenge} / 20</div>
             </div>
           </div>
 
-          <div class="p-6 rounded-3xl bg-gradient-to-r from-teal-950 via-slate-900 to-teal-950 border border-teal-500/40 max-w-md w-full mb-6 shadow-2xl">
-            <div class="text-xs text-slate-400 uppercase tracking-wider">คะแนนรวมสุทธิ (Total Score)</div>
-            <div class="text-5xl font-bold font-heading text-teal-300 mt-2 mb-2">${totalScore} / 100</div>
-            <div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-              <i class="fa-solid fa-circle-check"></i> ผ่านเกณฑ์การประเมินระดับดีเยี่ยม (ก.ค.ศ.)
+          <div class="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-teal-950 via-slate-900 to-teal-950 border border-teal-500/40 max-w-xl w-full mb-8 shadow-2xl">
+            <div class="text-xs sm:text-sm text-slate-400 uppercase tracking-wider font-semibold">คะแนนรวมสุทธิ (Total Score)</div>
+            <div class="text-6xl sm:text-7xl lg:text-8xl font-black font-heading text-teal-300 my-3">${totalScore} / 100</div>
+            <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs sm:text-sm lg:text-base font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <i class="fa-solid fa-circle-check text-base"></i> ผ่านเกณฑ์การประเมินระดับดีเยี่ยม (ก.ค.ศ.)
             </div>
           </div>
 
-          <p class="text-xs text-slate-400 max-w-lg leading-relaxed">
+          <p class="text-xs sm:text-sm lg:text-base text-slate-400 max-w-2xl leading-relaxed">
             พร้อมรับการประเมินจากคณะกรรมการผู้ทรงคุณวุฒิ และมีเอกสารหลักฐานดิจิทัลพร้อมตรวจสอบย้อนกลับในระบบ Google Drive ครบทุกตัวชี้วัด
           </p>
         </div>
