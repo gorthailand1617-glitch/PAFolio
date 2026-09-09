@@ -15,10 +15,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$rootName = \"PAFolio - แฟ้มสะสมงาน ว.PA ($teacher)\";" ^
   "$yearName = \"PA$shortYear ผลการประเมิน ว.PA ปีการศึกษา $year\";" ^
   "Write-Host \"`nกำลังสร้างโครงสร้างโฟลเดอร์: $rootName ...\" -ForegroundColor Cyan;" ^
-  "New-Item -ItemType Directory -Force -Path \"$rootName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/01_รูปโปรไฟล์ครู (Profile Photos)\" | Out-Null;" ^
-  "New-Item -ItemType Directory -Force -Path \"$rootName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/02_โลโก้โรงเรียนและตราสัญลักษณ์ (Logos)\" | Out-Null;" ^
-  "New-Item -ItemType Directory -Force -Path \"$rootName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/03_ภาพปกและภาพหัวเรื่อง (Banners & Covers)\" | Out-Null;" ^
-  "New-Item -ItemType Directory -Force -Path \"$rootName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/04_เกียรติบัตรและโล่รางวัลรวม (Certificates)\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/01_รูปโปรไฟล์ครู (Profile Photos)\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/02_โลโก้โรงเรียนและตราสัญลักษณ์ (Logos)\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/03_ภาพปกและภาพหัวเรื่อง (Banners & Covers)\" | Out-Null;" ^
+  "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/🖼️ 00_Assets_ภาพประจำตัวและโลโก้/04_เกียรติบัตรและโล่รางวัลรวม (Certificates)\" | Out-Null;" ^
   "New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/📸 รูปถ่ายครูและภาพกิจกรรมประจำปี $year\" | Out-Null;" ^
   "$indicators = @('1.1 สร้างและหรือพัฒนาหลักสูตร', '1.2 ออกแบบการจัดการเรียนรู้', '1.3 จัดกิจกรรมการเรียนรู้ (Active Learning)', '1.4 สร้างและหรือพัฒนาสื่อ นวัตกรรม เทคโนโลยี', '1.5 วัดและประเมินผลการเรียนรู้', '1.6 ศึกษา วิเคราะห์ สังเคราะห์ เพื่อแก้ไขปัญหา', '1.7 จัดบรรยากาศที่ส่งเสริมและพัฒนาผู้เรียน', '1.8 อบรมและพัฒนาคุณลักษณะที่ดีของผู้เรียน');" ^
   "foreach ($ind in $indicators) { $code = $ind.Substring(0, 3); New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)/$ind/🖼️ รูปภาพประกอบตัวชี้วัด $code\" | Out-Null; New-Item -ItemType Directory -Force -Path \"$rootName/$yearName/ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)/$ind/📄 เอกสารและหลักฐาน PDF\" | Out-Null; };" ^

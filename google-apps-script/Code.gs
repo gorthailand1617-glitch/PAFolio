@@ -89,10 +89,17 @@ function createPAFolderStructure() {
     Logger.log("📂 กำลังสร้างโฟลเดอร์สำหรับรอบปีการศึกษา: " + year);
     const yearFolder = getOrCreateSubFolder(rootFolder, "PA" + year.substring(2) + " ผลการประเมิน ว.PA ปีการศึกษา " + year);
 
-    // 2.1 โฟลเดอร์รูปโปรไฟล์ประจำปีนั้นๆ
-    const yearAssetFolder = getOrCreateSubFolder(yearFolder, "📸 รูปถ่ายครูและภาพกิจกรรมประจำปี " + year);
+    // 2.1 โฟลเดอร์ Assets ประจำปี: รูปโปรไฟล์, โลโก้, ภาพปก แยกตามปีการศึกษา
+    const yearAssetFolder = getOrCreateSubFolder(yearFolder, "🖼️ 00_Assets_ภาพประจำตัวและโลโก้");
+    getOrCreateSubFolder(yearAssetFolder, "01_รูปโปรไฟล์ครู (Profile Photos)");
+    getOrCreateSubFolder(yearAssetFolder, "02_โลโก้โรงเรียนและตราสัญลักษณ์ (Logos)");
+    getOrCreateSubFolder(yearAssetFolder, "03_ภาพปกและภาพหัวเรื่อง (Banners & Covers)");
+    getOrCreateSubFolder(yearAssetFolder, "04_เกียรติบัตรและโล่รางวัลรวม (Certificates)");
 
-    // 2.2 โฟลเดอร์แบ่งตาม 3 ด้าน 15 ตัวชี้วัด
+    // 2.2 โฟลเดอร์รูปถ่ายกิจกรรมประจำปี
+    getOrCreateSubFolder(yearFolder, "📸 รูปถ่ายครูและภาพกิจกรรมประจำปี " + year);
+
+    // 2.3 โฟลเดอร์แบ่งตาม 3 ด้าน 15 ตัวชี้วัด
     const domain1Folder = getOrCreateSubFolder(yearFolder, "ด้านที่ 1 ด้านการจัดการเรียนรู้ (8 ตัวชี้วัด)");
     const domain2Folder = getOrCreateSubFolder(yearFolder, "ด้านที่ 2 ด้านการส่งเสริมและสนับสนุน (4 ตัวชี้วัด)");
     const domain3Folder = getOrCreateSubFolder(yearFolder, "ด้านที่ 3 ด้านการพัฒนาตนเองและวิชาชีพ (3 ตัวชี้วัด)");
@@ -303,10 +310,7 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     certificateFolderUrl: ""
   };
 
-  // 1. สแกนหา Asset กลาง (รูปโปรไฟล์ / โลโก้ / ปก)
-  scanSystemAssets(rootFolder, result);
-
-  // 2. ตรวจสอบโฟลเดอร์ปีการศึกษา
+  // 1. ตรวจสอบโฟลเดอร์ปีการศึกษา
   const subFolders = rootFolder.getFolders();
   const folderList = [];
   while (subFolders.hasNext()) {
@@ -324,7 +328,7 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     }
   });
 
-  // 3. กรองตามปีที่ร้องขอ
+  // 2. กรองตามปีที่ร้องขอ
   let targetFoldersToScan = [];
   if (yearFoldersFound.length > 0) {
     if (filterYear) {
@@ -344,6 +348,9 @@ function scanDriveRecursively(rootFolderId, filterYear) {
   } else {
     targetFoldersToScan = [rootFolder];
   }
+
+  // 3. สแกนหารูปโปรไฟล์ ภาพปก และโลโก้ (เน้นโฟลเดอร์ปีที่เลือกเป็นหลัก แยกของใครของมัน หากไม่เจอยังคงมี fallback)
+  scanSystemAssets(targetFoldersToScan, rootFolder, result);
 
   // 4. สแกนหาไฟล์ตัวชี้วัดและภาพกิจกรรม
   targetFoldersToScan.forEach(folder => {
@@ -368,8 +375,10 @@ function scanDriveRecursively(rootFolderId, filterYear) {
 
 /**
  * สแกนหารูปโปรไฟล์ ภาพปก และโลโก้อย่างชาญฉลาดรอบด้าน (Smart Asset Scanner)
+ * 1. สแกนในโฟลเดอร์ปีการศึกษาที่เลือกก่อนเป็นอันดับแรก (Priority 1: แยกรูปโปรไฟล์และปกตามปี)
+ * 2. หากยังไม่พบ จึงสแกน Root Folder เป็น Fallback
  */
-function scanSystemAssets(rootFolder, result) {
+function scanSystemAssets(targetFoldersToScan, rootFolder, result) {
   const checkAndAssignAsset = function(file, contextName) {
     try {
       const mime = file.getMimeType();
@@ -407,46 +416,63 @@ function scanSystemAssets(rootFolder, result) {
     }
   };
 
-  // 1. ตรวจสอบไฟล์รูปภาพที่อาจวางอยู่ในโฟลเดอร์หลัก (Root Folder) โดยตรง
-  try {
-    const rootFiles = rootFolder.getFiles();
-    while (rootFiles.hasNext()) {
-      checkAndAssignAsset(rootFiles.next(), rootFolder.getName());
-    }
-  } catch(e) {}
+  const scanFolderForAssets = function(folder) {
+    if (!folder) return;
+    try {
+      // 1. ตรวจสอบไฟล์รูปภาพที่อาจวางอยู่ในโฟลเดอร์นี้โดยตรง
+      const directFiles = folder.getFiles();
+      while (directFiles.hasNext()) {
+        checkAndAssignAsset(directFiles.next(), folder.getName());
+      }
 
-  // 2. ค้นหาโฟลเดอร์ Asset หรือโฟลเดอร์รูปภาพในโฟลเดอร์หลัก
-  try {
-    const subFolders = rootFolder.getFolders();
-    while (subFolders.hasNext()) {
-      const f = subFolders.next();
-      const folderName = f.getName().toLowerCase();
+      // 2. ค้นหาโฟลเดอร์ Asset หรือโฟลเดอร์รูปภาพข้างใน
+      const subFolders = folder.getFolders();
+      while (subFolders.hasNext()) {
+        const f = subFolders.next();
+        const folderName = f.getName().toLowerCase();
 
-      // ตรวจสอบโฟลเดอร์ที่เกี่ยวข้องกับ Assets / รูปภาพ / โปรไฟล์ / ปก / โลโก้
-      if (folderName.includes("asset") || folderName.includes("ภาพประจำตัว") || folderName.includes("00_") ||
-          folderName.includes("profile") || folderName.includes("โปรไฟล์") || 
-          folderName.includes("cover") || folderName.includes("ปก") || 
-          folderName.includes("logo") || folderName.includes("โลโก้") || folderName.includes("รูปภาพ")) {
-        
-        // ก. ตรวจสอบไฟล์ที่อยู่ในโฟลเดอร์นี้โดยตรง
-        const directFiles = f.getFiles();
-        while (directFiles.hasNext()) {
-          checkAndAssignAsset(directFiles.next(), folderName);
-        }
+        // ตรวจสอบโฟลเดอร์ที่เกี่ยวข้องกับ Assets / รูปภาพ / โปรไฟล์ / ปก / โลโก้
+        if (folderName.includes("asset") || folderName.includes("ภาพประจำตัว") || folderName.includes("00_") ||
+            folderName.includes("profile") || folderName.includes("โปรไฟล์") || 
+            folderName.includes("cover") || folderName.includes("ปก") || 
+            folderName.includes("logo") || folderName.includes("โลโก้") || folderName.includes("รูปภาพ")) {
+          
+          const innerDirectFiles = f.getFiles();
+          while (innerDirectFiles.hasNext()) {
+            checkAndAssignAsset(innerDirectFiles.next(), folderName);
+          }
 
-        // ข. ตรวจสอบโฟลเดอร์ย่อยข้างใน (เช่น 01_รูปโปรไฟล์, 03_ภาพปก)
-        const innerFolders = f.getFolders();
-        while (innerFolders.hasNext()) {
-          const innerF = innerFolders.next();
-          const innerName = innerF.getName().toLowerCase();
-          const innerFiles = innerF.getFiles();
-          while (innerFiles.hasNext()) {
-            checkAndAssignAsset(innerFiles.next(), folderName + " " + innerName);
+          const innerFolders = f.getFolders();
+          while (innerFolders.hasNext()) {
+            const innerF = innerFolders.next();
+            const innerName = innerF.getName().toLowerCase();
+            const innerFiles = innerF.getFiles();
+            while (innerFiles.hasNext()) {
+              checkAndAssignAsset(innerFiles.next(), folderName + " " + innerName);
+            }
           }
         }
       }
+    } catch(e) {
+      Logger.log("scanFolderForAssets error: " + e);
     }
-  } catch(e) {}
+  };
+
+  // 1. สแกนในโฟลเดอร์ปีการศึกษาที่เลือกก่อนเป็นอันดับแรก (Priority 1: แยกรูปโปรไฟล์และปกตามปี)
+  if (Array.isArray(targetFoldersToScan)) {
+    targetFoldersToScan.forEach(function(f) {
+      scanFolderForAssets(f);
+    });
+  } else if (targetFoldersToScan) {
+    scanFolderForAssets(targetFoldersToScan);
+  }
+
+  // 2. หากยังไม่พบรูปโปรไฟล์, ภาพปก หรือโลโก้ ให้สแกน Root Folder เป็น Fallback
+  if (!result.assets.profileUrl || !result.assets.coverUrl || !result.assets.logoUrl) {
+    if (rootFolder) {
+      scanFolderForAssets(rootFolder);
+    }
+  }
 }
 
 /**
@@ -601,15 +627,25 @@ function traverseFolder(folder, result, depth, parentIndicatorCode) {
       type = "image";
       icon = "fa-file-image";
       
-      result.evidenceGallery.push({
-        id: file.getId(),
-        title: file.getName(),
-        caption: folderName,
-        badge: indicatorCode ? `ตัวชี้วัด ${indicatorCode}` : folderName,
-        thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800",
-        fullUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w1600",
-        date: file.getLastUpdated().toLocaleDateString('th-TH')
-      });
+      // ไม่รวมรูปภาพจากโฟลเดอร์ 00_Assets (โปรไฟล์, โลโก้, ภาพปก) เข้าไปปนในคลังภาพหลักฐานกิจกรรมการสอน
+      const fNameLower = folderName.toLowerCase();
+      const isAssetFolder = fNameLower.includes("00_") || fNameLower.includes("asset") || 
+                           fNameLower.includes("โปรไฟล์") || fNameLower.includes("profile") || 
+                           fNameLower.includes("โลโก้") || fNameLower.includes("logo") ||
+                           fNameLower.includes("ภาพประจำตัว") || fNameLower.includes("ภาพปก") ||
+                           fNameLower.includes("banner");
+
+      if (!isAssetFolder) {
+        result.evidenceGallery.push({
+          id: file.getId(),
+          title: file.getName(),
+          caption: folderName,
+          badge: indicatorCode ? `ตัวชี้วัด ${indicatorCode}` : folderName,
+          thumbUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800",
+          fullUrl: "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w1600",
+          date: file.getLastUpdated().toLocaleDateString('th-TH')
+        });
+      }
     } else if (mime.includes("video")) {
       type = "video";
       icon = "fa-file-video";

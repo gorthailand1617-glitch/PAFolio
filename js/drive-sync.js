@@ -259,22 +259,38 @@ const DriveSync = {
         }
       }
 
-      // อัปเดตรูปโปรไฟล์, ภาพปก และโลโก้จาก Google Drive (เฉพาะกรณีที่ยังไม่ได้เลือกรูปเอง ป้องกันรูปเด้งกลับ)
+      // อัปเดตรูปโปรไฟล์, ภาพปก และโลโก้จาก Google Drive แยกตามปีการศึกษา (Year-Specific Assets)
       if (data.assets) {
         const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
         let updatedAsset = false;
 
-        // ไม่ให้ assets เขียนทับรูปที่ครูเลือกปรับแต่งเองเด็ดขาด
-        if (data.assets.profileUrl && teacher && !teacher._hasCustomProfile && (!teacher.avatarUrl || teacher.avatarUrl.includes('unsplash'))) {
-          document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = data.assets.profileUrl);
-          teacher.avatarUrl = data.assets.profileUrl;
-          updatedAsset = true;
+        // 1. บันทึกรูปโปรไฟล์และภาพปกประจำปีการศึกษาลงในฐานข้อมูล
+        if (teacher && teacher.years && teacher.years[year]) {
+          if (data.assets.profileUrl) {
+            teacher.years[year].avatarUrl = data.assets.profileUrl;
+            updatedAsset = true;
+          }
+          if (data.assets.coverUrl) {
+            teacher.years[year].coverUrl = data.assets.coverUrl;
+            updatedAsset = true;
+          }
         }
 
-        if (data.assets.coverUrl && teacher && !teacher._hasCustomProfile && (!teacher.coverUrl || teacher.coverUrl.includes('unsplash'))) {
-          document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = data.assets.coverUrl);
-          teacher.coverUrl = data.assets.coverUrl;
-          updatedAsset = true;
+        // 2. หากปีที่ซิงก์ตรงกับปีที่กำลังเปิดดูอยู่บนหน้าเว็บ ให้เปลี่ยนรูปที่แสดงบนหน้าจอทันที
+        const currentActiveYear = localStorage.getItem('pafolio_active_year') || '2569';
+        if (year === currentActiveYear && teacher) {
+          if (data.assets.profileUrl) {
+            const avatarSrc = (typeof convertToGoogleDriveThumbnailUrl === 'function') 
+              ? convertToGoogleDriveThumbnailUrl(data.assets.profileUrl, 'w800') 
+              : data.assets.profileUrl;
+            document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = avatarSrc);
+          }
+          if (data.assets.coverUrl) {
+            const coverSrc = (typeof convertToGoogleDriveThumbnailUrl === 'function') 
+              ? convertToGoogleDriveThumbnailUrl(data.assets.coverUrl, 'w1920') 
+              : data.assets.coverUrl;
+            document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = coverSrc);
+          }
         }
 
         if (updatedAsset && typeof saveStoredTeachers === 'function') {
@@ -431,16 +447,16 @@ const DriveSync = {
     const rootFolderName = `PAFolio - แฟ้มสะสมงาน ว.PA (${teacherName})`;
     const root = zip.folder(rootFolderName);
 
-    // 1. Assets ส่วนกลาง
-    const assets = root.folder("🖼️ 00_Assets_ภาพประจำตัวและโลโก้");
-    assets.folder("01_รูปโปรไฟล์ครู (Profile Photos)").file("คำแนะนำ_รูปโปรไฟล์.txt", "วางไฟล์รูปภาพประจำตัวครู (JPG/PNG) ที่นี่ เพื่อให้ระบบดึงไปแสดงผลเป็นรูปโปรไฟล์");
-    assets.folder("02_โลโก้โรงเรียนและตราสัญลักษณ์ (Logos)").file("คำแนะนำ_โลโก้.txt", "วางไฟล์ภาพตราสัญลักษณ์หรือโลโก้โรงเรียน (PNG โปร่งใส แนะนำ)");
-    assets.folder("03_ภาพปกและภาพหัวเรื่อง (Banners & Covers)").file("คำแนะนำ_ภาพปก.txt", "วางไฟล์ภาพหัวเรื่อง ภาพแบนเนอร์ หรือภาพกิจกรรมสำคัญสำหรับใช้เป็นปก");
-    assets.folder("04_เกียรติบัตรและโล่รางวัลรวม (Certificates)").file("คำแนะนำ_เกียรติบัตร.txt", "วางไฟล์เกียรติบัตร โล่รางวัล หรือเอกสารยกย่องเชิดชูเกียรติ");
-
-    // 2. โฟลเดอร์ประจำปีการศึกษา
+    // 1. โฟลเดอร์ประจำปีการศึกษา
     const yearFolderName = `PA${shortYear} ผลการประเมิน ว.PA ปีการศึกษา ${year}`;
     const yearFolder = root.folder(yearFolderName);
+
+    // 2. Assets ประจำปีการศึกษา (รูปโปรไฟล์, โลโก้, ภาพปก แยกตามปี)
+    const yearAssets = yearFolder.folder("🖼️ 00_Assets_ภาพประจำตัวและโลโก้");
+    yearAssets.folder("01_รูปโปรไฟล์ครู (Profile Photos)").file("คำแนะนำ_รูปโปรไฟล์.txt", `วางไฟล์รูปภาพประจำตัวครู (JPG/PNG) สำหรับรอบปี ${year} ที่นี่ เพื่อให้ระบบดึงไปแสดงผลเป็นรูปโปรไฟล์ประจำปี`);
+    yearAssets.folder("02_โลโก้โรงเรียนและตราสัญลักษณ์ (Logos)").file("คำแนะนำ_โลโก้.txt", `วางไฟล์ภาพตราสัญลักษณ์หรือโลโก้โรงเรียน ประจำปี ${year} (PNG โปร่งใส แนะนำ)`);
+    yearAssets.folder("03_ภาพปกและภาพหัวเรื่อง (Banners & Covers)").file("คำแนะนำ_ภาพปก.txt", `วางไฟล์ภาพหัวเรื่อง ภาพแบนเนอร์ หรือภาพกิจกรรมสำคัญสำหรับใช้เป็นปกประจำปี ${year}`);
+    yearAssets.folder("04_เกียรติบัตรและโล่รางวัลรวม (Certificates)").file("คำแนะนำ_เกียรติบัตร.txt", `วางไฟล์เกียรติบัตร โล่รางวัล หรือเอกสารยกย่องเชิดชูเกียรติ ประจำปี ${year}`);
 
     yearFolder.folder(`📸 รูปถ่ายครูและภาพกิจกรรมประจำปี ${year}`).file("คำแนะนำ.txt", `วางภาพถ่ายกิจกรรมการเรียนการสอนและกิจกรรมต่างๆ ในปีการศึกษา ${year}`);
 

@@ -1208,8 +1208,9 @@ const PresentationDeck = {
         fontSize: 11, color: "34D399", fontFace: FONT_NAME, bold: true, align: "center"
       });
 
-      // รูปภาพโปรไฟล์ครู
-      const avatarData = await getImageDataUrl(teacher.avatarUrl);
+      // รูปภาพโปรไฟล์ครู (ดึงตามปีการศึกษาที่เลือกก่อน)
+      const targetAvatarUrl = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
+      const avatarData = await getImageDataUrl(targetAvatarUrl);
       if (avatarData) {
         slide1.addImage({
           data: avatarData,
