@@ -192,7 +192,8 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     },
     evidenceGallery: [],
     challengeDocs: [],
-    extractedChallenge: null
+    extractedChallenge: null,
+    indicatorFolders: {}
   };
 
   // 1. สแกนหา Asset กลาง (รูปโปรไฟล์ / โลโก้ / ปก)
@@ -418,6 +419,17 @@ function traverseFolder(folder, result, depth) {
       };
     } else {
       result.indicators[key].files = result.indicators[key].files.concat(fileItems);
+    }
+    
+    // บันทึก URL โฟลเดอร์เฉพาะตัวชี้วัดลงใน indicatorFolders โดยตรง
+    if (indicatorCode) {
+      if (!result.indicatorFolders[indicatorCode] || !result.indicatorFolders[indicatorCode].folderUrl) {
+        result.indicatorFolders[indicatorCode] = {
+          folderId: folder.getId(),
+          folderUrl: folder.getUrl(),
+          folderName: folderName
+        };
+      }
     }
   }
 

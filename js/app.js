@@ -29,6 +29,12 @@ const BASE_INDICATOR_TEMPLATES = [
 document.addEventListener('DOMContentLoaded', () => {
   // Load custom teachers from localStorage if any
   loadStoredTeachers();
+  
+  // โหลดแคชข้อมูล Google Drive ที่เคยซิงก์ไว้ทันทีเพื่อไม่ให้ข้อมูลหายเมื่อรีเฟรชหน้าเว็บ
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.loadCachedData === 'function') {
+    DriveSync.loadCachedData(currentAcademicYear);
+  }
+
   renderApp();
   setupEventListeners();
   DriveSync.updateStatusUI();
@@ -211,6 +217,12 @@ function renderYearSwitcher(teacher) {
 function switchAcademicYear(year) {
   currentAcademicYear = year;
   localStorage.setItem('pafolio_active_year', year);
+
+  // โหลดแคชข้อมูล Google Drive ของปีที่เลือก
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.loadCachedData === 'function') {
+    DriveSync.loadCachedData(year);
+  }
+
   renderApp();
 
   // ซิงก์ข้อมูล Google Drive สำหรับปีที่เลือกใหม่ทันที
@@ -327,6 +339,9 @@ function renderIndicators(filter = 'all', searchQuery = '') {
         }
       }
 
+      const indDriveUrl = getIndicatorDriveUrl(ind.code);
+      const isDirectFolder = isIndicatorFolderDirect(ind.code);
+
       card.innerHTML = `
         <div>
           <div class="flex justify-between items-start mb-3 gap-1">
@@ -335,6 +350,11 @@ function renderIndicators(filter = 'all', searchQuery = '') {
             </span>
             <div class="flex items-center gap-1.5">
               ${fileBadge}
+              <a href="${indDriveUrl}" target="_blank" onclick="event.stopPropagation();" 
+                 title="เปิดโฟลเดอร์ตัวชี้วัด ${ind.code} ใน Google Drive" 
+                 class="w-7 h-7 rounded-lg ${isDirectFolder ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60' : 'bg-slate-100 text-slate-500 hover:bg-teal-50 hover:text-teal-700'} flex items-center justify-center transition shadow-sm">
+                <i class="fa-brands fa-google-drive text-xs"></i>
+              </a>
               <span class="text-xs font-medium text-slate-400 group-hover:text-teal-600 transition">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
               </span>
@@ -352,9 +372,16 @@ function renderIndicators(filter = 'all', searchQuery = '') {
           <span class="text-[11px] text-slate-500 flex items-center gap-1.5">
             ${fileCountText}
           </span>
-          <span class="text-[11px] font-semibold text-teal-700 group-hover:underline flex items-center gap-1">
-            ดูหลักฐาน <i class="fa-solid fa-angle-right"></i>
-          </span>
+          <div class="flex items-center gap-2.5">
+            <a href="${indDriveUrl}" target="_blank" onclick="event.stopPropagation();" 
+               class="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 hover:underline" 
+               title="เปิดโฟลเดอร์ Google Drive ของตัวชี้วัด ${ind.code}">
+              <i class="fa-brands fa-google-drive"></i> เปิดไดรฟ์ <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+            <span class="text-[11px] font-semibold text-slate-600 group-hover:text-teal-700 flex items-center gap-0.5">
+              ดูหลักฐาน <i class="fa-solid fa-chevron-right text-[9px]"></i>
+            </span>
+          </div>
         </div>
       `;
 
@@ -530,17 +557,26 @@ function openIndicatorModal(indicator, teacher, expectedLevel) {
     const folderTargetUrl = driveFolderData.folderUrl || (driveFolderData.folderId ? `https://drive.google.com/drive/folders/${driveFolderData.folderId}` : getIndicatorDriveUrl(indicator.code));
     if (folderTargetUrl) {
       const folderLink = document.createElement('div');
-      folderLink.className = 'pt-2 text-right';
+      folderLink.className = 'pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs border-t border-slate-100 mt-2';
       folderLink.innerHTML = `
-        <a href="${folderTargetUrl}" target="_blank" class="text-xs text-teal-700 hover:text-teal-900 font-semibold inline-flex items-center gap-1">
-          <i class="fa-brands fa-google-drive"></i> เปิดดูโฟลเดอร์นี้ใน Google Drive <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        </a>
+        <div class="flex items-center gap-1.5 text-emerald-700 font-semibold">
+          <i class="fa-solid fa-folder-check text-emerald-600"></i> โฟลเดอร์ตรงตัวชี้วัด ${indicator.code}
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openEditIndicatorFolderModal('${indicator.code}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition inline-flex items-center gap-1">
+            <i class="fa-solid fa-pen-to-square text-teal-600"></i> เปลี่ยนโฟลเดอร์
+          </button>
+          <a href="${folderTargetUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold border border-teal-200 inline-flex items-center gap-1">
+            <i class="fa-brands fa-google-drive"></i> เปิดดูโฟลเดอร์ในไดรฟ์ <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
       `;
       listEl.appendChild(folderLink);
     }
   } else {
     // โหมดจำลอง / หรือยังไม่มีไฟล์ใน Google Drive
     const targetDriveUrl = getIndicatorDriveUrl(indicator.code);
+    const isDirect = isIndicatorFolderDirect(indicator.code);
     listEl.innerHTML = `
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition gap-3">
         <div class="flex items-center gap-3 min-w-0">
@@ -549,12 +585,17 @@ function openIndicatorModal(indicator, teacher, expectedLevel) {
           </div>
           <div class="min-w-0">
             <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm">เอกสารร่องรอยหลักฐาน ตัวชี้วัด ${indicator.code} (ปีการศึกษา ${currentAcademicYear})</div>
-            <div class="text-[11px] text-teal-800 font-medium line-clamp-1">${(synth && synth.evidence) ? '<i class="fa-solid fa-list-check mr-1 text-teal-600"></i> ' + synth.evidence : 'Google Drive Folder · ตัวชี้วัด ' + indicator.code}</div>
+            <div class="text-[11px] ${isDirect ? 'text-emerald-700 font-semibold' : 'text-teal-800 font-medium'} line-clamp-1">
+              ${isDirect ? '<i class="fa-solid fa-folder-check text-emerald-600 mr-1"></i> โฟลเดอร์ตรง: ตัวชี้วัด ' + indicator.code : '<i class="fa-brands fa-google-drive mr-1 text-teal-600"></i> ค้นหาในไดรฟ์: ตัวชี้วัด ' + indicator.code}
+            </div>
           </div>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0">
+          <button onclick="openEditIndicatorFolderModal('${indicator.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-teal-700 hover:bg-slate-50 text-xs font-semibold transition shadow-sm inline-flex items-center gap-1" title="ตั้งค่าหรือแก้ไขลิงก์โฟลเดอร์ Google Drive ของตัวชี้วัด ${indicator.code}">
+            <i class="fa-solid fa-pen-to-square text-teal-600"></i> ตั้งค่าโฟลเดอร์
+          </button>
           <a href="${targetDriveUrl}" target="_blank" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading transition shadow-sm inline-flex items-center gap-1.5">
-            <i class="fa-brands fa-google-drive"></i> เปิดไดรฟ์ <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            <i class="fa-brands fa-google-drive"></i> เปิดไดรฟ์ตัวชี้วัด ${indicator.code} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
           </a>
           <button onclick="openDocViewer('เอกสารประกอบตัวชี้วัด ${indicator.code}', 'PDF', '${indicator.code}')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition shadow-sm inline-flex items-center gap-1">
             <i class="fa-solid fa-circle-info text-teal-600"></i> รายละเอียด
@@ -618,49 +659,255 @@ function closeLightbox() {
 // Document Viewer Modal & Drive Link Helper
 let currentDocDriveUrl = 'https://drive.google.com/drive/my-drive';
 
-function getIndicatorDriveUrl(indicatorCode = '') {
-  // 1. Check synced indicator folder
-  if (indicatorCode && typeof DriveSync !== 'undefined' && DriveSync.syncedData && DriveSync.syncedData.indicators) {
-    const cleanCode = String(indicatorCode).trim();
-    const matchingKey = Object.keys(DriveSync.syncedData.indicators).find(key => 
-      key === cleanCode || key.startsWith(cleanCode + ' ') || key.startsWith(cleanCode + '.') || key.includes(cleanCode)
-    );
-    if (matchingKey && DriveSync.syncedData.indicators[matchingKey]) {
-      const indData = DriveSync.syncedData.indicators[matchingKey];
-      if (indData.folderUrl) return indData.folderUrl;
-      if (indData.folderId) return `https://drive.google.com/drive/folders/${indData.folderId}`;
-      if (indData.files && indData.files.length > 0 && indData.files[0].viewUrl) {
-        return indData.files[0].viewUrl;
+function getIndicatorDriveUrl(indicatorCode = '', targetYear = null) {
+  const code = String(indicatorCode || '').trim();
+  const year = targetYear || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
+
+  // 1. ตรวจสอบการตั้งค่าโฟลเดอร์เฉพาะตัวชี้วัดที่ผู้ใช้กำหนดเอง (Custom Folder Link)
+  const directKey = `pafolio_ind_folder_${year}_${code}`;
+  const directSaved = localStorage.getItem(directKey);
+  if (directSaved) return directSaved.trim();
+
+  try {
+    const customMapKey = 'pafolio_indicator_folders_' + year;
+    const savedMap = JSON.parse(localStorage.getItem(customMapKey) || '{}');
+    if (code && savedMap[code]) {
+      return savedMap[code].trim();
+    }
+  } catch(e) {}
+
+  // 2. ตรวจสอบในข้อมูล yearData ของฐานข้อมูล
+  const yearData = (typeof getActiveYearData === 'function') ? getActiveYearData() : null;
+  if (yearData && yearData.indicatorFolders && yearData.indicatorFolders[code]) {
+    return yearData.indicatorFolders[code].trim();
+  }
+
+  // 3. ตรวจสอบจากผลการซิงก์สดหรือแคชของ Google Drive (DriveSync.syncedData)
+  if (code && typeof DriveSync !== 'undefined' && DriveSync.syncedData) {
+    // 3.1 จาก indicatorFolders
+    if (DriveSync.syncedData.indicatorFolders && DriveSync.syncedData.indicatorFolders[code]) {
+      const item = DriveSync.syncedData.indicatorFolders[code];
+      if (typeof item === 'string' && item) return item.trim();
+      if (item && item.folderUrl) return item.folderUrl.trim();
+      if (item && item.folderId) return `https://drive.google.com/drive/folders/${item.folderId}`;
+    }
+
+    // 3.2 จาก indicators ที่สแกนได้
+    if (DriveSync.syncedData.indicators) {
+      const matchingKey = Object.keys(DriveSync.syncedData.indicators).find(key => 
+        key === code || key.startsWith(code + ' ') || key.startsWith(code + '.') || key.includes(code)
+      );
+      if (matchingKey && DriveSync.syncedData.indicators[matchingKey]) {
+        const indData = DriveSync.syncedData.indicators[matchingKey];
+        if (indData.folderUrl) return indData.folderUrl.trim();
+        if (indData.folderId) return `https://drive.google.com/drive/folders/${indData.folderId}`;
+        if (indData.files && indData.files.length > 0 && indData.files[0].viewUrl) {
+          return indData.files[0].viewUrl.trim();
+        }
       }
     }
   }
 
-  // 2. Check DriveSync main folderUrl / folderId
-  if (typeof DriveSync !== 'undefined' && DriveSync.config) {
-    if (DriveSync.config.folderUrl && DriveSync.config.folderUrl.includes('drive.google.com')) {
-      return DriveSync.config.folderUrl;
-    }
-    if (DriveSync.config.folderId) {
-      return `https://drive.google.com/drive/folders/${DriveSync.config.folderId}`;
+  // 4. กรณีที่ยังไม่มีโฟลเดอร์ตรง: สืบหาโฟลเดอร์หลักแล้วสร้าง Smart Scoped Search
+  // โดยค้นหาไฟล์/โฟลเดอร์ที่ตรงกับตัวชี้วัดนั้นๆ ในไดรฟ์ของครู (ไม่ส่งไปหน้าแรกของโฟลเดอร์หลัก)
+  let rootFolderId = '';
+  if (typeof DriveSync !== 'undefined' && DriveSync.config && DriveSync.config.folderId) {
+    rootFolderId = DriveSync.config.folderId.trim();
+  }
+  if (!rootFolderId) {
+    const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : null;
+    if (teacher && teacher.driveFolderId) {
+      rootFolderId = teacher.driveFolderId.trim();
     }
   }
 
-  // 3. Check Teacher Profile driveFolderId
-  const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : null;
-  if (teacher && teacher.driveFolderId) {
-    const fid = teacher.driveFolderId.trim();
-    if (fid.startsWith('http')) return fid;
-    return `https://drive.google.com/drive/folders/${fid}`;
+  if (rootFolderId) {
+    let cleanId = rootFolderId;
+    if (cleanId.includes('/folders/')) {
+      cleanId = cleanId.split('/folders/')[1].split('?')[0].split('/')[0];
+    }
+    if (code) {
+      // ค้นหาเจาะจงเฉพาะโฟลเดอร์หรือไฟล์ที่มีรหัสตัวชี้วัดนี้ภายในโฟลเดอร์หลัก
+      return `https://drive.google.com/drive/search?q='${cleanId}'+in+parents+name+contains+'${encodeURIComponent(code)}'`;
+    }
+    return `https://drive.google.com/drive/folders/${cleanId}`;
   }
 
-  // 4. Check global teacherProfile
-  if (typeof teacherProfile !== 'undefined' && teacherProfile.driveFolderId) {
-    const fid = teacherProfile.driveFolderId.trim();
-    if (fid.startsWith('http')) return fid;
-    return `https://drive.google.com/drive/folders/${fid}`;
+  if (code) {
+    return `https://drive.google.com/drive/search?q=${encodeURIComponent('"' + code + '"')}`;
   }
 
   return 'https://drive.google.com/drive/my-drive';
+}
+
+// ตรวจสอบว่าตัวชี้วัดนี้มีโฟลเดอร์ตรงโดยเฉพาะหรือไม่
+function isIndicatorFolderDirect(indicatorCode = '', targetYear = null) {
+  const code = String(indicatorCode || '').trim();
+  const year = targetYear || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
+
+  if (localStorage.getItem(`pafolio_ind_folder_${year}_${code}`)) return true;
+
+  try {
+    const map = JSON.parse(localStorage.getItem(`pafolio_indicator_folders_${year}`) || '{}');
+    if (map[code]) return true;
+  } catch(e) {}
+
+  const yearData = (typeof getActiveYearData === 'function') ? getActiveYearData() : null;
+  if (yearData && yearData.indicatorFolders && yearData.indicatorFolders[code]) return true;
+
+  if (typeof DriveSync !== 'undefined' && DriveSync.syncedData) {
+    if (DriveSync.syncedData.indicatorFolders && DriveSync.syncedData.indicatorFolders[code]) return true;
+    if (DriveSync.syncedData.indicators) {
+      const match = Object.keys(DriveSync.syncedData.indicators).find(k => 
+        k === code || k.startsWith(code + ' ') || k.startsWith(code + '.') || k.includes(code)
+      );
+      if (match) {
+        const item = DriveSync.syncedData.indicators[match];
+        if (item && (item.folderUrl || item.folderId)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// ================= จัดการตั้งค่าลิงก์โฟลเดอร์เฉพาะตัวชี้วัด =================
+let currentEditingIndicatorCode = '';
+
+function openEditIndicatorFolderModal(indicatorCode) {
+  currentEditingIndicatorCode = String(indicatorCode).trim();
+  const modal = document.getElementById('indicator-folder-modal');
+  if (!modal) return;
+
+  const codeLabel = document.getElementById('edit-ind-code-label');
+  if (codeLabel) codeLabel.innerText = currentEditingIndicatorCode;
+
+  const currentUrl = getIndicatorDriveUrl(currentEditingIndicatorCode);
+  const displayEl = document.getElementById('edit-ind-current-url-display');
+  if (displayEl) displayEl.innerText = currentUrl;
+
+  const inputEl = document.getElementById('edit-ind-folder-url');
+  if (inputEl) {
+    const directSaved = localStorage.getItem(`pafolio_ind_folder_${currentAcademicYear}_${currentEditingIndicatorCode}`);
+    inputEl.value = directSaved || (isIndicatorFolderDirect(currentEditingIndicatorCode) ? currentUrl : '');
+    setTimeout(() => inputEl.focus(), 100);
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditIndicatorFolderModal() {
+  const modal = document.getElementById('indicator-folder-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    const indModal = document.getElementById('indicator-modal');
+    if (indModal && !indModal.classList.contains('hidden')) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }
+}
+
+function saveIndicatorFolderLink() {
+  if (!currentEditingIndicatorCode) return;
+  const inputEl = document.getElementById('edit-ind-folder-url');
+  let val = (inputEl ? inputEl.value : '').trim();
+
+  if (!val) {
+    alert('กรุณากรอก URL หรือ Folder ID ของ Google Drive');
+    return;
+  }
+
+  // ปรับให้อยู่ในรูปแบบ URL ที่สมบูรณ์
+  if (!val.startsWith('http://') && !val.startsWith('https://')) {
+    val = `https://drive.google.com/drive/folders/${val}`;
+  }
+
+  const year = currentAcademicYear;
+  const code = currentEditingIndicatorCode;
+
+  // 1. บันทึกลง localStorage รายตัวชี้วัด
+  const directKey = `pafolio_ind_folder_${year}_${code}`;
+  localStorage.setItem(directKey, val);
+
+  // 2. บันทึกลง map รวม
+  const mapKey = `pafolio_indicator_folders_${year}`;
+  try {
+    const map = JSON.parse(localStorage.getItem(mapKey) || '{}');
+    map[code] = val;
+    localStorage.setItem(mapKey, JSON.stringify(map));
+  } catch(e) {}
+
+  // 3. บันทึกลง memory yearData
+  const yearData = getActiveYearData();
+  if (yearData) {
+    if (!yearData.indicatorFolders) yearData.indicatorFolders = {};
+    yearData.indicatorFolders[code] = val;
+    if (typeof saveStoredTeachers === 'function') saveStoredTeachers();
+  }
+
+  closeEditIndicatorFolderModal();
+
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
+    DriveSync.showToast(`บันทึกลิงก์โฟลเดอร์ตัวชี้วัด ${code} สำเร็จแล้ว!`, 'success');
+  }
+
+  // อัปเดตหน้าจอทันที
+  renderIndicators('all', '');
+
+  // หากเปิดหน้าต่างตัวชี้วัดอยู่ ให้อัปเดตเนื้อหาในหน้าต่างด้วย
+  const indModal = document.getElementById('indicator-modal');
+  if (indModal && !indModal.classList.contains('hidden')) {
+    const ind = BASE_INDICATOR_TEMPLATES.find(i => i.code === code);
+    if (ind) {
+      const teacher = getActiveTeacher();
+      const expectedLevel = getExpectedLevel(teacher.academicStanding);
+      openIndicatorModal(ind, teacher, expectedLevel);
+    }
+  }
+}
+
+function resetIndicatorFolderLink() {
+  if (!currentEditingIndicatorCode) return;
+  const year = currentAcademicYear;
+  const code = currentEditingIndicatorCode;
+
+  localStorage.removeItem(`pafolio_ind_folder_${year}_${code}`);
+
+  const mapKey = `pafolio_indicator_folders_${year}`;
+  try {
+    const map = JSON.parse(localStorage.getItem(mapKey) || '{}');
+    delete map[code];
+    localStorage.setItem(mapKey, JSON.stringify(map));
+  } catch(e) {}
+
+  const yearData = getActiveYearData();
+  if (yearData && yearData.indicatorFolders) {
+    delete yearData.indicatorFolders[code];
+    if (typeof saveStoredTeachers === 'function') saveStoredTeachers();
+  }
+
+  closeEditIndicatorFolderModal();
+
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
+    DriveSync.showToast(`คืนค่าเริ่มต้นโฟลเดอร์ตัวชี้วัด ${code} เรียบร้อยแล้ว`, 'info');
+  }
+
+  renderIndicators('all', '');
+
+  const indModal = document.getElementById('indicator-modal');
+  if (indModal && !indModal.classList.contains('hidden')) {
+    const ind = BASE_INDICATOR_TEMPLATES.find(i => i.code === code);
+    if (ind) {
+      const teacher = getActiveTeacher();
+      const expectedLevel = getExpectedLevel(teacher.academicStanding);
+      openIndicatorModal(ind, teacher, expectedLevel);
+    }
+  }
 }
 
 function openDocViewer(title, type, indicatorCode = '') {

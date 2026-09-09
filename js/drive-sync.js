@@ -63,6 +63,37 @@ const DriveSync = {
         this.config.lastSyncTime = new Date().toISOString();
         localStorage.setItem('pafolio_last_sync_time', this.config.lastSyncTime);
         this.syncedData = result.data;
+
+        // บันทึกแคชข้อมูล Google Drive ลงใน localStorage เพื่อให้คงอยู่แม้รีเฟรชหน้าเว็บ
+        try {
+          const targetYear = year || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
+          localStorage.setItem('pafolio_synced_data_' + targetYear, JSON.stringify(result.data));
+          localStorage.setItem('pafolio_synced_data', JSON.stringify(result.data));
+
+          // จัดเก็บลิงก์โฟลเดอร์ของแต่ละตัวชี้วัด
+          const customMapKey = 'pafolio_indicator_folders_' + targetYear;
+          let customMap = {};
+          try { customMap = JSON.parse(localStorage.getItem(customMapKey) || '{}'); } catch(e) {}
+
+          if (result.data.indicatorFolders) {
+            Object.entries(result.data.indicatorFolders).forEach(([code, obj]) => {
+              if (obj && obj.folderUrl) customMap[code] = obj.folderUrl;
+              else if (obj && obj.folderId) customMap[code] = `https://drive.google.com/drive/folders/${obj.folderId}`;
+              else if (typeof obj === 'string') customMap[code] = obj;
+            });
+          }
+          if (result.data.indicators) {
+            Object.entries(result.data.indicators).forEach(([key, obj]) => {
+              const code = obj.indicatorCode || key;
+              if (code && obj.folderUrl) customMap[code] = obj.folderUrl;
+              else if (code && obj.folderId) customMap[code] = `https://drive.google.com/drive/folders/${obj.folderId}`;
+            });
+          }
+          localStorage.setItem(customMapKey, JSON.stringify(customMap));
+        } catch(cacheErr) {
+          console.warn('[DriveSync] Failed to cache Drive data to localStorage', cacheErr);
+        }
+
         this.updateStatusUI(true);
         return { status: 'success', data: result.data };
       } else {
@@ -510,8 +541,24 @@ const DriveSync = {
       reader.onerror = (e) => reject(e);
       reader.readAsDataURL(videoBlob);
     });
+  },
+
+  // โหลดข้อมูล Google Drive ที่เคยซิงก์และแคชไว้ในเครื่อง
+  loadCachedData(year = null) {
+    try {
+      const targetYear = year || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
+      const cachedStr = localStorage.getItem('pafolio_synced_data_' + targetYear) || localStorage.getItem('pafolio_synced_data');
+      if (cachedStr) {
+        this.syncedData = JSON.parse(cachedStr);
+        console.log('[DriveSync] Loaded cached Google Drive data for year:', targetYear);
+      }
+    } catch (e) {
+      console.warn('[DriveSync] Could not parse cached data:', e);
+    }
   }
 };
 
-// เริ่มต้น Auto-sync listeners ทันทีที่โหลดสคริปต์
+// โหลดแคชข้อมูลเดิมทันที และเริ่มต้น Auto-sync listeners
+DriveSync.loadCachedData();
 DriveSync.initAutoSyncListeners();
+

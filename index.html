@@ -1183,6 +1183,63 @@
     </div>
   </div>
 
+  <!-- ================= MODAL: EDIT SPECIFIC INDICATOR FOLDER LINK ================= -->
+  <div id="indicator-folder-modal" class="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 modal-backdrop" onclick="closeEditIndicatorFolderModal()">
+    <div class="relative bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 flex flex-col text-slate-800 modal-content" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-brands fa-google-drive"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-slate-900 text-base sm:text-lg">
+              ตั้งค่าโฟลเดอร์ไดรฟ์ ตัวชี้วัด <span id="edit-ind-code-label" class="text-teal-700 font-bold"></span>
+            </h3>
+            <p class="text-xs text-slate-500">ปีการศึกษา <span class="current-year-label font-semibold text-teal-800">2568</span></p>
+          </div>
+        </div>
+        <button onclick="closeEditIndicatorFolderModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-heading font-semibold text-slate-800 mb-1.5">
+            วาง URL หรือ Folder ID ของตัวชี้วัดนี้:
+          </label>
+          <input type="text" id="edit-ind-folder-url" 
+                 placeholder="https://drive.google.com/drive/folders/... หรือ Folder ID"
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 focus:outline-none font-mono text-xs text-slate-900">
+          <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+            💡 <strong>วิธีนำลิงก์มาใส่:</strong> เปิด Google Drive เข้าไปในโฟลเดอร์ตัวชี้วัดนั้นๆ แล้วคัดลอก URL จากช่องที่อยู่เว็บด้านบน (Address bar) มาวางได้ทันที
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200/80 text-[11px] text-teal-950 space-y-1">
+          <div class="font-bold flex items-center gap-1.5 text-teal-900">
+            <i class="fa-solid fa-circle-info text-teal-600"></i> ลิงก์ที่ระบบใช้อยู่ปัจจุบัน:
+          </div>
+          <div id="edit-ind-current-url-display" class="font-mono break-all text-teal-800 bg-white p-2 rounded-lg border border-teal-100 text-[11px]"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-5 border-t border-slate-100 mt-5">
+        <button type="button" onclick="resetIndicatorFolderLink()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 flex items-center gap-1 transition">
+          <i class="fa-solid fa-trash-can"></i> ล้างค่า / ใช้ค่าค้นหาอัตโนมัติ
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeEditIndicatorFolderModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">
+            ยกเลิก
+          </button>
+          <button type="button" onclick="saveIndicatorFolderLink()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold font-heading text-xs transition shadow-md flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> บันทึกลิงก์โฟลเดอร์
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL: AI ASSISTANT FOR PA ================= -->
   <div id="ai-assistant-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeAIAssistant()">
     <div class="relative max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto modal-content" onclick="event.stopPropagation()">
