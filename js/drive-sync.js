@@ -165,10 +165,12 @@ const DriveSync = {
       let testUrl = cleanUrl;
       const params = new URLSearchParams();
       if (cleanFolderId) params.append('folderId', cleanFolderId);
+      params.append('quick', '1');
+      params.append('test', '1');
       testUrl += (testUrl.includes('?') ? '&' : '?') + params.toString();
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // ขยายเวลาเป็น 45 วินาทีเพื่อรองรับ Google Apps Script Cold Start
 
       const res = await fetch(testUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -191,7 +193,10 @@ const DriveSync = {
       }
     } catch (err) {
       if (err.name === 'AbortError') {
-        return { ok: false, message: 'การเชื่อมต่อหมดเวลา (Timeout 15 วินาที) กรุณาตรวจสอบอินเทอร์เน็ตหรือ Apps Script' };
+        return { 
+          ok: false, 
+          message: 'การเชื่อมต่อใช้เวลานานเกินไป (Timeout 45 วินาที)\n\nสาเหตุ: Google Apps Script ใช้เวลาในการเริ่มต้นระบบหรือสแกนไฟล์ในไดรฟ์\n\n💡 คำแนะนำ: คุณครูสามารถกดปุ่มสีฟ้า "บันทึกการตั้งค่า" ด้านล่างนี้ได้เลยทันทีครับ ระบบจะจดจำ URL และเริ่มดึงไฟล์ในเบื้องหลังให้อัตโนมัติ' 
+        };
       }
       if (err.name === 'TypeError' || (err.message && err.message.toLowerCase().includes('failed to fetch'))) {
         return {

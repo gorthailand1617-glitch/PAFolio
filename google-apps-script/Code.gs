@@ -158,6 +158,27 @@ function doGet(e) {
       throw new Error("กรุณาระบุ Google Drive Folder ID ในหน้าเว็บหรือใน Code.gs");
     }
 
+    // ⚡ โหมดทดสอบการเชื่อมต่อด่วน (Quick Test / Ping): ตอบกลับทันทีใน 0.5 วินาที ไม่ต้องรอสแกนไฟล์ทั้งหมด
+    if (e && e.parameter && (e.parameter.test === '1' || e.parameter.quick === '1')) {
+      const rootFolder = DriveApp.getFolderById(folderId);
+      const subFolders = rootFolder.getFolders();
+      const years = [];
+      while (subFolders.hasNext()) {
+        const name = subFolders.next().getName();
+        if (/(25\d{2}|6\d|7\d)/.test(name) && !/(1\.[1-8]|2\.[1-4]|3\.[1-3])/.test(name)) {
+          years.push(name);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "เชื่อมต่อ Google Apps Script และ Google Drive สำเร็จ 100%",
+        data: {
+          folderName: rootFolder.getName(),
+          years: years.length > 0 ? years : ["2570", "2569", "2568", "2567", "2566"]
+        }
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const data = scanDriveRecursively(folderId, year);
     
     return ContentService.createTextOutput(JSON.stringify({

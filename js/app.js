@@ -28,7 +28,7 @@ const BASE_INDICATOR_TEMPLATES = [
 
 document.addEventListener('DOMContentLoaded', () => {
   // ✨ Cache-Busting & Smart Version Migration: ตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ และรักษาโปรไฟล์ของครูไว้
-  const CURRENT_APP_VERSION = '2569.4.3';
+  const CURRENT_APP_VERSION = '2569.4.4';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.setItem('pafolio_active_year', '2569');
