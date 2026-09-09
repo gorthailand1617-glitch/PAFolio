@@ -185,6 +185,8 @@ function testScanDrive() {
   Logger.log("📁 ชื่อโฟลเดอร์หลัก: " + res.folderName);
   Logger.log("📂 ปีที่พบ: " + JSON.stringify(res.years));
   Logger.log("📋 ตัวชี้วัดที่พบ: " + Object.keys(res.indicators).join(", "));
+  Logger.log("🎖️ เกียรติบัตรและโล่รางวัลที่พบ: " + (res.certificates ? res.certificates.length : 0) + " รายการ");
+  Logger.log("📁 ลิงก์โฟลเดอร์เกียรติบัตร: " + (res.certificateFolderUrl || "ไม่พบ"));
   Logger.log("🔗 โฟลเดอร์ตัวชี้วัดที่ตรวจพบ: " + JSON.stringify(res.indicatorFolders));
   Logger.log("✅ ทดสอบสแกนสำเร็จเรียบร้อย!");
 }
@@ -215,7 +217,9 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     evidenceGallery: [],
     challengeDocs: [],
     extractedChallenge: null,
-    indicatorFolders: {}
+    indicatorFolders: {},
+    certificates: [],
+    certificateFolderUrl: ""
   };
 
   // 1. สแกนหา Asset กลาง (รูปโปรไฟล์ / โลโก้ / ปก)
@@ -264,6 +268,9 @@ function scanDriveRecursively(rootFolderId, filterYear) {
   targetFoldersToScan.forEach(folder => {
     traverseFolder(folder, result, 0, null);
   });
+
+  // 5. สแกนหาคลังเกียรติบัตรและโล่รางวัลจากโฟลเดอร์เกียรติบัตรโดยตรง
+  scanCertificates(rootFolder, targetFoldersToScan, result);
 
   return result;
 }
@@ -349,6 +356,130 @@ function scanSystemAssets(rootFolder, result) {
       }
     }
   } catch(e) {}
+}
+
+/**
+ * 🎖️ สแกนหาเกียรติบัตรและโล่รางวัลจากโฟลเดอร์เกียรติบัตร (ทั้งใน 00_Assets และในแต่ละปีการศึกษา)
+ */
+function scanCertificates(rootFolder, targetFoldersToScan, result) {
+  const seenFileIds = {};
+
+  const processCertFile = function(file, folderName) {
+    try {
+      const fileId = file.getId();
+      if (seenFileIds[fileId]) return;
+      seenFileIds[fileId] = true;
+
+      const mime = file.getMimeType().toLowerCase();
+      const isImage = mime.includes("image");
+      const isPdf = mime.includes("pdf");
+      if (!isImage && !isPdf) return;
+
+      // พยายามเปิดสิทธิ์ Anyone with link เพื่อให้รูปแสดงบนเว็บได้ 100%
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch(e) {}
+
+      const fileName = file.getName();
+      const cleanTitle = fileName.replace(/\.[^/.]+$/, "");
+      const thumbUrl = "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w1200";
+      const viewUrl = file.getUrl();
+
+      // วิเคราะห์ระดับเกียรติบัตรจากชื่อไฟล์หรือชื่อโฟลเดอร์
+      let category = "national";
+      let categoryThai = "ระดับชาติ / นานาชาติ";
+      let levelBadge = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+      let badgeIcon = "fa-trophy text-amber-400";
+
+      const textForCat = (folderName + " " + cleanTitle).toLowerCase();
+      if (textForCat.includes("ชาติ") || textForCat.includes("นานาชาติ") || textForCat.includes("obec") || textForCat.includes("สพฐ") || textForCat.includes("คุรุสภา")) {
+        category = "national";
+        categoryThai = "ระดับชาติ / นานาชาติ";
+        levelBadge = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        badgeIcon = "fa-trophy text-amber-400";
+      } else if (textForCat.includes("ภาค") || textForCat.includes("เขตตรวจ") || textForCat.includes("จังหวัด")) {
+        category = "regional";
+        categoryThai = "ระดับภาค / จังหวัด";
+        levelBadge = "bg-teal-500/20 text-teal-300 border-teal-500/40";
+        badgeIcon = "fa-medal text-teal-400";
+      } else if (textForCat.includes("เขต") || textForCat.includes("สพม") || textForCat.includes("สพป") || textForCat.includes("อำเภอ")) {
+        category = "district";
+        categoryThai = "ระดับเขตพื้นที่การศึกษา";
+        levelBadge = "bg-blue-500/20 text-blue-300 border-blue-500/40";
+        badgeIcon = "fa-star text-blue-400";
+      } else if (textForCat.includes("โรงเรียน") || textForCat.includes("สถานศึกษา") || textForCat.includes("กลุ่มสาระ")) {
+        category = "school";
+        categoryThai = "ระดับสถานศึกษา";
+        levelBadge = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+        badgeIcon = "fa-certificate text-emerald-400";
+      }
+
+      // ดึงปีการศึกษา
+      let fileYear = result.years && result.years[0] ? result.years[0] : "2569";
+      const yearMatch = (folderName + " " + cleanTitle).match(/(25\d{2}|6\d|7\d)/);
+      if (yearMatch) {
+        fileYear = yearMatch[1].length === 2 ? "25" + yearMatch[1] : yearMatch[1];
+      }
+
+      result.certificates.push({
+        id: "drive-cert-" + fileId,
+        title: cleanTitle,
+        category: category,
+        categoryThai: categoryThai,
+        levelBadge: levelBadge,
+        badgeIcon: badgeIcon,
+        issuer: "Google Drive (" + folderName + ")",
+        year: fileYear,
+        date: file.getLastUpdated().toLocaleDateString('th-TH'),
+        imageUrl: thumbUrl,
+        description: "เกียรติบัตร / โล่รางวัล จากโฟลเดอร์ [" + folderName + "] ใน Google Drive",
+        docUrl: viewUrl
+      });
+    } catch(err) {
+      Logger.log("processCertFile error: " + err);
+    }
+  };
+
+  const checkFolderForCerts = function(folder, depth) {
+    if (depth > 5) return;
+    const name = folder.getName().toLowerCase();
+    const isCertFolder = name.includes("เกียรติบัตร") || name.includes("certificate") || 
+                         name.includes("โล่") || name.includes("รางวัล") || name.includes("award") ||
+                         name.includes("วุฒิบัตร");
+
+    if (isCertFolder) {
+      if (!result.certificateFolderUrl) {
+        result.certificateFolderUrl = folder.getUrl();
+      }
+      const files = folder.getFiles();
+      while (files.hasNext()) {
+        processCertFile(files.next(), folder.getName());
+      }
+    }
+
+    const subs = folder.getFolders();
+    while (subs.hasNext()) {
+      checkFolderForCerts(subs.next(), depth + 1);
+    }
+  };
+
+  // 1. ค้นหาใน Root Folder (เช่น 00_Assets_... หรือโฟลเดอร์เกียรติบัตรในไดรฟ์หลัก)
+  try {
+    checkFolderForCerts(rootFolder, 0);
+  } catch(e) {
+    Logger.log("scanCertificates root error: " + e);
+  }
+
+  // 2. ค้นหาในโฟลเดอร์แต่ละปีการศึกษา (เผื่อครูเก็บโฟลเดอร์เกียรติบัตรไว้ใน PA69, PA68)
+  try {
+    targetFoldersToScan.forEach(function(f) {
+      if (f.getId() !== rootFolder.getId()) {
+        checkFolderForCerts(f, 0);
+      }
+    });
+  } catch(e) {
+    Logger.log("scanCertificates targetFolders error: " + e);
+  }
 }
 
 /**

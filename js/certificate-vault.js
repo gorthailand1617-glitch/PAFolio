@@ -95,41 +95,96 @@ const CertificateVault = {
     }
   ],
 
-  // ดึงรายการเกียรติบัตรทั้งหมด (รวมข้อมูลจาก Google Drive ถ้ามี)
+  // ดึงรายการเกียรติบัตรทั้งหมด (ดึงรูปภาพจริงจากโฟลเดอร์เกียรติบัตรใน Google Drive เป็นอันดับแรก)
   getAllCertificates() {
-    let list = [...this.sampleCertificates];
+    let driveCerts = [];
+    const seenIds = new Set();
 
-    // ผสานข้อมูลจาก Google Drive โฟลเดอร์ 04_เกียรติบัตร
+    // 1. ดึงข้อมูลตรงจาก DriveSync.syncedData.certificates ที่สแกนได้จาก Google Drive
     if (typeof DriveSync !== 'undefined' && DriveSync.syncedData) {
+      if (Array.isArray(DriveSync.syncedData.certificates) && DriveSync.syncedData.certificates.length > 0) {
+        DriveSync.syncedData.certificates.forEach(c => {
+          if (!seenIds.has(c.id)) {
+            seenIds.add(c.id);
+            driveCerts.push(c);
+          }
+        });
+      }
+
+      // 2. ตรวจสอบเพิ่มเติมในตัวชี้วัดทั้งหมด เผื่อมีโฟลเดอร์หรือไฟล์เกียรติบัตรแทรกอยู่
       if (DriveSync.syncedData.indicators) {
         Object.values(DriveSync.syncedData.indicators).forEach(ind => {
-          if (ind.folderName && (ind.folderName.includes('เกียรติบัตร') || ind.folderName.includes('Certificates') || ind.folderName.includes('รางวัล'))) {
-            if (ind.files && ind.files.length > 0) {
-              ind.files.forEach((file, fIdx) => {
-                if (file.type === 'image' || file.type === 'pdf') {
-                  list.unshift({
-                    id: `drive-cert-${file.id || fIdx}`,
+          const isCertFolder = ind.folderName && (
+            ind.folderName.includes('เกียรติบัตร') || 
+            ind.folderName.includes('Certificates') || 
+            ind.folderName.includes('รางวัล') || 
+            ind.folderName.includes('วุฒิบัตร')
+          );
+          
+          if (ind.files && ind.files.length > 0) {
+            ind.files.forEach((file, fIdx) => {
+              const fileName = (file.title || '').toLowerCase();
+              const isCertFile = isCertFolder || 
+                                fileName.includes('เกียรติบัตร') || 
+                                fileName.includes('วุฒิบัตร') || 
+                                fileName.includes('รางวัล') || 
+                                fileName.includes('cert');
+
+              if (isCertFile && (file.type === 'image' || file.type === 'pdf')) {
+                const cId = `drive-cert-${file.id || fIdx}`;
+                if (!seenIds.has(cId)) {
+                  seenIds.add(cId);
+                  
+                  // วิเคราะห์ระดับรางวัลจากชื่อ
+                  let cat = 'national';
+                  let catThai = 'ระดับชาติ / นานาชาติ';
+                  let badge = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+                  let icon = 'fa-trophy text-amber-400';
+
+                  const fullText = (ind.folderName + ' ' + file.title).toLowerCase();
+                  if (fullText.includes('ภาค') || fullText.includes('จังหวัด')) {
+                    cat = 'regional'; catThai = 'ระดับภาค / จังหวัด';
+                    badge = 'bg-teal-500/20 text-teal-300 border-teal-500/40';
+                    icon = 'fa-medal text-teal-400';
+                  } else if (fullText.includes('เขต') || fullText.includes('สพม') || fullText.includes('สพป')) {
+                    cat = 'district'; catThai = 'ระดับเขตพื้นที่การศึกษา';
+                    badge = 'bg-blue-500/20 text-blue-300 border-blue-500/40';
+                    icon = 'fa-star text-blue-400';
+                  } else if (fullText.includes('โรงเรียน') || fullText.includes('สถานศึกษา')) {
+                    cat = 'school'; catThai = 'ระดับสถานศึกษา';
+                    badge = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+                    icon = 'fa-certificate text-emerald-400';
+                  }
+
+                  driveCerts.push({
+                    id: cId,
                     title: file.title.replace(/\.[^/.]+$/, ""),
-                    category: 'national',
-                    categoryThai: 'Google Drive Sync',
-                    levelBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-                    badgeIcon: 'fa-brands fa-google-drive text-teal-400',
-                    issuer: 'Google Drive (' + ind.folderName + ')',
-                    year: '2568',
+                    category: cat,
+                    categoryThai: catThai,
+                    levelBadge: badge,
+                    badgeIcon: icon,
+                    issuer: `Google Drive (${ind.folderName || 'โฟลเดอร์เกียรติบัตร'})`,
+                    year: (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2569'),
                     date: 'ซิงก์สดจากไดรฟ์',
-                    imageUrl: file.thumbUrl || file.viewUrl,
-                    description: `ไฟล์หลักฐานเกียรติบัตรและโล่รางวัลที่ตรวจพบจาก Google Drive โฟลเดอร์ [${ind.folderName}]`,
+                    imageUrl: file.thumbUrl || `https://drive.google.com/thumbnail?id=${file.id}&sz=w1200`,
+                    description: `ไฟล์ภาพเกียรติบัตรจริงจาก Google Drive โฟลเดอร์ [${ind.folderName}]`,
                     docUrl: file.viewUrl
                   });
                 }
-              });
-            }
+              }
+            });
           }
         });
       }
     }
 
-    return list;
+    // หากพบรูปเกียรติบัตรจริงจาก Google Drive ให้แสดงรูปจริงจากไดรฟ์เป็นหลัก 100%!
+    if (driveCerts.length > 0) {
+      return driveCerts;
+    }
+
+    // หากยังไม่ได้เชื่อมต่อไดรฟ์ ให้แสดง Baseline ตัวอย่าง
+    return [...this.sampleCertificates];
   },
 
   // กรองเกียรติบัตรตามหมวดหมู่และคำค้นหา
@@ -255,5 +310,18 @@ const CertificateVault = {
   setSearch(query) {
     this.searchQuery = query;
     this.renderVaultUI();
+  },
+
+  // เปิดโฟลเดอร์เกียรติบัตรใน Google Drive
+  openDriveFolder() {
+    let folderUrl = '';
+    if (typeof DriveSync !== 'undefined' && DriveSync.syncedData && DriveSync.syncedData.certificateFolderUrl) {
+      folderUrl = DriveSync.syncedData.certificateFolderUrl;
+    }
+    if (!folderUrl) {
+      const rootId = (typeof DriveSync !== 'undefined' && DriveSync.config && DriveSync.config.folderId) ? DriveSync.config.folderId : '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K';
+      folderUrl = `https://drive.google.com/drive/search?q='${rootId}'+in+parents+name+contains+'${encodeURIComponent("เกียรติบัตร")}'`;
+    }
+    window.open(folderUrl, '_blank');
   }
 };

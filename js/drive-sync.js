@@ -241,6 +241,9 @@ const DriveSync = {
       // รีเฟรชส่วนการแสดงผลบนหน้าเว็บ
       if (typeof renderGallery === 'function') renderGallery();
       if (typeof renderIndicators === 'function') renderIndicators('all', '');
+      if (typeof CertificateVault !== 'undefined' && typeof CertificateVault.renderVaultUI === 'function') {
+        CertificateVault.renderVaultUI();
+      }
 
       if (showToast) {
         this.showToast(`ซิงก์ข้อมูลจาก Google Drive เรียบร้อยแล้ว (พบ ${totalFiles} ไฟล์, ${totalImages} ภาพ)`, 'success', 4000);
