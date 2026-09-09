@@ -320,18 +320,40 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
       <!-- Profile Card -->
-      <div class="lg:col-span-4 bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-slate-100 text-center relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-teal-800 to-slate-900"></div>
-        <div class="relative mt-10">
-          <img src="https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w600" 
-               alt="ภาพโปรไฟล์" 
-               class="w-40 h-40 mx-auto rounded-3xl object-cover ring-4 ring-white shadow-2xl teacher-avatar-img">
-          <span class="absolute bottom-1 right-1/2 translate-x-16 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full ring-2 ring-white shadow-md teacher-standing-label">
-            ชำนาญการพิเศษ
-          </span>
+      <div class="lg:col-span-4 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 text-center relative overflow-hidden group">
+        <div class="absolute top-0 left-0 right-0 h-44 bg-gradient-to-tr from-teal-950 via-teal-800 to-slate-900">
+          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#2dd4bf_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        </div>
+        
+        <div class="relative mt-8">
+          <!-- Floating Year Badge -->
+          <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-md text-teal-300 text-[11px] font-semibold border border-teal-500/40 shadow-lg mb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="current-year-label">ปีการศึกษา 2568</span>
+          </div>
+
+          <!-- Prominent Large Avatar with Executive Aura (Grand Size) -->
+          <div class="relative inline-block mx-auto">
+            <div class="p-2 rounded-[32px] bg-gradient-to-tr from-teal-400 via-emerald-400 to-indigo-500 shadow-[0_25px_60px_rgba(13,148,136,0.45)] group-hover:shadow-[0_30px_70px_rgba(13,148,136,0.6)] transition-all duration-500">
+              <img src="https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800" 
+                   alt="ภาพโปรไฟล์ครู" 
+                   class="w-64 h-64 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mx-auto rounded-[26px] object-cover ring-4 ring-white transform transition duration-500 group-hover:scale-[1.02] teacher-avatar-img bg-slate-900">
+            </div>
+            
+            <!-- Quick Edit Shortcut on Avatar Hover -->
+            <button onclick="openProfileEditorModal()" title="คลิกเพื่อเปลี่ยนรูปภาพหรือแก้ไขข้อมูลของปีนี้" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-2xl bg-slate-900/85 hover:bg-teal-600 text-white flex items-center justify-center text-sm backdrop-blur-md border border-white/20 shadow-xl transition opacity-80 group-hover:opacity-100 hover:scale-110">
+              <i class="fa-solid fa-camera"></i>
+            </button>
+
+            <!-- Standing Badge Floating at Bottom -->
+            <span class="absolute -bottom-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gradient-to-r from-emerald-600 via-teal-700 to-indigo-700 text-white text-xs sm:text-sm font-bold px-5 py-2 rounded-full ring-4 ring-white shadow-2xl teacher-standing-label flex items-center gap-2">
+              <i class="fa-solid fa-award text-amber-300"></i> ชำนาญการพิเศษ
+            </span>
+          </div>
         </div>
 
-        <h3 class="mt-6 text-2xl font-bold text-slate-900 font-heading teacher-name-label">นายกรกฎ รัตนะโชติ</h3>
+        <h3 class="mt-8 text-2xl font-bold text-slate-900 font-heading teacher-name-label">นายกรกฎ รัตนะโชติ</h3>
         <p class="text-sm text-slate-500 font-medium">ตำแหน่ง ครู วิทยฐานะ <span class="teacher-standing-label">ครูชำนาญการพิเศษ</span></p>
         <p class="text-sm font-semibold text-teal-700 mt-1 teacher-school-label">โรงเรียนเปรมติณสูลานนท์</p>
         <p class="text-xs text-slate-400 teacher-dept-label">กลุ่มสาระการเรียนรู้การงานอาชีพ</p>

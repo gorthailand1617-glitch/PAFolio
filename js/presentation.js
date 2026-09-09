@@ -397,10 +397,11 @@ const PresentationDeck = {
 
     if (activeSlide.type === 'cover') {
       // 1. หน้าปก (Cover Slide)
+      const coverAvatarSrc = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
       html = `
         <div class="h-full flex flex-col justify-center items-center text-center p-8 max-w-4xl mx-auto animate-fade-in text-white">
-          <div onclick="openLightbox('${teacher.avatarUrl}', '${teacher.name}', 'รูปประจำตัวครูผู้รับการประเมิน')" class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl p-1.5 bg-gradient-to-tr from-teal-400 via-indigo-400 to-amber-400 shadow-2xl mb-6 ring-4 ring-white/10 cursor-pointer hover:scale-105 transition duration-300">
-            <img src="${teacher.avatarUrl}" alt="${teacher.name}" class="w-full h-full object-cover rounded-[20px]">
+          <div onclick="openLightbox('${coverAvatarSrc}', '${teacher.name}', 'รูปประจำตัวครูผู้รับการประเมิน')" class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl p-1.5 bg-gradient-to-tr from-teal-400 via-indigo-400 to-amber-400 shadow-2xl mb-6 ring-4 ring-white/10 cursor-pointer hover:scale-105 transition duration-300">
+            <img src="${coverAvatarSrc}" alt="${teacher.name}" class="w-full h-full object-cover rounded-[20px]">
           </div>
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/40 text-xs sm:text-sm font-semibold mb-4 shadow-sm">
             <i class="fa-solid fa-award text-amber-400"></i> การประเมินผลการพัฒนางานตามข้อตกลง (ว.PA)
@@ -485,6 +486,14 @@ const PresentationDeck = {
         ? AIAssistant.generateIndicatorContent(ind.code, teacher.learningArea, "มัธยมศึกษา", teacher.academicStanding)
         : { workDescription: ind.shortDesc, outcomeDescription: "ผู้เรียนเกิดสมรรถนะตามเป้าหมาย" };
 
+      let workDesc = aiContent.workDescription;
+      let outcomeDesc = aiContent.outcomeDescription;
+      if (yearData && yearData.indicatorSyntheses && yearData.indicatorSyntheses[ind.code]) {
+        const synth = yearData.indicatorSyntheses[ind.code];
+        workDesc = synth.task;
+        outcomeDesc = `• เชิงปริมาณ: ${synth.quant}\n• เชิงคุณภาพ: ${synth.qual}`;
+      }
+
       const evidenceImages = this.findEvidenceImagesForIndicator(ind.code, indIdx >= 0 ? indIdx : 0);
       currentSlideImages = evidenceImages;
 
@@ -531,7 +540,7 @@ const PresentationDeck = {
                   <i class="fa-solid fa-file-pen text-teal-400"></i> การดำเนินการตามมาตรฐานวิทยฐานะ (${teacher.academicStanding})
                 </h4>
                 <p class="text-xs sm:text-sm leading-relaxed text-slate-200">
-                  ${aiContent.workDescription}
+                  ${workDesc}
                 </p>
               </div>
 
@@ -540,7 +549,7 @@ const PresentationDeck = {
                   <i class="fa-solid fa-award text-emerald-400"></i> ผลลัพธ์ที่เกิดขึ้นกับผู้เรียน
                 </h4>
                 <p class="text-xs sm:text-sm leading-relaxed text-slate-200 whitespace-pre-line">
-                  ${aiContent.outcomeDescription}
+                  ${outcomeDesc}
                 </p>
               </div>
 

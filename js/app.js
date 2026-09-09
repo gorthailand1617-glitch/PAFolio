@@ -137,15 +137,17 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   document.querySelectorAll('.teacher-school-label').forEach(el => el.innerText = teacher.school);
   document.querySelectorAll('.teacher-dept-label').forEach(el => el.innerText = teacher.learningArea);
 
-  // อัปเดตรูปโปรไฟล์ครู (ป้องกันกรณีผู้ใช้ใส่ลิงก์โฟลเดอร์)
-  if (teacher.avatarUrl && !teacher.avatarUrl.includes('/drive/folders/')) {
-    const avatarSrc = convertToGoogleDriveThumbnailUrl(teacher.avatarUrl, 'w800');
+  // อัปเดตรูปโปรไฟล์ครู (ดึงภาพเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้รูปหลัก)
+  const activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
+  if (activeAvatar && !activeAvatar.includes('/drive/folders/')) {
+    const avatarSrc = convertToGoogleDriveThumbnailUrl(activeAvatar, 'w800');
     document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = avatarSrc);
   }
 
-  // อัปเดตภาพปกแบนเนอร์ Hero (ป้องกันกรณีผู้ใช้ใส่ลิงก์โฟลเดอร์)
-  if (teacher.coverUrl && !teacher.coverUrl.includes('/drive/folders/')) {
-    const coverSrc = convertToGoogleDriveThumbnailUrl(teacher.coverUrl, 'w1920');
+  // อัปเดตภาพปกแบนเนอร์ Hero (ดึงภาพปกเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้ภาพหลัก)
+  const activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
+  if (activeCover && !activeCover.includes('/drive/folders/')) {
+    const coverSrc = convertToGoogleDriveThumbnailUrl(activeCover, 'w1920');
     document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = coverSrc);
   }
 
@@ -413,7 +415,9 @@ function renderGallery(filter = 'all') {
   ];
 
   // ถ้ามีภาพจริงที่ซิงก์สดมาจาก Google Drive ให้แสดงภาพจาก Google Drive
-  let galleryList = sampleGallery;
+  // หากไม่มี ให้ดึงภาพคลังหลักฐานเฉพาะของปีการศึกษานั้นๆ (yearData.gallery)
+  const yearData = getActiveYearData();
+  let galleryList = (yearData && yearData.gallery && yearData.gallery.length > 0) ? yearData.gallery : sampleGallery;
   let isLiveDrive = false;
   if (DriveSync.syncedData && DriveSync.syncedData.evidenceGallery && DriveSync.syncedData.evidenceGallery.length > 0) {
     galleryList = DriveSync.syncedData.evidenceGallery;
@@ -453,11 +457,33 @@ function openIndicatorModal(indicator, teacher, expectedLevel) {
   const modal = document.getElementById('indicator-modal');
   if (!modal) return;
 
+  const yearData = getActiveYearData();
+  const synth = (yearData && yearData.indicatorSyntheses && yearData.indicatorSyntheses[indicator.code])
+    ? yearData.indicatorSyntheses[indicator.code]
+    : null;
+
   document.getElementById('modal-code').innerText = `ตัวชี้วัด ${indicator.code}`;
   document.getElementById('modal-title').innerText = indicator.title;
   document.getElementById('modal-level').innerText = expectedLevel;
-  document.getElementById('modal-details').innerText = `การดำเนินการตามตัวชี้วัด ${indicator.code} (${indicator.title}) ของ ${teacher.name} สอดรับกับระดับการปฏิบัติที่คาดหวังตามมาตรฐานตำแหน่งและวิทยฐานะ ${teacher.academicStanding} คือ "${expectedLevel}"`;
-  document.getElementById('modal-results').innerText = `ผู้เรียนเกิดสมรรถนะการเรียนรู้ ทักษะการปฏิบัติงาน และมีคุณลักษณะอันพึงประสงค์ผ่านเกณฑ์มาตรฐานของกลุ่มสาระการเรียนรู้`;
+
+  if (synth) {
+    document.getElementById('modal-details').innerText = synth.task;
+    document.getElementById('modal-results').innerHTML = `
+      <div class="space-y-2">
+        <div class="flex items-start gap-2">
+          <span class="px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-900 font-bold text-xs flex-shrink-0">เชิงปริมาณ</span>
+          <span class="text-xs sm:text-sm text-emerald-950">${synth.quant}</span>
+        </div>
+        <div class="flex items-start gap-2 pt-1 border-t border-emerald-200/60">
+          <span class="px-2 py-0.5 rounded bg-teal-200/80 text-teal-900 font-bold text-xs flex-shrink-0">เชิงคุณภาพ</span>
+          <span class="text-xs sm:text-sm text-emerald-950">${synth.qual}</span>
+        </div>
+      </div>
+    `;
+  } else {
+    document.getElementById('modal-details').innerText = `การดำเนินการตามตัวชี้วัด ${indicator.code} (${indicator.title}) ของ ${teacher.name} สอดรับกับระดับการปฏิบัติที่คาดหวังตามมาตรฐานตำแหน่งและวิทยฐานะ ${teacher.academicStanding} คือ "${expectedLevel}"`;
+    document.getElementById('modal-results').innerText = `ผู้เรียนเกิดสมรรถนะการเรียนรู้ ทักษะการปฏิบัติงาน และมีคุณลักษณะอันพึงประสงค์ผ่านเกณฑ์มาตรฐานของกลุ่มสาระการเรียนรู้`;
+  }
 
   // ตรวจสอบไฟล์จริงจาก Google Drive ที่ซิงก์มา
   const listEl = document.getElementById('modal-evidence-list');
@@ -518,12 +544,12 @@ function openIndicatorModal(indicator, teacher, expectedLevel) {
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-base"><i class="fa-solid fa-file-pdf"></i></div>
           <div>
-            <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm">เอกสารร่องรอยหลักฐาน ตัวชี้วัด ${indicator.code} (ปี ${currentAcademicYear})</div>
-            <div class="text-[11px] text-slate-500">Google Drive Folder · ตัวชี้วัด ${indicator.code}</div>
+            <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm">เอกสารร่องรอยหลักฐาน ตัวชี้วัด ${indicator.code} (ปีการศึกษา ${currentAcademicYear})</div>
+            <div class="text-[11px] text-teal-800 font-medium">${(synth && synth.evidence) ? '<i class="fa-solid fa-list-check mr-1 text-teal-600"></i> ' + synth.evidence : 'Google Drive Folder · ตัวชี้วัด ' + indicator.code}</div>
           </div>
         </div>
         <button class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-teal-700 text-xs font-semibold hover:bg-teal-600 hover:text-white transition shadow-sm">
-          <i class="fa-solid fa-eye mr-1"></i> เปิดดูไฟล์
+          <i class="fa-solid fa-eye mr-1"></i> เปิดดูตัวอย่าง
         </button>
       </div>
     `;
@@ -919,14 +945,38 @@ function loadStoredTeachers() {
     const data = localStorage.getItem('pafolio_custom_teachers');
     if (data) {
       const parsed = JSON.parse(data);
-      // ตรวจสอบและล้างลิงก์ที่เป็นโฟลเดอร์ Google Drive ออก เพื่อไม่ให้เกิดภาพแตก
+      // ตรวจสอบและผสานข้อมูลอย่างปลอดภัย ป้องกันไม่ให้แคชเก่าลบปี 2567, 2566 หรือ indicatorSyntheses
       for (const key in parsed) {
-        const t = parsed[key];
-        if (t.avatarUrl && t.avatarUrl.includes('/drive/folders/')) {
-          t.avatarUrl = PAFOLIO_DATABASE[key]?.avatarUrl || PAFOLIO_DATABASE['teacher-korakot']?.avatarUrl || '';
+        const stored = parsed[key];
+        const baseline = PAFOLIO_DATABASE[key];
+
+        if (stored.avatarUrl && stored.avatarUrl.includes('/drive/folders/')) {
+          stored.avatarUrl = baseline?.avatarUrl || PAFOLIO_DATABASE['teacher-korakot']?.avatarUrl || '';
         }
-        if (t.coverUrl && t.coverUrl.includes('/drive/folders/')) {
-          t.coverUrl = PAFOLIO_DATABASE[key]?.coverUrl || PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
+        if (stored.coverUrl && stored.coverUrl.includes('/drive/folders/')) {
+          stored.coverUrl = baseline?.coverUrl || PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
+        }
+
+        if (baseline && baseline.years) {
+          if (!stored.years) stored.years = {};
+          for (const y in baseline.years) {
+            if (!stored.years[y]) {
+              stored.years[y] = baseline.years[y];
+            } else {
+              if (!stored.years[y].indicatorSyntheses && baseline.years[y].indicatorSyntheses) {
+                stored.years[y].indicatorSyntheses = baseline.years[y].indicatorSyntheses;
+              }
+              if (!stored.years[y].gallery && baseline.years[y].gallery) {
+                stored.years[y].gallery = baseline.years[y].gallery;
+              }
+              if (!stored.years[y].avatarUrl && baseline.years[y].avatarUrl) {
+                stored.years[y].avatarUrl = baseline.years[y].avatarUrl;
+              }
+              if (!stored.years[y].coverUrl && baseline.years[y].coverUrl) {
+                stored.years[y].coverUrl = baseline.years[y].coverUrl;
+              }
+            }
+          }
         }
       }
       Object.assign(PAFOLIO_DATABASE, parsed);
@@ -1225,8 +1275,8 @@ function openProfileEditorModal() {
   if (document.getElementById('edit-profile-school')) document.getElementById('edit-profile-school').value = teacher.school || '';
   if (document.getElementById('edit-profile-affiliation')) document.getElementById('edit-profile-affiliation').value = teacher.affiliation || '';
   
-  const currentAvatar = teacher.avatarUrl || '';
-  const currentCover = teacher.coverUrl || '';
+  const currentAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : (teacher.avatarUrl || '');
+  const currentCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : (teacher.coverUrl || '');
   if (document.getElementById('edit-profile-avatar')) document.getElementById('edit-profile-avatar').value = currentAvatar;
   if (document.getElementById('edit-profile-cover')) document.getElementById('edit-profile-cover').value = currentCover;
 
@@ -1287,9 +1337,16 @@ function handleSaveProfileEditor() {
   if (standing) teacher.academicStanding = standing;
   if (dept) { teacher.learningArea = dept; teacher.department = dept; }
   if (school) teacher.school = school;
-  if (affiliation) teacher.affiliation = affiliation;
-  if (avatar) teacher.avatarUrl = convertToGoogleDriveThumbnailUrl(avatar, 'w800');
-  if (cover) teacher.coverUrl = convertToGoogleDriveThumbnailUrl(cover, 'w1920');
+  if (avatar) {
+    const convertedAvatar = convertToGoogleDriveThumbnailUrl(avatar, 'w800');
+    teacher.avatarUrl = convertedAvatar;
+    if (yearData) yearData.avatarUrl = convertedAvatar;
+  }
+  if (cover) {
+    const convertedCover = convertToGoogleDriveThumbnailUrl(cover, 'w1920');
+    teacher.coverUrl = convertedCover;
+    if (yearData) yearData.coverUrl = convertedCover;
+  }
 
   if (topic) {
     if (!yearData.challengeIssue) yearData.challengeIssue = {};
