@@ -3,9 +3,9 @@
  * รองรับการสลับปีการศึกษา, สลับครูผู้สอน, และการซิงก์ Google Drive
  */
 
-// Active State Management
+// Active State Management (ตั้งค่าเริ่มต้นเป็นปี 2569 ล่าสุด)
 let currentTeacherId = localStorage.getItem('pafolio_active_teacher') || 'teacher-korakot';
-let currentAcademicYear = localStorage.getItem('pafolio_active_year') || '2568';
+let currentAcademicYear = localStorage.getItem('pafolio_active_year') || '2569';
 
 // Fallback Indicator Templates
 const BASE_INDICATOR_TEMPLATES = [
@@ -27,6 +27,16 @@ const BASE_INDICATOR_TEMPLATES = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ✨ Cache-Busting & Auto-Migration: ล้างแคชเก่าที่ค้างอยู่ในเครื่องอื่น และตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ
+  const CURRENT_APP_VERSION = '2569.3.2';
+  const localVersion = localStorage.getItem('pafolio_app_version');
+  if (localVersion !== CURRENT_APP_VERSION) {
+    localStorage.removeItem('pafolio_custom_teachers');
+    localStorage.setItem('pafolio_active_year', '2569');
+    localStorage.setItem('pafolio_app_version', CURRENT_APP_VERSION);
+    currentAcademicYear = '2569';
+  }
+
   // ✨ AI Auto-Heal: ตรวจสอบและแก้ไข Google Drive Folder ID อัตโนมัติ (Zero-Config)
   // หากพบ ID ที่เป็นโฟลเดอร์สคริปต์ (19mPdGDZ...) หรือค่าว่าง ให้ AI สลับเป็นโฟลเดอร์ ว.PA จริงทันที
   const badFolderIds = ['19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE'];
