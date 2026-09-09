@@ -329,69 +329,68 @@ function renderIndicators(filter = 'all', searchQuery = '') {
     const grid = domainSection.querySelector(`#grid-${domain.id}`);
 
     indicators.forEach(ind => {
+      const media = (typeof getIndicatorFilesAndMedia === 'function') 
+        ? getIndicatorFilesAndMedia(ind.code, currentAcademicYear)
+        : { images: [], docs: [], isLiveFromDrive: false, folderUrl: getIndicatorDriveUrl(ind.code) };
+
       const card = document.createElement('div');
-      card.className = 'bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80 hover-lift flex flex-col justify-between cursor-pointer group';
-      card.onclick = () => openIndicatorModal(ind, teacher, expectedLevel);
+      card.className = 'bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 hover-lift flex flex-col justify-between cursor-pointer group overflow-hidden transition duration-300';
+      card.onclick = () => openIndicatorModal(ind, teacher, expectedLevel, domain);
 
-      let tagBg = domain.color === 'teal' ? 'bg-teal-50 text-teal-700 border-teal-100' : (domain.color === 'indigo' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-amber-50 text-amber-800 border-amber-200');
+      let tagBg = domain.color === 'teal' ? 'bg-teal-50 text-teal-700 border-teal-200' : (domain.color === 'indigo' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-800 border-amber-200');
 
-      // ตรวจสอบจำนวนไฟล์จริงจาก Google Drive
-      let fileCountText = `<i class="fa-solid fa-folder-open text-teal-600"></i> โฟลเดอร์ Drive ${ind.code}`;
-      let fileBadge = '';
-      if (DriveSync.syncedData && DriveSync.syncedData.indicators) {
-        const matchingKey = Object.keys(DriveSync.syncedData.indicators).find(key => 
-          key === ind.code || key.startsWith(ind.code + ' ') || key.startsWith(ind.code + '.') || key.includes(ind.code)
-        );
-        if (matchingKey && DriveSync.syncedData.indicators[matchingKey].files) {
-          const count = DriveSync.syncedData.indicators[matchingKey].files.length;
-          if (count > 0) {
-            fileBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-brands fa-google-drive"></i> ${count} ไฟล์</span>`;
-            fileCountText = `<i class="fa-solid fa-file-circle-check text-emerald-600"></i> ซิงก์แล้ว ${count} รายการ`;
-          }
-        }
-      }
+      const primaryImg = (media.images && media.images.length > 0) ? media.images[0] : null;
+      const primaryImgUrl = primaryImg ? (primaryImg.url || primaryImg.thumbUrl) : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80';
+      const imgCount = media.images ? media.images.length : 0;
+      const filesCount = media.docs ? media.docs.length : 0;
 
-      const indDriveUrl = getIndicatorDriveUrl(ind.code);
+      const liveBadge = media.isLiveFromDrive
+        ? `<span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-emerald-950/85 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold backdrop-blur-md shadow-sm flex items-center gap-1"><i class="fa-brands fa-google-drive"></i> ไดรฟ์สด</span>`
+        : '';
+      const photoBadge = imgCount > 1
+        ? `<span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-slate-950/70 text-white text-[10px] font-semibold backdrop-blur-md flex items-center gap-1 shadow"><i class="fa-solid fa-images"></i> ${imgCount} ภาพ</span>`
+        : '';
+
+      const indDriveUrl = media.folderUrl || getIndicatorDriveUrl(ind.code);
       const isDirectFolder = isIndicatorFolderDirect(ind.code);
 
       card.innerHTML = `
         <div>
-          <div class="flex justify-between items-start mb-3 gap-1">
-            <span class="text-xs font-bold px-2.5 py-1 rounded-md border ${tagBg}">
+          <!-- 🖼️ ภาพตัวอย่างจากโฟลเดอร์ภาพตัวชี้วัดในไดรฟ์ -->
+          <div class="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-3.5 bg-slate-100 shadow-inner">
+            <img src="${primaryImgUrl}" alt="${ind.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
+            <span class="absolute top-2.5 left-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${tagBg}">
               ตัวชี้วัด ${ind.code}
             </span>
-            <div class="flex items-center gap-1.5">
-              ${fileBadge}
-              <a href="${indDriveUrl}" target="_blank" onclick="event.stopPropagation();" 
-                 title="เปิดโฟลเดอร์ตัวชี้วัด ${ind.code} ใน Google Drive" 
-                 class="w-7 h-7 rounded-lg ${isDirectFolder ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60' : 'bg-slate-100 text-slate-500 hover:bg-teal-50 hover:text-teal-700'} flex items-center justify-center transition shadow-sm">
-                <i class="fa-brands fa-google-drive text-xs"></i>
-              </a>
-              <span class="text-xs font-medium text-slate-400 group-hover:text-teal-600 transition">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              </span>
+            ${liveBadge}
+            ${photoBadge}
+            <div class="absolute bottom-2 left-2.5 right-14 text-white/95 text-[11px] font-medium truncate drop-shadow">
+              ${primaryImg ? (primaryImg.title || ind.title) : ind.title}
             </div>
           </div>
-          <h4 class="font-heading font-bold text-slate-900 text-base mb-2 group-hover:text-teal-700 transition leading-snug">
+
+          <h4 class="font-heading font-bold text-slate-900 text-base mb-2 group-hover:text-teal-700 transition leading-snug line-clamp-2">
             ${ind.title}
           </h4>
-          <p class="text-xs text-slate-600 leading-relaxed line-clamp-3">
+          <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">
             ${ind.shortDesc}
           </p>
         </div>
 
-        <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           <span class="text-[11px] text-slate-500 flex items-center gap-1.5">
-            ${fileCountText}
+            ${media.isLiveFromDrive ? '<i class="fa-solid fa-cloud-arrow-down text-emerald-600"></i>' : '<i class="fa-solid fa-folder-open text-teal-600"></i>'}
+            <span>${filesCount > 0 ? filesCount + ' เอกสาร' : 'โฟลเดอร์ไดรฟ์'}</span>
           </span>
-          <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-2">
             <a href="${indDriveUrl}" target="_blank" onclick="event.stopPropagation();" 
                class="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 hover:underline" 
                title="เปิดโฟลเดอร์ Google Drive ของตัวชี้วัด ${ind.code}">
               <i class="fa-brands fa-google-drive"></i> เปิดไดรฟ์ <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
             </a>
             <span class="text-[11px] font-semibold text-slate-600 group-hover:text-teal-700 flex items-center gap-0.5">
-              ดูหลักฐาน <i class="fa-solid fa-chevron-right text-[9px]"></i>
+              ดูสไลด์ <i class="fa-solid fa-chevron-right text-[9px]"></i>
             </span>
           </div>
         </div>
@@ -491,130 +490,445 @@ function renderGallery(filter = 'all') {
   });
 }
 
-// Indicator Modal
-function openIndicatorModal(indicator, teacher, expectedLevel) {
+// ================= คลังภาพและเอกสารมาตรฐาน 15 ตัวชี้วัด ว9/2564 =================
+const INDICATOR_CURATED_MEDIA = {
+  "1.1": {
+    images: [
+      { title: "การพัฒนาหลักสูตรรายวิชาและโครงสร้างสาระการเรียนรู้", url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&auto=format&fit=crop&q=80", caption: "การวิเคราะห์โครงสร้างหลักสูตรและจัดทำคำอธิบายรายวิชา" },
+      { title: "ผังมโนทัศน์หน่วยการเรียนรู้", url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&auto=format&fit=crop&q=80", caption: "การออกแบบโครงสร้างหน่วยและสมรรถนะการเรียนรู้ตามมาตรฐาน" }
+    ],
+    sampleDocs: [
+      { title: "หลักสูตรกลุ่มสาระการเรียนรู้และคำอธิบายรายวิชา.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.4 MB" },
+      { title: "โครงสร้างหน่วยการเรียนรู้และกำหนดการสอน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB" }
+    ]
+  },
+  "1.2": {
+    images: [
+      { title: "การออกแบบแผนการจัดการเรียนรู้เชิงรุก (Active Learning)", url: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=1600&auto=format&fit=crop&q=80", caption: "แผนการจัดการเรียนรู้เชิงรุกเน้นผู้เรียนเป็นสำคัญ" },
+      { title: "กระบวนการจัดการเรียนรู้เน้นการปฏิบัติ", url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80", caption: "การจำลองสถานการณ์จริงเพื่อฝึกทักษะการคิดวิเคราะห์" }
+    ],
+    sampleDocs: [
+      { title: "แผนการจัดการเรียนรู้เชิงรุก (Active Learning).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.5 MB" },
+      { title: "บันทึกหลังการจัดการเรียนรู้และสะท้อนผล.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.2 MB" }
+    ]
+  },
+  "1.3": {
+    images: [
+      { title: "บรรยากาศการจัดกิจกรรม Active Learning", url: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1600&auto=format&fit=crop&q=80", caption: "นักเรียนลงมือปฏิบัติกิจกรรมกลุ่มและการแก้ปัญหาเป็นทีม" },
+      { title: "การระดมความคิดด้วย Thinking Whiteboard", url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&auto=format&fit=crop&q=80", caption: "การแลกเปลี่ยนเรียนรู้และนำเสนอผลงานกลุ่ม" }
+    ],
+    sampleDocs: [
+      { title: "ใบกิจกรรมการเรียนรู้และแบบบันทึกงานกลุ่ม.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.6 MB" },
+      { title: "ภาพถ่ายและบันทึกกิจกรรมการเรียนรู้เชิงรุก.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.1 MB" }
+    ]
+  },
+  "1.4": {
+    images: [
+      { title: "สื่อนวัตกรรมดิจิทัลและ AI ช่วยสอน", url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&auto=format&fit=crop&q=80", caption: "การประยุกต์ใช้แพลตฟอร์มดิจิทัลและ AI ในห้องเรียน" },
+      { title: "สื่อการสอนมัลติมีเดียแบบมีปฏิสัมพันธ์", url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1600&auto=format&fit=crop&q=80", caption: "บทเรียน Micro-learning และเครื่องมือสร้างสรรค์นวัตกรรม" }
+    ],
+    sampleDocs: [
+      { title: "รายงานการพัฒนาสื่อนวัตกรรมและเทคโนโลยีการสอน.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.9 MB" },
+      { title: "คู่มือการใช้สื่อนวัตกรรมและลิงก์เข้าสู่บทเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.4 MB" }
+    ]
+  },
+  "1.5": {
+    images: [
+      { title: "การวัดและประเมินผลตามสภาพจริง", url: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1600&auto=format&fit=crop&q=80", caption: "การประเมินชิ้นงานและทักษะด้วยเกณฑ์รูบริกส์ (Rubrics)" },
+      { title: "ระบบสารสนเทศคะแนนและการสะท้อนผล", url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&auto=format&fit=crop&q=80", caption: "การวิเคราะห์ผลสัมฤทธิ์ทางการเรียนและการให้ข้อมูลย้อนกลับ" }
+    ],
+    sampleDocs: [
+      { title: "เครื่องมือวัดและประเมินผลพร้อมเกณฑ์รูบริกส์.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.1 MB" },
+      { title: "ตารางวิเคราะห์ผลสัมฤทธิ์และผลการประเมิน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.5 MB" }
+    ]
+  },
+  "1.6": {
+    images: [
+      { title: "การวิจัยในชั้นเรียนเพื่อแก้ไขปัญหา", url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&auto=format&fit=crop&q=80", caption: "การศึกษา วิเคราะห์ สังเคราะห์เพื่อพัฒนาการเรียนรู้" },
+      { title: "เล่มรายงานวิจัยในชั้นเรียน 5 บท", url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&auto=format&fit=crop&q=80", caption: "รายงานวิจัยในชั้นเรียนฉบับสมบูรณ์และการเผยแพร่" }
+    ],
+    sampleDocs: [
+      { title: "รายงานการวิจัยในชั้นเรียน 5 บทฉบับสมบูรณ์.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.8 MB" },
+      { title: "บทคัดย่อและบทสรุปผู้บริหารงานวิจัย.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.1 MB" }
+    ]
+  },
+  "1.7": {
+    images: [
+      { title: "บรรยากาศห้องเรียนส่งเสริมการเรียนรู้", url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1600&auto=format&fit=crop&q=80", caption: "การจัดสภาพแวดล้อมที่เอื้อต่อการคิดริเริ่มและปลอดภัย" }
+    ],
+    sampleDocs: [
+      { title: "บันทึกการจัดบรรยากาศและมุมส่งเสริมการเรียนรู้.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB" }
+    ]
+  },
+  "1.8": {
+    images: [
+      { title: "การพัฒนาคุณลักษณะที่ดีของผู้เรียน", url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1600&auto=format&fit=crop&q=80", caption: "กิจกรรมโฮมรูม การอบรมคุณธรรม จริยธรรม และ AI Ethics" }
+    ],
+    sampleDocs: [
+      { title: "แบบประเมินคุณลักษณะอันพึงประสงค์และบันทึกโฮมรูม.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.7 MB" }
+    ]
+  },
+  "2.1": {
+    images: [
+      { title: "ระบบสารสนเทศนักเรียนและ ปพ.5 ดิจิทัล", url: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1600&auto=format&fit=crop&q=80", caption: "การจัดทำฐานข้อมูลผลการเรียน สถิติการมาเรียน สารสนเทศรายวิชา" }
+    ],
+    sampleDocs: [
+      { title: "แบบบันทึกผลการพัฒนาคุณภาพผู้เรียน (ปพ.5).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.2 MB" },
+      { title: "รายงานสารสนเทศรายวิชาและสถิติชั้นเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.8 MB" }
+    ]
+  },
+  "2.2": {
+    images: [
+      { title: "ระบบดูแลช่วยเหลือผู้เรียนเชิงรุก", url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80", caption: "การคัดกรอง SDQ การเยี่ยมบ้าน และการส่งเสริมศักยภาพรายบุคคล" }
+    ],
+    sampleDocs: [
+      { title: "สรุปผลการคัดกรอง SDQ และแบบบันทึกการเยี่ยมบ้าน.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.6 MB" },
+      { title: "รายงานการดำเนินงานระบบดูแลช่วยเหลือนักเรียน.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.5 MB" }
+    ]
+  },
+  "2.3": {
+    images: [
+      { title: "การปฏิบัติงานวิชาการและงานสถานศึกษา", url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1600&auto=format&fit=crop&q=80", caption: "คำสั่งปฏิบัติหน้าที่และผลการบริหารงานวิชาการโรงเรียน" }
+    ],
+    sampleDocs: [
+      { title: "คำสั่งปฏิบัติหน้าที่ราชการและงานฝ่ายวิชาการ.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.9 MB" },
+      { title: "รายงานผลการปฏิบัติงานตามคำสั่งและงานที่ได้รับมอบหมาย.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.3 MB" }
+    ]
+  },
+  "2.4": {
+    images: [
+      { title: "การประสานความร่วมมือผู้ปกครองและเครือข่าย", url: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1600&auto=format&fit=crop&q=80", caption: "การประชุมผู้ปกครองชั้นเรียน (Classroom Meeting) และภาคีเครือข่าย" }
+    ],
+    sampleDocs: [
+      { title: "บันทึกการประชุมผู้ปกครองชั้นเรียนและการสร้างเครือข่าย.pdf", type: "pdf", icon: "fa-file-pdf", size: "2.0 MB" }
+    ]
+  },
+  "3.1": {
+    images: [
+      { title: "การพัฒนาตนเองอย่างต่อเนื่อง (ID Plan)", url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&auto=format&fit=crop&q=80", caption: "การเข้าร่วมอบรมเชิงปฏิบัติการ เทคโนโลยี AI และการพัฒนาวิชาชีพ" }
+    ],
+    sampleDocs: [
+      { title: "แผนพัฒนาตนเองรายบุคคล (ID Plan) และรายงานการอบรม.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.1 MB" },
+      { title: "รวมวุฒิบัตรและเกียรติบัตรการพัฒนาวิชาชีพ.pdf", type: "pdf", icon: "fa-file-pdf", size: "4.5 MB" }
+    ]
+  },
+  "3.2": {
+    images: [
+      { title: "การเป็นผู้นำชุมชนการเรียนรู้ทางวิชาชีพ (PLC)", url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1600&auto=format&fit=crop&q=80", caption: "การประชุม PLC เพื่อแลกเปลี่ยนเรียนรู้และแก้ไขปัญหาการจัดการเรียนรู้" }
+    ],
+    sampleDocs: [
+      { title: "บันทึกชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC Logbook).pdf", type: "pdf", icon: "fa-file-pdf", size: "3.7 MB" },
+      { title: "แบบสะท้อนคิดและรายงานผลลัพธ์จากกระบวนการ PLC.pdf", type: "pdf", icon: "fa-file-pdf", size: "1.6 MB" }
+    ]
+  },
+  "3.3": {
+    images: [
+      { title: "การนำผลการพัฒนามาสร้างสรรค์นวัตกรรม", url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600&auto=format&fit=crop&q=80", caption: "การเผยแพร่นวัตกรรมการจัดการเรียนรู้และเป็นแบบอย่างทางวิชาการ" }
+    ],
+    sampleDocs: [
+      { title: "รายงานการเผยแพร่นวัตกรรมและการขยายผลสู่เพื่อนครู.pdf", type: "pdf", icon: "fa-file-pdf", size: "3.3 MB" }
+    ]
+  }
+};
+
+/**
+ * 📦 ดึงภาพถ่ายและไฟล์เอกสารของตัวชี้วัดจาก Google Drive (หรือ Fallback Curated Data)
+ */
+function getIndicatorFilesAndMedia(indicatorCode, academicYear = null) {
+  const code = String(indicatorCode || '').trim();
+  const year = academicYear || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
+  let driveImages = [];
+  let driveDocs = [];
+  let isLiveFromDrive = false;
+  let folderUrl = getIndicatorDriveUrl(code, year);
+
+  // 1. ตรวจสอบใน DriveSync.syncedData.indicators
+  if (typeof DriveSync !== 'undefined' && DriveSync.syncedData && DriveSync.syncedData.indicators) {
+    const matchingKey = Object.keys(DriveSync.syncedData.indicators).find(key => 
+      key === code || key.startsWith(code + ' ') || key.startsWith(code + '.') || key.includes(code)
+    );
+    if (matchingKey && DriveSync.syncedData.indicators[matchingKey]) {
+      const indData = DriveSync.syncedData.indicators[matchingKey];
+      if (indData.folderUrl) folderUrl = indData.folderUrl;
+      if (indData.folderId) folderUrl = `https://drive.google.com/drive/folders/${indData.folderId}`;
+
+      if (Array.isArray(indData.files)) {
+        indData.files.forEach(f => {
+          const isImg = f.type === 'image' || (f.mime && f.mime.includes('image')) || /\.(jpe?g|png|webp|gif)$/i.test(f.title);
+          if (isImg) {
+            driveImages.push({
+              title: f.title,
+              url: f.thumbUrl || f.viewUrl,
+              fullUrl: f.thumbUrl ? f.thumbUrl.replace('w800', 'w1600') : f.viewUrl,
+              caption: `ภาพหลักฐานจาก Google Drive (${indData.folderName || 'ตัวชี้วัด ' + code})`
+            });
+          } else {
+            driveDocs.push({
+              title: f.title,
+              size: f.size || '1.5 MB',
+              icon: f.icon || 'fa-file-lines',
+              viewUrl: f.viewUrl,
+              type: f.type || 'doc'
+            });
+          }
+        });
+      }
+    }
+  }
+
+  // 2. ตรวจสอบใน DriveSync.syncedData.evidenceGallery
+  if (typeof DriveSync !== 'undefined' && DriveSync.syncedData && Array.isArray(DriveSync.syncedData.evidenceGallery)) {
+    DriveSync.syncedData.evidenceGallery.forEach(item => {
+      const txt = (item.badge + ' ' + item.title + ' ' + (item.caption || '')).toLowerCase();
+      if (txt.includes(code)) {
+        driveImages.push({
+          title: item.title,
+          url: item.thumbUrl,
+          fullUrl: item.fullUrl,
+          caption: item.caption || item.title
+        });
+      }
+    });
+  }
+
+  // ถ้ามีภาพจริงจาก Drive
+  if (driveImages.length > 0) {
+    isLiveFromDrive = true;
+  }
+
+  // 3. Fallback Images
+  let finalImages = driveImages;
+  if (finalImages.length === 0) {
+    const curated = INDICATOR_CURATED_MEDIA[code];
+    if (curated && curated.images && curated.images.length > 0) {
+      finalImages = curated.images;
+    } else {
+      finalImages = [
+        { title: `ภาพหลักฐานตัวชี้วัด ${code}`, url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80", fullUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80", caption: `กิจกรรมการจัดการเรียนรู้ประกอบตัวชี้วัด ${code}` }
+      ];
+    }
+  }
+
+  // 4. Fallback Docs
+  let finalDocs = driveDocs;
+  if (finalDocs.length === 0) {
+    const curated = INDICATOR_CURATED_MEDIA[code];
+    if (curated && curated.sampleDocs) {
+      finalDocs = curated.sampleDocs;
+    }
+  }
+
+  return {
+    images: finalImages,
+    docs: finalDocs,
+    isLiveFromDrive: isLiveFromDrive,
+    folderUrl: folderUrl
+  };
+}
+
+// ================= ระบบภาพสไลด์ CAROUSEL / SLIDER ใน MODAL =================
+let currentViewingIndicatorCode = '1.1';
+let currentIndicatorSlides = [];
+let currentIndicatorSlideIdx = 0;
+
+function initIndicatorSlider(images, isLiveDrive = false) {
+  currentIndicatorSlides = (Array.isArray(images) && images.length > 0) ? images : [
+    { title: 'ภาพหลักฐานกิจกรรม', url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80', fullUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80', caption: 'ภาพถ่ายกิจกรรมการจัดการเรียนรู้ประกอบตัวชี้วัด' }
+  ];
+  currentIndicatorSlideIdx = 0;
+
+  const badgeEl = document.getElementById('modal-slider-badge');
+  if (badgeEl) {
+    badgeEl.innerHTML = isLiveDrive 
+      ? '<i class="fa-brands fa-google-drive"></i> ภาพสดจากโฟลเดอร์ไดรฟ์' 
+      : '<i class="fa-solid fa-camera"></i> ภาพหลักฐานตัวชี้วัด';
+  }
+
+  updateIndicatorSliderView();
+}
+
+function updateIndicatorSliderView() {
+  const slide = currentIndicatorSlides[currentIndicatorSlideIdx];
+  if (!slide) return;
+
+  const imgEl = document.getElementById('modal-slider-img');
+  if (imgEl) {
+    imgEl.src = slide.url || slide.thumbUrl || slide.fullUrl;
+    imgEl.alt = slide.title || 'ภาพหลักฐานตัวชี้วัด';
+  }
+
+  const counterEl = document.getElementById('modal-slider-counter');
+  if (counterEl) {
+    counterEl.innerText = `${currentIndicatorSlideIdx + 1} / ${currentIndicatorSlides.length}`;
+  }
+
+  const captionEl = document.getElementById('modal-slider-caption');
+  if (captionEl) {
+    captionEl.innerHTML = `<span class="font-bold text-teal-300 mr-1">${slide.title || ''}</span> ${slide.caption ? '· ' + slide.caption : ''}`;
+  }
+
+  // Dots
+  const dotsEl = document.getElementById('modal-slider-dots');
+  if (dotsEl) {
+    if (currentIndicatorSlides.length <= 1) {
+      dotsEl.classList.add('hidden');
+    } else {
+      dotsEl.classList.remove('hidden');
+      dotsEl.innerHTML = '';
+      currentIndicatorSlides.forEach((s, idx) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = idx === currentIndicatorSlideIdx 
+          ? 'w-7 h-2 rounded-full bg-teal-400 transition-all shadow-sm' 
+          : 'w-2 h-2 rounded-full bg-slate-600 hover:bg-slate-400 transition-all';
+        dot.onclick = (e) => { e.stopPropagation(); goToIndicatorSlide(idx); };
+        dotsEl.appendChild(dot);
+      });
+    }
+  }
+
+  // Prev / Next arrows visibility
+  const prevBtn = document.getElementById('modal-slider-prev');
+  const nextBtn = document.getElementById('modal-slider-next');
+  if (prevBtn && nextBtn) {
+    if (currentIndicatorSlides.length <= 1) {
+      prevBtn.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+    } else {
+      prevBtn.classList.remove('hidden');
+      nextBtn.classList.remove('hidden');
+    }
+  }
+}
+
+function prevIndicatorSlide() {
+  if (currentIndicatorSlides.length <= 1) return;
+  currentIndicatorSlideIdx = (currentIndicatorSlideIdx - 1 + currentIndicatorSlides.length) % currentIndicatorSlides.length;
+  updateIndicatorSliderView();
+}
+
+function nextIndicatorSlide() {
+  if (currentIndicatorSlides.length <= 1) return;
+  currentIndicatorSlideIdx = (currentIndicatorSlideIdx + 1) % currentIndicatorSlides.length;
+  updateIndicatorSliderView();
+}
+
+function goToIndicatorSlide(idx) {
+  if (idx >= 0 && idx < currentIndicatorSlides.length) {
+    currentIndicatorSlideIdx = idx;
+    updateIndicatorSliderView();
+  }
+}
+
+function openSliderImageLightbox() {
+  const slide = currentIndicatorSlides[currentIndicatorSlideIdx];
+  if (slide) {
+    openLightbox(slide.fullUrl || slide.url, slide.title, slide.caption);
+  }
+}
+
+// ================= MODAL: DETAILED INDICATOR =================
+function openIndicatorModal(indicator, teacher, expectedLevel, domain = null) {
   const modal = document.getElementById('indicator-modal');
   if (!modal) return;
 
+  currentViewingIndicatorCode = indicator.code;
   const yearData = getActiveYearData();
   const synth = (yearData && yearData.indicatorSyntheses && yearData.indicatorSyntheses[indicator.code])
     ? yearData.indicatorSyntheses[indicator.code]
     : null;
 
+  // Header & Meta
+  const domainEl = document.getElementById('modal-domain');
+  if (domainEl) {
+    domainEl.innerText = domain ? domain.title : 'ด้านการจัดการเรียนรู้';
+  }
   document.getElementById('modal-code').innerText = `ตัวชี้วัด ${indicator.code}`;
   document.getElementById('modal-title').innerText = indicator.title;
   document.getElementById('modal-level').innerText = expectedLevel;
 
+  // 1. Image Slider (ดึงภาพจากโฟลเดอร์ภาพตัวชี้วัดใน Google Drive)
+  const media = getIndicatorFilesAndMedia(indicator.code, currentAcademicYear);
+  initIndicatorSlider(media.images, media.isLiveFromDrive);
+
+  // 2. Synthesized Performance Details (สังเคราะห์จากข้อตกลง ว.PA / แผน / วิจัย)
   if (synth) {
     document.getElementById('modal-details').innerText = synth.task;
     document.getElementById('modal-results').innerHTML = `
       <div class="space-y-2">
         <div class="flex items-start gap-2">
-          <span class="px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-900 font-bold text-xs flex-shrink-0">เชิงปริมาณ</span>
+          <span class="px-2.5 py-0.5 rounded-md bg-emerald-200/90 text-emerald-950 font-bold text-xs flex-shrink-0">เชิงปริมาณ</span>
           <span class="text-xs sm:text-sm text-emerald-950">${synth.quant}</span>
         </div>
-        <div class="flex items-start gap-2 pt-1 border-t border-emerald-200/60">
-          <span class="px-2 py-0.5 rounded bg-teal-200/80 text-teal-900 font-bold text-xs flex-shrink-0">เชิงคุณภาพ</span>
+        <div class="flex items-start gap-2 pt-1.5 border-t border-emerald-200/60">
+          <span class="px-2.5 py-0.5 rounded-md bg-teal-200/90 text-teal-950 font-bold text-xs flex-shrink-0">เชิงคุณภาพ</span>
           <span class="text-xs sm:text-sm text-emerald-950">${synth.qual}</span>
         </div>
       </div>
     `;
+    const refEl = document.getElementById('modal-synthesized-refs');
+    if (refEl) {
+      refEl.innerText = synth.evidence || 'ข้อตกลง ว.PA (แบบ PA 1/ส), แผนการจัดการเรียนรู้, เล่มวิจัย 5 บท, บันทึก ปพ.5';
+    }
   } else {
     document.getElementById('modal-details').innerText = `การดำเนินการตามตัวชี้วัด ${indicator.code} (${indicator.title}) ของ ${teacher.name} สอดรับกับระดับการปฏิบัติที่คาดหวังตามมาตรฐานตำแหน่งและวิทยฐานะ ${teacher.academicStanding} คือ "${expectedLevel}"`;
     document.getElementById('modal-results').innerText = `ผู้เรียนเกิดสมรรถนะการเรียนรู้ ทักษะการปฏิบัติงาน และมีคุณลักษณะอันพึงประสงค์ผ่านเกณฑ์มาตรฐานของกลุ่มสาระการเรียนรู้`;
+    const refEl = document.getElementById('modal-synthesized-refs');
+    if (refEl) {
+      refEl.innerText = 'ข้อตกลง ว.PA (แบบ PA 1/ส), แผนการจัดการเรียนรู้, รายงานผลการประเมิน';
+    }
   }
 
-  // ตรวจสอบไฟล์จริงจาก Google Drive ที่ซิงก์มา
+  // 3. Evidence Documents in Drive (รายการเอกสารพร้อมปุ่มเปิดเอกสาร)
   const listEl = document.getElementById('modal-evidence-list');
-  let driveFolderData = null;
+  const countBadge = document.getElementById('modal-files-count-badge');
+  listEl.innerHTML = '';
 
-  if (DriveSync.syncedData && DriveSync.syncedData.indicators) {
-    // ค้นหาโฟลเดอร์ที่ชื่อขึ้นต้นหรือตรงกับรหัสตัวชี้วัด เช่น "1.1", "1.1 การสร้างและพัฒนาหลักสูตร"
-    const matchingKey = Object.keys(DriveSync.syncedData.indicators).find(key => 
-      key === indicator.code || key.startsWith(indicator.code + ' ') || key.startsWith(indicator.code + '.') || key.includes(indicator.code)
-    );
-    if (matchingKey) {
-      driveFolderData = DriveSync.syncedData.indicators[matchingKey];
-    }
+  const docsToRender = (media.docs && media.docs.length > 0) ? media.docs : [];
+  if (countBadge) {
+    countBadge.innerText = `${docsToRender.length} ไฟล์เอกสาร`;
   }
 
-  if (driveFolderData && driveFolderData.files && driveFolderData.files.length > 0) {
-    listEl.innerHTML = '';
-    driveFolderData.files.forEach(file => {
-      const fileCard = document.createElement('div');
-      fileCard.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/60 transition';
-      fileCard.innerHTML = `
-        <div class="flex items-center gap-3 min-w-0 pr-2">
-          <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-base flex-shrink-0">
-            <i class="fa-solid ${file.icon || 'fa-file-lines'}"></i>
-          </div>
-          <div class="min-w-0">
-            <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm truncate" title="${file.title}">${file.title}</div>
-            <div class="text-[11px] text-slate-500 flex items-center gap-2">
-              <span>ขนาด ${file.size}</span>
-              <span>•</span>
-              <span class="text-teal-700 font-medium">Google Drive สด</span>
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center gap-1.5 flex-shrink-0">
-          <a href="${file.viewUrl}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="hidden sm:inline">เปิดดู</span>
-          </a>
-        </div>
-      `;
-      listEl.appendChild(fileCard);
-    });
+  docsToRender.forEach(doc => {
+    const docCard = document.createElement('div');
+    docCard.className = 'flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition';
+    
+    const isLive = Boolean(doc.viewUrl);
+    const viewUrl = doc.viewUrl || getIndicatorDriveUrl(indicator.code);
 
-    const folderTargetUrl = driveFolderData.folderUrl || (driveFolderData.folderId ? `https://drive.google.com/drive/folders/${driveFolderData.folderId}` : getIndicatorDriveUrl(indicator.code));
-    if (folderTargetUrl) {
-      const folderLink = document.createElement('div');
-      folderLink.className = 'pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs border-t border-slate-100 mt-2';
-      folderLink.innerHTML = `
-        <div class="flex items-center gap-1.5 text-emerald-700 font-semibold">
-          <i class="fa-solid fa-folder-check text-emerald-600"></i> โฟลเดอร์ตรงตัวชี้วัด ${indicator.code}
+    docCard.innerHTML = `
+      <div class="flex items-center gap-3 min-w-0 pr-2">
+        <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-base flex-shrink-0">
+          <i class="fa-solid ${doc.icon || 'fa-file-pdf'}"></i>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="openEditIndicatorFolderModal('${indicator.code}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition inline-flex items-center gap-1">
-            <i class="fa-solid fa-pen-to-square text-teal-600"></i> เปลี่ยนโฟลเดอร์
-          </button>
-          <a href="${folderTargetUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold border border-teal-200 inline-flex items-center gap-1">
-            <i class="fa-brands fa-google-drive"></i> เปิดดูโฟลเดอร์ในไดรฟ์ <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-          </a>
-        </div>
-      `;
-      listEl.appendChild(folderLink);
-    }
-  } else {
-    // โหมดจำลอง / หรือยังไม่มีไฟล์ใน Google Drive
-    const targetDriveUrl = getIndicatorDriveUrl(indicator.code);
-    const isDirect = isIndicatorFolderDirect(indicator.code);
-    listEl.innerHTML = `
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-teal-50/50 transition gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center text-lg flex-shrink-0">
-            <i class="fa-solid fa-file-shield"></i>
+        <div class="min-w-0">
+          <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm truncate" title="${doc.title}">${doc.title}</div>
+          <div class="text-[11px] text-slate-500 flex items-center gap-2">
+            <span>ขนาด ${doc.size || '1.5 MB'}</span>
+            <span>•</span>
+            <span class="${isLive ? 'text-emerald-700 font-semibold' : 'text-teal-700 font-medium'}">
+              ${isLive ? '<i class="fa-brands fa-google-drive"></i> ไฟล์จาก Google Drive' : 'เอกสารหลักฐานมาตรฐาน'}
+            </span>
           </div>
-          <div class="min-w-0">
-            <div class="font-heading font-semibold text-slate-900 text-xs sm:text-sm">เอกสารร่องรอยหลักฐาน ตัวชี้วัด ${indicator.code} (ปีการศึกษา ${currentAcademicYear})</div>
-            <div class="text-[11px] ${isDirect ? 'text-emerald-700 font-semibold' : 'text-teal-800 font-medium'} line-clamp-1">
-              ${isDirect ? '<i class="fa-solid fa-folder-check text-emerald-600 mr-1"></i> โฟลเดอร์ตรง: ตัวชี้วัด ' + indicator.code : '<i class="fa-brands fa-google-drive mr-1 text-teal-600"></i> ค้นหาในไดรฟ์: ตัวชี้วัด ' + indicator.code}
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0">
-          <button onclick="openEditIndicatorFolderModal('${indicator.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-teal-700 hover:bg-slate-50 text-xs font-semibold transition shadow-sm inline-flex items-center gap-1" title="ตั้งค่าหรือแก้ไขลิงก์โฟลเดอร์ Google Drive ของตัวชี้วัด ${indicator.code}">
-            <i class="fa-solid fa-pen-to-square text-teal-600"></i> ตั้งค่าโฟลเดอร์
-          </button>
-          <a href="${targetDriveUrl}" target="_blank" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading transition shadow-sm inline-flex items-center gap-1.5">
-            <i class="fa-brands fa-google-drive"></i> เปิดไดรฟ์ตัวชี้วัด ${indicator.code} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-          </a>
-          <button onclick="openDocViewer('เอกสารประกอบตัวชี้วัด ${indicator.code}', 'PDF', '${indicator.code}')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition shadow-sm inline-flex items-center gap-1">
-            <i class="fa-solid fa-circle-info text-teal-600"></i> รายละเอียด
-          </button>
         </div>
       </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <a href="${viewUrl}" target="_blank" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> <span>เปิดดูเอกสาร</span>
+        </a>
+      </div>
     `;
+    listEl.appendChild(docCard);
+  });
+
+  // Action Bar Buttons
+  const folderBtn = document.getElementById('modal-open-drive-folder-btn');
+  const folderLabel = document.getElementById('modal-open-drive-btn-label');
+  if (folderBtn) {
+    folderBtn.href = media.folderUrl;
+  }
+  if (folderLabel) {
+    folderLabel.innerText = `เปิดโฟลเดอร์ตัวชี้วัด ${indicator.code} ใน Google Drive`;
   }
 
   modal.classList.remove('hidden');

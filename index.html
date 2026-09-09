@@ -1105,15 +1105,19 @@
   </div>
 
   <!-- ================= MODAL: DETAILED INDICATOR ================= -->
-  <div id="indicator-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 backdrop-blur-md modal-backdrop" onclick="closeIndicatorModal()">
-    <div class="relative max-w-3xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto modal-content" onclick="event.stopPropagation()">
-      <button onclick="closeIndicatorModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+  <div id="indicator-modal" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-3 sm:p-4 backdrop-blur-md modal-backdrop" onclick="closeIndicatorModal()">
+    <div class="relative max-w-4xl w-full bg-white rounded-3xl p-5 sm:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeIndicatorModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition z-20">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-        <div class="flex items-center gap-2">
-          <span id="modal-code" class="text-xs font-bold px-3 py-1 rounded-lg bg-teal-100 text-teal-800 font-heading">
+      <!-- Modal Header Meta -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2 pr-10">
+        <div class="flex flex-wrap items-center gap-2">
+          <span id="modal-domain" class="text-xs font-bold px-3 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-heading">
+            ด้านที่ 1 ด้านการจัดการเรียนรู้
+          </span>
+          <span id="modal-code" class="text-xs font-bold px-3 py-1 rounded-lg bg-teal-600 text-white font-heading">
             ตัวชี้วัด 1.1
           </span>
           <span id="modal-level" class="text-xs font-semibold px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800">
@@ -1125,30 +1129,112 @@
         </button>
       </div>
 
+      <!-- Title -->
       <h3 id="modal-title" class="text-xl sm:text-2xl font-bold font-heading text-slate-900 mt-2 mb-4 leading-snug">
         สร้างและหรือพัฒนาหลักสูตร
       </h3>
 
-      <div class="space-y-5 text-sm text-slate-700">
-        <div>
-          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-700 mb-1">
-            รายละเอียดการปฏิบัติงาน
-          </h5>
-          <p id="modal-details" class="leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100"></p>
+      <!-- 📸 1. IMAGE SLIDER SECTION (ภาพสไลด์จากโฟลเดอร์ภาพตัวชี้วัดในไดรฟ์) -->
+      <div id="modal-slider-section" class="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-200/80 mb-6 shadow-lg">
+        <div class="relative aspect-[16/9] sm:aspect-[21/9] bg-slate-900 flex items-center justify-center overflow-hidden cursor-pointer group" onclick="openSliderImageLightbox()">
+          <img id="modal-slider-img" src="" alt="ภาพหลักฐานตัวชี้วัด" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
+          
+          <!-- Slider Navigation Arrows -->
+          <button id="modal-slider-prev" type="button" onclick="event.stopPropagation(); prevIndicatorSlide();" 
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-teal-600 text-white flex items-center justify-center transition backdrop-blur-md shadow-lg z-10">
+            <i class="fa-solid fa-chevron-left text-sm"></i>
+          </button>
+          <button id="modal-slider-next" type="button" onclick="event.stopPropagation(); nextIndicatorSlide();" 
+                  class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-teal-600 text-white flex items-center justify-center transition backdrop-blur-md shadow-lg z-10">
+            <i class="fa-solid fa-chevron-right text-sm"></i>
+          </button>
+
+          <!-- Badges on Image -->
+          <div class="absolute top-3 left-3 flex items-center gap-2 z-10">
+            <span id="modal-slider-badge" class="px-2.5 py-1 rounded-lg bg-teal-600/90 text-white text-[11px] font-semibold backdrop-blur-md shadow-sm flex items-center gap-1.5">
+              <i class="fa-brands fa-google-drive"></i> ภาพหลักฐานตัวชี้วัด
+            </span>
+            <span id="modal-slider-counter" class="px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-semibold backdrop-blur-md">
+              1 / 1
+            </span>
+          </div>
+
+          <div class="absolute top-3 right-3 z-10">
+            <span class="px-2.5 py-1 rounded-lg bg-black/60 hover:bg-black/80 text-white text-[11px] font-semibold backdrop-blur-md flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-expand text-[10px]"></i> คลิกดูภาพขยาย
+            </span>
+          </div>
+
+          <!-- Caption Overlay -->
+          <div class="absolute bottom-3.5 left-4 right-4 z-10 text-left">
+            <div id="modal-slider-caption" class="text-white text-xs sm:text-sm font-medium leading-snug drop-shadow-md"></div>
+          </div>
         </div>
 
-        <div>
-          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-700 mb-1">
-            ผลลัพธ์ที่เกิดขึ้นกับผู้เรียน
-          </h5>
-          <p id="modal-results" class="leading-relaxed bg-emerald-50/70 text-emerald-950 p-4 rounded-2xl border border-emerald-100"></p>
+        <!-- Slider Dots / Thumbnails -->
+        <div id="modal-slider-dots" class="p-2.5 bg-slate-900 flex items-center justify-center gap-2 overflow-x-auto border-t border-slate-800"></div>
+      </div>
+
+      <!-- 📝 2. PERFORMANCE DETAILS & SYNTHESIS (สังเคราะห์จากไฟล์ข้อตกลง แผน วิจัย) -->
+      <div class="space-y-4 text-sm text-slate-700 mb-6">
+        <!-- การปฏิบัติงานจริง -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+          <div class="flex items-center justify-between">
+            <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-signature text-teal-600"></i> รายละเอียดการปฏิบัติงาน (สังเคราะห์จากข้อตกลง ว.PA / แผนการสอน / วิจัย)
+            </h5>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-semibold">AI Synthesized</span>
+          </div>
+          <p id="modal-details" class="text-xs sm:text-sm leading-relaxed text-slate-800 font-sans"></p>
         </div>
 
-        <div>
-          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-700 mb-2">
-            เอกสารหลักฐานใน Google Drive
+        <!-- ผลลัพธ์เชิงปริมาณและคุณภาพ -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
+          <h5 class="font-heading font-bold text-emerald-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-award text-emerald-600"></i> ผลลัพธ์ที่เกิดขึ้นกับผู้เรียนตามข้อตกลง
           </h5>
-          <div id="modal-evidence-list" class="space-y-2"></div>
+          <div id="modal-results" class="text-xs sm:text-sm leading-relaxed text-emerald-950 font-sans"></div>
+        </div>
+
+        <!-- เอกสารอ้างอิงที่ใช้สังเคราะห์ -->
+        <div id="modal-synthesized-refs-container" class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-950 flex items-start gap-2.5">
+          <i class="fa-solid fa-bookmark text-amber-600 text-sm mt-0.5 flex-shrink-0"></i>
+          <div>
+            <span class="font-bold text-amber-900">แหล่งข้อมูลและเอกสารที่ใช้สังเคราะห์:</span>
+            <span id="modal-synthesized-refs" class="text-amber-900/90 ml-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📄 3. DOCUMENTS & EVIDENCE LIST IN GOOGLE DRIVE -->
+      <div class="pt-4 border-t border-slate-100">
+        <div class="flex items-center justify-between mb-3">
+          <h5 class="font-heading font-bold text-slate-900 text-xs uppercase tracking-wider text-teal-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-folder-open text-teal-600"></i> เอกสารและหลักฐานของตัวชี้วัดนี้ใน Google Drive
+          </h5>
+          <span id="modal-files-count-badge" class="text-[11px] text-slate-500 font-medium"></span>
+        </div>
+
+        <div id="modal-evidence-list" class="space-y-2.5 mb-5"></div>
+
+        <!-- Primary Action CTA Bar -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 bg-slate-50 -mx-5 -mb-5 sm:-mx-8 sm:-mb-8 p-4 sm:p-6 rounded-b-3xl">
+          <div class="flex items-center gap-2">
+            <button type="button" id="modal-edit-folder-btn" onclick="closeIndicatorModal(); openEditIndicatorFolderModal(currentViewingIndicatorCode);" 
+                    class="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold font-heading transition flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-pen-to-square text-teal-600"></i> ตั้งค่าลิงก์โฟลเดอร์
+            </button>
+            <button type="button" onclick="closeIndicatorModal()" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold font-heading transition">
+              ปิด
+            </button>
+          </div>
+          <a id="modal-open-drive-folder-btn" href="#" target="_blank" 
+             class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold font-heading transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-brands fa-google-drive text-sm"></i>
+            <span id="modal-open-drive-btn-label">เปิดโฟลเดอร์ตัวชี้วัดนี้ใน Google Drive</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+          </a>
         </div>
       </div>
     </div>
