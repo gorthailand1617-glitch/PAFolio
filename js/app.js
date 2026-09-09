@@ -67,10 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auto-sync ข้อมูลสดจาก Google Drive เมื่อเปิดหน้าเว็บ (ถ้ามีการตั้งค่าไว้)
   if (DriveSync.config.appsScriptUrl) {
-    // 1. ดึง Cloud State ด่วนพิเศษทันที (ตอบกลับ < 0.3 วินาที)
+    // 1. ดึง Universal Cloud State ด่วนพิเศษทันที (< 0.2 วินาที) เพื่อให้อุปกรณ์ทั่วโลกแสดงค่าตรงกัน 100%
     if (typeof DriveSync.fetchCloudState === 'function') {
-      DriveSync.fetchCloudState().then(cloudState => {
-        if (cloudState) DriveSync.applyCloudState(cloudState, true);
+      DriveSync.fetchCloudState().then(res => {
+        if (res) {
+          const cState = res.cloudState || (res.theme ? res : null);
+          const lProfile = res.liveProfile || null;
+          DriveSync.applyCloudState(cState, lProfile, true);
+        }
       }).catch(err => console.warn('fetchCloudState error:', err));
     }
     // 2. สแกนและซิงก์โฟลเดอร์เต็มรูปแบบในพื้นหลัง
@@ -262,6 +266,11 @@ function renderYearSwitcher(teacher) {
 function switchAcademicYear(year) {
   currentAcademicYear = year;
   localStorage.setItem('pafolio_active_year', year);
+
+  // ส่งต่อการเปลี่ยนปีการศึกษาขึ้น Google Drive (Debounced) เพื่อให้อุปกรณ์อื่นแสดงปีเดียวกัน
+  if (typeof DriveSync !== 'undefined' && typeof DriveSync.syncYearToCloud === 'function') {
+    DriveSync.syncYearToCloud(year);
+  }
 
   // โหลดแคชข้อมูล Google Drive ของปีที่เลือก
   if (typeof DriveSync !== 'undefined' && typeof DriveSync.loadCachedData === 'function') {
@@ -2103,6 +2112,18 @@ function handleCreateNewTeacher() {
   alert(`สร้างโปรไฟล์ครู ${name} เรียบร้อยแล้ว! ระบบได้ปรับระดับความคาดหวังตามวิทยฐานะ "${standing}" ให้อัตโนมัติ`);
 }
 
+let _cloudSyncDatabaseTimeout = null;
+function debouncedSyncStoredTeachersToCloud() {
+  if (typeof DriveSync === 'undefined' || !DriveSync.config || !DriveSync.config.appsScriptUrl) return;
+  if (_cloudSyncDatabaseTimeout) clearTimeout(_cloudSyncDatabaseTimeout);
+  _cloudSyncDatabaseTimeout = setTimeout(() => {
+    const teacher = getActiveTeacher();
+    if (teacher && typeof DriveSync.saveProfileToCloud === 'function') {
+      DriveSync.saveProfileToCloud(teacher);
+    }
+  }, 2500);
+}
+
 // Local Storage for Teachers
 function saveStoredTeachers() {
   try {
@@ -2110,6 +2131,7 @@ function saveStoredTeachers() {
   } catch (e) {
     console.error('Error saving teachers to localStorage', e);
   }
+  debouncedSyncStoredTeachersToCloud();
 }
 
 function loadStoredTeachers() {
@@ -2128,6 +2150,10 @@ function loadStoredTeachers() {
         if (stored.coverUrl && stored.coverUrl.includes('/drive/folders/')) {
           stored.coverUrl = baseline?.coverUrl || PAFOLIO_DATABASE['teacher-korakot']?.coverUrl || '';
         }
+        if (!stored._hasCustomProfile) {
+          stored.avatarUrl = baseline?.avatarUrl || (typeof PAFOLIO_CONFIG !== 'undefined' ? PAFOLIO_CONFIG.DEFAULT_AVATAR_URL : '');
+          stored.coverUrl = baseline?.coverUrl || (typeof PAFOLIO_CONFIG !== 'undefined' ? PAFOLIO_CONFIG.DEFAULT_COVER_URL : '');
+        }
 
         if (baseline && baseline.years) {
           if (!stored.years) stored.years = {};
@@ -2141,11 +2167,16 @@ function loadStoredTeachers() {
               if (!stored.years[y].gallery && baseline.years[y].gallery) {
                 stored.years[y].gallery = baseline.years[y].gallery;
               }
-              if (!stored.years[y].avatarUrl && baseline.years[y].avatarUrl) {
+              if (y === '2569' && !stored.years[y]._hasCustomProfile) {
                 stored.years[y].avatarUrl = baseline.years[y].avatarUrl;
-              }
-              if (!stored.years[y].coverUrl && baseline.years[y].coverUrl) {
                 stored.years[y].coverUrl = baseline.years[y].coverUrl;
+              } else {
+                if (!stored.years[y].avatarUrl && baseline.years[y].avatarUrl) {
+                  stored.years[y].avatarUrl = baseline.years[y].avatarUrl;
+                }
+                if (!stored.years[y].coverUrl && baseline.years[y].coverUrl) {
+                  stored.years[y].coverUrl = baseline.years[y].coverUrl;
+                }
               }
             }
           }

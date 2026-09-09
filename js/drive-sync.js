@@ -67,6 +67,7 @@ const DriveSync = {
   },
 
   // ☁️ บันทึกสถานะระบบศูนย์กลาง (Cloud State) ขึ้น Google Drive
+  // ☁️ บันทึกสถานะระบบศูนย์กลาง (Cloud State & Universal Profile) ขึ้น Google Drive
   async saveCloudState(customPayload = {}) {
     if (!this.config.appsScriptUrl) {
       console.warn('[DriveSync] Cannot save cloud state: No Apps Script URL configured.');
@@ -94,6 +95,11 @@ const DriveSync = {
         teacherId: currentTeacher,
         avatarUrl: (teacherObj && teacherObj.avatarUrl) || 'https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800',
         coverUrl: (teacherObj && teacherObj.coverUrl) || 'https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920',
+        name: (teacherObj && teacherObj.name) || '',
+        position: (teacherObj && teacherObj.position) || '',
+        academicStanding: (teacherObj && teacherObj.academicStanding) || '',
+        school: (teacherObj && teacherObj.school) || '',
+        department: (teacherObj && (teacherObj.department || teacherObj.learningArea)) || '',
         lastUpdated: new Date().toISOString(),
         deviceOrigin: navigator.userAgent || 'Desktop',
         ...customPayload
@@ -103,9 +109,10 @@ const DriveSync = {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
-          action: 'saveCloudState',
+          action: 'saveUniversalState',
           folderId: this.config.folderId,
-          state: stateData
+          state: stateData,
+          profile: teacherObj || null
         })
       });
 
@@ -114,7 +121,7 @@ const DriveSync = {
       if (res.status === 'success') {
         localStorage.setItem('pafolio_cloud_state', JSON.stringify(stateData));
         localStorage.setItem('pafolio_last_cloud_sync', stateData.lastUpdated);
-        console.log('[DriveSync] Cloud State saved to Google Drive successfully:', stateData);
+        console.log('[DriveSync] Universal Cloud State saved to Google Drive successfully:', stateData);
         return true;
       }
     } catch(err) {
@@ -123,7 +130,7 @@ const DriveSync = {
     return false;
   },
 
-  // ☁️ ดึงสถานะคลาวด์ศูนย์กลางจาก Google Drive (ตอบกลับด่วนพิเศษ)
+  // ☁️ ดึงสถานะคลาวด์ศูนย์กลางและโปรไฟล์ล่าสุดจาก Google Drive (ตอบกลับด่วนพิเศษ < 0.2 วินาที)
   async fetchCloudState() {
     if (!this.config.appsScriptUrl) return null;
     try {
@@ -135,8 +142,8 @@ const DriveSync = {
       const res = await fetch(url.toString());
       if (!res.ok) return null;
       const json = await res.json();
-      if (json.status === 'success' && json.cloudState) {
-        return json.cloudState;
+      if (json.status === 'success') {
+        return json;
       }
     } catch(err) {
       console.warn('[DriveSync] fetchCloudState error:', err);
@@ -144,23 +151,24 @@ const DriveSync = {
     return null;
   },
 
-  // ☁️ ปรับใช้สถานะคลาวด์ศูนย์กลางบนเครื่องผู้เข้าชม (เช่น แท็บเล็ตกรรมการ) แบบไร้รอยต่อ
-  applyCloudState(cloudState, silent = true) {
-    if (!cloudState || typeof cloudState !== 'object') return false;
+  // ☁️ ปรับใช้สถานะคลาวด์ศูนย์กลางบนเครื่องผู้เข้าชม (เช่น แท็บเล็ตกรรมการ หรืออุปกรณ์เครื่องอื่นทั่วโลก)
+  applyCloudState(cloudState, liveProfile = null, silent = true) {
+    if (!cloudState && !liveProfile) return false;
 
     let modified = false;
 
-    // 1. ซิงก์ธีม (เช่น หากครูปรับเป็นธีมสีทองคำจักรพรรดิบนคอมทำงาน)
-    if (cloudState.theme && typeof ThemeManager !== 'undefined') {
+    // 1. ซิงก์ธีม (เช่น หากปรับเป็นธีมทองคำจักรพรรดิบนคอมทำงาน)
+    if (cloudState && cloudState.theme && typeof ThemeManager !== 'undefined') {
       const currentTheme = ThemeManager.activeThemeId;
       if (currentTheme !== cloudState.theme) {
         ThemeManager.setTheme(cloudState.theme, false);
+        localStorage.setItem('pafolio_active_theme', cloudState.theme);
         modified = true;
       }
     }
 
-    // 2. ซิงก์ปีการศึกษา (ถ้าไม่ระบุใน URL)
-    if (cloudState.year && typeof currentAcademicYear !== 'undefined') {
+    // 2. ซิงก์ปีการศึกษาเริ่มต้น (ถ้าไม่ระบุใน URL)
+    if (cloudState && cloudState.year && typeof currentAcademicYear !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (!urlParams.has('year') && currentAcademicYear !== cloudState.year) {
         currentAcademicYear = cloudState.year;
@@ -169,25 +177,128 @@ const DriveSync = {
       }
     }
 
-    // 3. ซิงก์รูปโปรไฟล์หรือภาพปก
-    if (cloudState.avatarUrl || cloudState.coverUrl) {
-      const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : (window.PAFOLIO_DATABASE && window.PAFOLIO_DATABASE['teacher-korakot']);
-      if (teacher) {
+    // 3. ซิงก์โปรไฟล์ครู ข้อมูลวิทยฐานะ โรงเรียน ประเด็นท้าทาย และรูปภาพ
+    const teacher = (typeof getActiveTeacher === 'function') 
+      ? getActiveTeacher() 
+      : (window.PAFOLIO_DATABASE && window.PAFOLIO_DATABASE['teacher-korakot']);
+
+    if (teacher) {
+      // 3.1 ข้อมูลจาก liveProfile (แฟ้มข้อมูลสดเต็มรูปแบบ)
+      if (liveProfile && typeof liveProfile === 'object') {
+        if (liveProfile.name && teacher.name !== liveProfile.name) {
+          teacher.name = liveProfile.name;
+          modified = true;
+        }
+        if (liveProfile.position && teacher.position !== liveProfile.position) {
+          teacher.position = liveProfile.position;
+          modified = true;
+        }
+        if (liveProfile.academicStanding && teacher.academicStanding !== liveProfile.academicStanding) {
+          teacher.academicStanding = liveProfile.academicStanding;
+          modified = true;
+        }
+        if (liveProfile.school && teacher.school !== liveProfile.school) {
+          teacher.school = liveProfile.school;
+          modified = true;
+        }
+        if (liveProfile.department || liveProfile.learningArea) {
+          const dept = liveProfile.department || liveProfile.learningArea;
+          if (teacher.department !== dept || teacher.learningArea !== dept) {
+            teacher.department = dept;
+            teacher.learningArea = dept;
+            modified = true;
+          }
+        }
+        if (liveProfile.affiliation && teacher.affiliation !== liveProfile.affiliation) {
+          teacher.affiliation = liveProfile.affiliation;
+          modified = true;
+        }
+        if (liveProfile.avatarUrl && teacher.avatarUrl !== liveProfile.avatarUrl) {
+          teacher.avatarUrl = liveProfile.avatarUrl;
+          teacher._hasCustomProfile = true;
+          modified = true;
+        }
+        if (liveProfile.coverUrl && teacher.coverUrl !== liveProfile.coverUrl) {
+          teacher.coverUrl = liveProfile.coverUrl;
+          teacher._hasCustomProfile = true;
+          modified = true;
+        }
+
+        // ซิงก์ประเด็นท้าทายและข้อมูลตามปีการศึกษา
+        if (liveProfile.years && typeof liveProfile.years === 'object') {
+          if (!teacher.years) teacher.years = {};
+          for (const y in liveProfile.years) {
+            const yrSrc = liveProfile.years[y];
+            if (!teacher.years[y]) {
+              teacher.years[y] = yrSrc;
+              modified = true;
+            } else {
+              if (yrSrc.avatarUrl && teacher.years[y].avatarUrl !== yrSrc.avatarUrl) {
+                teacher.years[y].avatarUrl = yrSrc.avatarUrl;
+                teacher.years[y]._hasCustomProfile = true;
+                modified = true;
+              }
+              if (yrSrc.coverUrl && teacher.years[y].coverUrl !== yrSrc.coverUrl) {
+                teacher.years[y].coverUrl = yrSrc.coverUrl;
+                teacher.years[y]._hasCustomProfile = true;
+                modified = true;
+              }
+              if (yrSrc.challengeIssue && typeof yrSrc.challengeIssue === 'object') {
+                teacher.years[y].challengeIssue = Object.assign(teacher.years[y].challengeIssue || {}, yrSrc.challengeIssue);
+                modified = true;
+              }
+              if (yrSrc.teachingLoad && Array.isArray(yrSrc.teachingLoad) && yrSrc.teachingLoad.length > 0) {
+                teacher.years[y].teachingLoad = yrSrc.teachingLoad;
+                modified = true;
+              }
+              if (yrSrc.totalHours) {
+                teacher.years[y].totalHours = yrSrc.totalHours;
+                modified = true;
+              }
+            }
+          }
+        }
+      }
+
+      // 3.2 ข้อมูลเสริมจาก cloudState
+      if (cloudState) {
         if (cloudState.avatarUrl && teacher.avatarUrl !== cloudState.avatarUrl) {
           teacher.avatarUrl = cloudState.avatarUrl;
+          teacher._hasCustomProfile = true;
+          if (teacher.years && teacher.years[currentAcademicYear]) {
+            teacher.years[currentAcademicYear].avatarUrl = cloudState.avatarUrl;
+            teacher.years[currentAcademicYear]._hasCustomProfile = true;
+          }
           modified = true;
         }
         if (cloudState.coverUrl && teacher.coverUrl !== cloudState.coverUrl) {
           teacher.coverUrl = cloudState.coverUrl;
+          teacher._hasCustomProfile = true;
+          if (teacher.years && teacher.years[currentAcademicYear]) {
+            teacher.years[currentAcademicYear].coverUrl = cloudState.coverUrl;
+            teacher.years[currentAcademicYear]._hasCustomProfile = true;
+          }
+          modified = true;
+        }
+        if (cloudState.name && teacher.name !== cloudState.name) {
+          teacher.name = cloudState.name;
           modified = true;
         }
       }
     }
 
-    if (modified && typeof renderApp === 'function') {
-      renderApp();
-      if (!silent) {
-        this.showToast('☁️ ปรับใช้สถานะล่าสุดจาก Google Drive เรียบร้อยแล้ว', 'success', 3500);
+    if (modified) {
+      if (typeof saveStoredTeachers === 'function') {
+        saveStoredTeachers();
+      }
+      if (typeof renderApp === 'function') {
+        renderApp();
+      }
+      if (typeof updateHeaderAndProfile === 'function') {
+        updateHeaderAndProfile();
+      }
+      if (!silent && typeof this.showToast === 'function') {
+        this.showToast('☁️ ซิงก์และปรับใช้ค่าเริ่มต้นล่าสุดจาก Google Drive สำเร็จ', 'success', 3500);
       }
     }
     return true;
@@ -199,6 +310,15 @@ const DriveSync = {
     if (this._themeSyncTimeout) clearTimeout(this._themeSyncTimeout);
     this._themeSyncTimeout = setTimeout(() => {
       this.saveCloudState({ theme: themeId });
+    }, 1500);
+  },
+
+  // ☁️ ส่งต่อการเปลี่ยนปีการศึกษาขึ้น Google Drive อัตโนมัติ (Debounced)
+  syncYearToCloud(year) {
+    if (!this.config.appsScriptUrl) return;
+    if (this._yearSyncTimeout) clearTimeout(this._yearSyncTimeout);
+    this._yearSyncTimeout = setTimeout(() => {
+      this.saveCloudState({ year: year });
     }, 1500);
   },
 
@@ -868,7 +988,7 @@ const DriveSync = {
     });
   },
 
-  // ☁️ ส่งข้อมูลโปรไฟล์ครูไปบันทึกลง Google Drive ทันที (Real-time Cloud Sync)
+  // ☁️ ส่งข้อมูลโปรไฟล์ครูไปบันทึกลง Google Drive ทันที และตั้งเป็นค่าเริ่มต้นสากล (Universal Cloud Default)
   async saveProfileToCloud(profile) {
     if (!this.config.appsScriptUrl) {
       console.log('[DriveSync] No Apps Script URL configured. Saved locally.');
@@ -877,11 +997,35 @@ const DriveSync = {
     }
 
     try {
-      this.showToast('☁️ กำลังเชื่อมต่อและบันทึกไฟล์โปรไฟล์บน Google Drive...', 'info', 2000);
+      this.showToast('☁️ กำลังเชื่อมต่อและบันทึกข้อมูลเป็นค่าเริ่มต้นบน Google Drive...', 'info', 2000);
+
+      const currentTheme = (typeof ThemeManager !== 'undefined' && ThemeManager.activeThemeId) 
+        ? ThemeManager.activeThemeId 
+        : (localStorage.getItem('pafolio_active_theme') || 'gold');
+
+      const currentYear = (typeof currentAcademicYear !== 'undefined')
+        ? currentAcademicYear
+        : (localStorage.getItem('pafolio_active_year') || '2569');
+
+      const cloudStateData = {
+        theme: currentTheme,
+        year: currentYear,
+        teacherId: profile.id || 'teacher-korakot',
+        name: profile.name || '',
+        position: profile.position || '',
+        academicStanding: profile.academicStanding || '',
+        school: profile.school || '',
+        department: profile.department || profile.learningArea || '',
+        avatarUrl: profile.avatarUrl || '',
+        coverUrl: profile.coverUrl || '',
+        lastUpdated: new Date().toISOString()
+      };
+
       const payload = {
-        action: 'saveProfile',
+        action: 'saveUniversalState',
         folderId: this.config.folderId || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K',
-        profile: profile
+        profile: profile,
+        cloudState: cloudStateData
       };
 
       const res = await fetch(this.config.appsScriptUrl.trim(), {
@@ -893,7 +1037,9 @@ const DriveSync = {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json.status === 'success') {
-        this.showToast('☁️ บันทึกโปรไฟล์ขึ้น Google Drive คลาวด์สำเร็จ! (ทุกเครื่องจะอัปเดตตรงกันทันที)', 'success', 3500);
+        localStorage.setItem('pafolio_cloud_state', JSON.stringify(cloudStateData));
+        localStorage.setItem('pafolio_last_cloud_sync', cloudStateData.lastUpdated);
+        this.showToast('☁️ บันทึกเป็นค่าเริ่มต้นบน Google Drive สำเร็จ! (เปิดเครื่องไหนทั่วโลกจะแสดงค่าเดียวกันทันที)', 'success', 4500);
       } else {
         this.showToast(`⚠️ Google Drive ตอบกลับ: ${json.message || 'บันทึกไม่สำเร็จ'}`, 'warning', 4000);
       }
