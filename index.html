@@ -557,14 +557,17 @@
             <i class="fa-solid fa-fire text-amber-300"></i> ข้อตกลงในการพัฒนางานที่เป็นประเด็นท้าทาย (<span class="current-year-label">ปี 2568</span>)
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button onclick="autoSynthesizeChallengeFromDrive(false)" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 hover:opacity-90 text-white text-xs font-bold font-heading shadow-md hover:scale-105 transition">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i> ให้ AI ค้นหาและสังเคราะห์จากไฟล์ในไดรฟ์
+            <button id="btn-ai-synthesize-challenge" onclick="autoSynthesizeChallengeFromDrive(false)" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 hover:opacity-90 text-white text-xs font-bold font-heading shadow-md hover:scale-105 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i> <span id="btn-ai-synthesize-text">ให้ AI ค้นหาและสังเคราะห์จากไฟล์ในไดรฟ์</span>
             </button>
             <button onclick="PresentationDeck.open('res-problem')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-bold font-heading shadow-md hover:scale-105 transition">
               <i class="fa-solid fa-tv"></i> สไลด์ประเด็นท้าทาย (วิจัย 5 บท)
             </button>
           </div>
         </div>
+
+        <!-- AI Live Status Banner in Challenge Section -->
+        <div id="challenge-ai-live-banner" class="hidden mb-4 p-3.5 rounded-2xl bg-teal-950/90 border border-teal-500/50 text-xs text-teal-200 transition-all duration-300"></div>
         
         <h2 class="text-2xl sm:text-4xl font-bold font-heading mb-3 leading-tight" id="challenge-topic-text">
           รูปแบบการจัดการเรียนรู้ PREM Model ร่วมกับ Thinking Whiteboard
@@ -1432,9 +1435,12 @@
           </div>
         </div>
 
-        <button onclick="handleAIGenerateIndicator()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 via-indigo-600 to-teal-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-sparkles"></i> ร่างข้อความตัวชี้วัดด้วย AI
+        <button id="btn-ai-generate-indicator" onclick="handleAIGenerateIndicator()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 via-indigo-600 to-teal-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-sparkles"></i> <span>ร่างข้อความตัวชี้วัดด้วย AI</span>
         </button>
+
+        <!-- Live Status Badge -->
+        <div id="ai-indicator-status-badge" class="hidden p-2.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-xs font-medium flex items-center gap-2 transition-all"></div>
 
         <!-- AI Output Display -->
         <div id="ai-indicator-output" class="hidden space-y-3 pt-2">
@@ -1455,8 +1461,8 @@
           </div>
 
           <div class="flex justify-end gap-2 pt-2">
-            <button onclick="applyAIToIndicatorModal()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading shadow-md transition">
-              <i class="fa-solid fa-check-double mr-1"></i> นำไปใช้ในหน้าต่างตัวชี้วัดทันที
+            <button id="btn-apply-ai-indicator" onclick="applyAIToIndicatorModal()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold font-heading shadow-md transition flex items-center gap-1.5">
+              <i class="fa-solid fa-check-double mr-1"></i> <span>นำไปใช้ในหน้าต่างตัวชี้วัดทันที</span>
             </button>
           </div>
         </div>
@@ -1485,9 +1491,12 @@
           </div>
         </div>
 
-        <button onclick="handleAIGenerateChallenge()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-teal-600 to-indigo-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> ออกแบบโมเดลประเด็นท้าทายด้วย AI
+        <button id="btn-ai-generate-challenge" onclick="handleAIGenerateChallenge()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-teal-600 to-indigo-600 hover:opacity-95 text-white text-xs font-bold font-heading shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>ออกแบบโมเดลประเด็นท้าทายด้วย AI</span>
         </button>
+
+        <!-- Live Status Badge -->
+        <div id="ai-challenge-status-badge" class="hidden p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-medium flex items-center gap-2 transition-all"></div>
 
         <div id="ai-challenge-output" class="hidden space-y-3 pt-2">
           <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2">
@@ -1496,8 +1505,8 @@
           </div>
 
           <div class="flex justify-end gap-2 pt-2">
-            <button onclick="applyAIToChallengeSection()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold font-heading shadow-md transition">
-              <i class="fa-solid fa-circle-arrow-down mr-1"></i> นำไปบันทึกในหน้าเว็บทันที
+            <button id="btn-apply-ai-challenge" onclick="applyAIToChallengeSection()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold font-heading shadow-md transition flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-arrow-down mr-1"></i> <span>นำไปบันทึกในหน้าเว็บทันที</span>
             </button>
           </div>
         </div>

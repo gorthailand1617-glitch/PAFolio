@@ -369,6 +369,7 @@ function renderIndicators(filter = 'all', searchQuery = '') {
 
       const indDriveUrl = media.folderUrl || getIndicatorDriveUrl(ind.code);
       const isDirectFolder = isIndicatorFolderDirect(ind.code);
+      const synth = (yearData && yearData.indicatorSyntheses && yearData.indicatorSyntheses[ind.code]) ? yearData.indicatorSyntheses[ind.code] : null;
 
       card.innerHTML = `
         <div>
@@ -379,8 +380,9 @@ function renderIndicators(filter = 'all', searchQuery = '') {
             <!-- Main uncropped fitted image showing all edges -->
             <img src="${primaryImgUrl}" alt="${ind.title}" class="relative z-10 max-w-full max-h-full w-auto h-auto object-contain p-1 group-hover:scale-105 transition duration-500 drop-shadow-md" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'">
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none z-10"></div>
-            <span class="absolute top-2.5 left-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${tagBg} z-20">
+            <span class="absolute top-2.5 left-2.5 text-[11px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${tagBg} z-20 flex items-center gap-1.5">
               ตัวชี้วัด ${ind.code}
+              ${synth ? '<span class="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-bold shadow-xs"><i class="fa-solid fa-sparkles text-[8px]"></i> AI</span>' : ''}
             </span>
             <div class="z-20">${liveBadge}</div>
             <div class="z-20">${photoBadge}</div>
@@ -392,8 +394,8 @@ function renderIndicators(filter = 'all', searchQuery = '') {
           <h4 class="font-heading font-bold text-slate-900 text-base mb-2 group-hover:text-teal-700 transition leading-snug line-clamp-2">
             ${ind.title}
           </h4>
-          <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">
-            ${ind.shortDesc}
+          <p class="text-xs text-slate-600 leading-relaxed line-clamp-2" title="${synth ? synth.task : ind.shortDesc}">
+            ${synth ? synth.task : ind.shortDesc}
           </p>
         </div>
 
@@ -2113,50 +2115,225 @@ function switchAITab(tab) {
   }
 }
 
-function handleAIGenerateIndicator() {
+async function handleAIGenerateIndicator() {
   const code = document.getElementById('ai-indicator-select')?.value || '1.1';
   const subject = document.getElementById('ai-subject-select')?.value || 'การงานอาชีพ';
   const teacher = getActiveTeacher();
   const standing = teacher.academicStanding || 'ครูชำนาญการพิเศษ';
 
+  const btn = document.getElementById('btn-ai-generate-indicator');
+  const badge = document.getElementById('ai-indicator-status-badge');
+  const outBox = document.getElementById('ai-indicator-output');
+
+  // 1. Loading state with spinner
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-300"></i> <span>AI กำลังวิเคราะห์และร่างข้อความ ว9/2564...</span>';
+    btn.classList.add('opacity-80', 'cursor-not-allowed');
+  }
+
+  if (badge) {
+    badge.className = 'p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2.5 transition-all shadow-sm';
+    badge.innerHTML = `
+      <i class="fa-solid fa-brain fa-fade text-amber-600 text-sm"></i>
+      <div>
+        <span class="font-bold">AI กำลังสังเคราะห์ข้อความตามมาตรฐานวิทยฐานะ:</span>
+        <span class="text-amber-700 font-semibold">${standing} (${subject})</span>
+      </div>
+    `;
+    badge.classList.remove('hidden');
+  }
+
+  // Visual simulation delay (450ms) for authentic AI processing feel
+  await new Promise(r => setTimeout(r, 450));
+
+  // 2. Generate content
   const res = AIAssistant.generateIndicatorContent(code, subject, 'มัธยมศึกษา', standing);
   currentAIIndicatorResult = res;
 
   const outWork = document.getElementById('ai-out-work');
   const outOutcome = document.getElementById('ai-out-outcome');
-  const outBox = document.getElementById('ai-indicator-output');
 
   if (outWork) outWork.innerText = res.workDescription;
   if (outOutcome) outOutcome.innerText = res.outcomeDescription;
-  if (outBox) outBox.classList.remove('hidden');
+
+  // 3. Success state badge
+  if (badge) {
+    badge.className = 'p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 text-emerald-950 text-xs font-medium flex items-center justify-between transition-all shadow-sm';
+    badge.innerHTML = `
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+        <div>
+          <span class="font-bold text-emerald-900">ร่างข้อความตัวชี้วัด ${code} สำเร็จแล้ว!</span>
+          <span class="text-emerald-700 block text-[11px]">คลิก "นำไปใช้ในหน้าต่างตัวชี้วัดทันที" เพื่อบันทึกลงระบบ</span>
+        </div>
+      </div>
+      <span class="px-2 py-0.5 rounded bg-emerald-200/70 text-emerald-900 font-bold text-[10px]">พร้อมบันทึก</span>
+    `;
+  }
+
+  if (outBox) {
+    outBox.classList.remove('hidden');
+    outBox.classList.add('ring-2', 'ring-teal-400/60', 'transition-all');
+    setTimeout(() => outBox.classList.remove('ring-2', 'ring-teal-400/60'), 1500);
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-sparkles"></i> <span>ร่างข้อความตัวชี้วัดด้วย AI</span>';
+    btn.classList.remove('opacity-80', 'cursor-not-allowed');
+  }
 }
 
-function applyAIToIndicatorModal() {
+async function applyAIToIndicatorModal() {
   if (!currentAIIndicatorResult) return;
-  const modalDetails = document.getElementById('modal-details');
-  const modalResults = document.getElementById('modal-results');
 
-  if (modalDetails) modalDetails.innerText = currentAIIndicatorResult.workDescription;
-  if (modalResults) modalResults.innerText = currentAIIndicatorResult.outcomeDescription;
+  const btnApply = document.getElementById('btn-apply-ai-indicator');
+  if (btnApply) {
+    btnApply.disabled = true;
+    btnApply.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึกลงระบบ...</span>';
+  }
+
+  const code = currentAIIndicatorResult.indicatorCode || document.getElementById('ai-indicator-select')?.value || '1.1';
+  const yearData = getActiveYearData();
+  if (!yearData.indicatorSyntheses) {
+    yearData.indicatorSyntheses = {};
+  }
+
+  let quant = '';
+  let qual = '';
+  if (currentAIIndicatorResult.outcomeDescription) {
+    const lines = currentAIIndicatorResult.outcomeDescription.split('\n');
+    lines.forEach(line => {
+      if (line.includes('เชิงปริมาณ')) quant = line.replace(/^.*เชิงปริมาณ:\s*/, '').trim();
+      if (line.includes('เชิงคุณภาพ')) qual = line.replace(/^.*เชิงคุณภาพ:\s*/, '').trim();
+    });
+  }
+  if (!quant) quant = currentAIIndicatorResult.outcomeDescription;
+  if (!qual) qual = 'ผู้เรียนเกิดสมรรถนะการเรียนรู้ ทักษะการปฏิบัติงาน และมีคุณลักษณะอันพึงประสงค์ตามเกณฑ์มาตรฐาน';
+
+  const evidence = (currentAIIndicatorResult.evidences && currentAIIndicatorResult.evidences.length > 0)
+    ? currentAIIndicatorResult.evidences.join(', ')
+    : 'ข้อตกลง ว.PA (แบบ PA 1/ส), แผนการจัดการเรียนรู้, เล่มวิจัย 5 บท, บันทึก ปพ.5';
+
+  // 1. บันทึกลง yearData (Persistent Data Model)
+  yearData.indicatorSyntheses[code] = {
+    task: currentAIIndicatorResult.workDescription,
+    quant: quant,
+    qual: qual,
+    evidence: evidence
+  };
+
+  // 2. บันทึกลง LocalStorage
+  saveStoredTeachers();
+
+  // 3. อัปเดตเนื้อหาใน Modal หากเปิดตัวชี้วัดนี้อยู่
+  const modalCodeEl = document.getElementById('modal-code');
+  if (modalCodeEl && modalCodeEl.innerText.includes(code)) {
+    const modalDetails = document.getElementById('modal-details');
+    const modalResults = document.getElementById('modal-results');
+    const refEl = document.getElementById('modal-synthesized-refs');
+
+    if (modalDetails) {
+      modalDetails.innerText = currentAIIndicatorResult.workDescription;
+      modalDetails.classList.add('transition-all', 'duration-500', 'bg-teal-50', 'p-2', 'rounded-lg');
+      setTimeout(() => modalDetails.classList.remove('bg-teal-50', 'p-2', 'rounded-lg'), 2000);
+    }
+    if (modalResults) {
+      modalResults.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex items-start gap-2">
+            <span class="px-2.5 py-0.5 rounded-md bg-emerald-200/90 text-emerald-950 font-bold text-xs flex-shrink-0">เชิงปริมาณ</span>
+            <span class="text-xs sm:text-sm text-emerald-950">${quant}</span>
+          </div>
+          <div class="flex items-start gap-2 pt-1.5 border-t border-emerald-200/60">
+            <span class="px-2.5 py-0.5 rounded-md bg-teal-200/90 text-teal-950 font-bold text-xs flex-shrink-0">เชิงคุณภาพ</span>
+            <span class="text-xs sm:text-sm text-emerald-950">${qual}</span>
+          </div>
+        </div>
+      `;
+    }
+    if (refEl) refEl.innerText = evidence;
+  }
+
+  // 4. รีเฟรชการแสดงผล 15 ตัวชี้วัดบนหน้าเว็บหลักทันที
+  renderIndicators('all', '');
+
+  if (btnApply) {
+    btnApply.disabled = false;
+    btnApply.innerHTML = '<i class="fa-solid fa-check-double mr-1"></i> <span>นำไปใช้ในหน้าต่างตัวชี้วัดทันที</span>';
+  }
 
   closeAIAssistant();
-  DriveSync.showToast('✅ อัปเดตข้อความจาก AI ลงในตัวชี้วัดเรียบร้อยแล้ว!', 'success', 3000);
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast(`✅ บันทึกข้อความ ว.PA ตัวชี้วัด ${code} ลงในระบบเรียบร้อยแล้ว!`, 'success', 3500);
+  }
 }
 
-function handleAIGenerateChallenge() {
+async function handleAIGenerateChallenge() {
   const topic = document.getElementById('ai-challenge-topic-input')?.value.trim() || 'ทักษะการเรียนรู้เชิงรุก Active Learning';
   const modelType = document.getElementById('ai-challenge-model-type')?.value || 'PREM';
   const grade = document.getElementById('ai-challenge-grade-input')?.value.trim() || 'มัธยมศึกษาปีที่ 6';
   const teacher = getActiveTeacher();
 
+  const btn = document.getElementById('btn-ai-generate-challenge');
+  const badge = document.getElementById('ai-challenge-status-badge');
+  const outBox = document.getElementById('ai-challenge-output');
+
+  // 1. Loading state
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-300"></i> <span>AI กำลังออกแบบโมเดลและโครงสร้างวิจัย 5 บท...</span>';
+    btn.classList.add('opacity-80', 'cursor-not-allowed');
+  }
+
+  if (badge) {
+    badge.className = 'p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2.5 transition-all shadow-sm';
+    badge.innerHTML = `
+      <i class="fa-solid fa-brain fa-fade text-indigo-600 text-sm"></i>
+      <div>
+        <span class="font-bold">AI กำลังสังเคราะห์โมเดล ${modelType}:</span>
+        <span class="text-indigo-700 font-semibold">กลุ่มสาระฯ ${teacher.learningArea || 'การงานอาชีพ'} (${grade})</span>
+      </div>
+    `;
+    badge.classList.remove('hidden');
+  }
+
+  await new Promise(r => setTimeout(r, 450));
+
+  // 2. Generate
   const res = AIAssistant.generateChallengeModel(topic, teacher.learningArea, grade, modelType);
   currentAIChallengeResult = res;
 
   const outTitle = document.getElementById('ai-out-challenge-title');
-  const outBox = document.getElementById('ai-challenge-output');
-
   if (outTitle) outTitle.innerText = res.topic;
-  if (outBox) outBox.classList.remove('hidden');
+
+  // 3. Success state
+  if (badge) {
+    badge.className = 'p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 text-emerald-950 text-xs font-medium flex items-center justify-between transition-all shadow-sm';
+    badge.innerHTML = `
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+        <div>
+          <span class="font-bold text-emerald-900">ออกแบบโมเดลประเด็นท้าทายสำเร็จ!</span>
+          <span class="text-emerald-700 block text-[11px]">โมเดล ${modelType} พร้อมบันทึกลงหน้าเว็บ</span>
+        </div>
+      </div>
+      <span class="px-2 py-0.5 rounded bg-emerald-200/70 text-emerald-900 font-bold text-[10px]">พร้อมบันทึก</span>
+    `;
+  }
+
+  if (outBox) {
+    outBox.classList.remove('hidden');
+    outBox.classList.add('ring-2', 'ring-indigo-400/60', 'transition-all');
+    setTimeout(() => outBox.classList.remove('ring-2', 'ring-indigo-400/60'), 1500);
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>ออกแบบโมเดลประเด็นท้าทายด้วย AI</span>';
+    btn.classList.remove('opacity-80', 'cursor-not-allowed');
+  }
 }
 
 function applyAIToChallengeSection() {
@@ -2165,11 +2342,20 @@ function applyAIToChallengeSection() {
   const yearData = getActiveYearData();
 
   yearData.challengeIssue = currentAIChallengeResult;
-  renderChallengeSection(teacher, yearData);
   saveStoredTeachers();
+  renderChallengeSection(teacher, yearData);
+
+  // Flash highlight on topic
+  const topicEl = document.getElementById('challenge-topic-text');
+  if (topicEl) {
+    topicEl.classList.add('text-amber-300', 'transition-all', 'duration-500');
+    setTimeout(() => topicEl.classList.remove('text-amber-300'), 2000);
+  }
 
   closeAIAssistant();
-  DriveSync.showToast('✅ อัปเดตโมเดลประเด็นท้าทายลงในหน้าเว็บเรียบร้อยแล้ว!', 'success', 3500);
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast('✅ อัปเดตโมเดลประเด็นท้าทายลงในหน้าเว็บเรียบร้อยแล้ว!', 'success', 3500);
+  }
 }
 
 // =========================================================================
@@ -2179,15 +2365,42 @@ async function autoSynthesizeChallengeFromDrive(inEditor = false) {
   const teacher = getActiveTeacher();
   const yearData = getActiveYearData();
 
-  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
-    DriveSync.showToast('🔍 AI กำลังค้นหาไฟล์เอกสารข้อตกลง PA และเล่มวิจัยใน Google Drive...', 'info', 3000);
+  // Status Elements
+  const statusEl = document.getElementById('editor-ai-challenge-status');
+  const bannerEl = document.getElementById('challenge-ai-live-banner');
+  const btnChallenge = document.getElementById('btn-ai-synthesize-challenge');
+  const btnText = document.getElementById('btn-ai-synthesize-text');
+
+  if (btnChallenge) {
+    btnChallenge.disabled = true;
+    btnChallenge.classList.add('opacity-80', 'cursor-not-allowed');
+  }
+  if (btnText) {
+    btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-200 mr-1"></i> AI กำลังสแกนไฟล์ในไดรฟ์...';
   }
 
-  const statusEl = document.getElementById('editor-ai-challenge-status');
   if (inEditor && statusEl) {
     statusEl.className = 'mb-3 p-3 rounded-xl bg-teal-950/80 border border-teal-500/40 text-[11px] text-teal-200 flex items-center gap-2';
     statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-teal-400"></i> AI กำลังสแกนไฟล์เอกสารและวิเคราะห์เนื้อหาประเด็นท้าทายจาก Google Drive...';
     statusEl.classList.remove('hidden');
+  }
+
+  if (bannerEl) {
+    bannerEl.className = 'mb-4 p-3.5 rounded-2xl bg-teal-950/90 border border-teal-500/50 text-xs text-teal-200 flex items-center gap-3 transition-all duration-300 shadow-md';
+    bannerEl.innerHTML = `
+      <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center flex-shrink-0">
+        <i class="fa-solid fa-circle-notch fa-spin text-base"></i>
+      </div>
+      <div>
+        <div class="font-bold text-amber-200 text-xs">AI กำลังสแกนและสังเคราะห์ประเด็นท้าทายจาก Google Drive...</div>
+        <div class="text-[11px] text-teal-300/80">ระบบกำลังวิเคราะห์ข้อตกลง PA 1/ส และโครงสร้างวิจัย 5 บทตามเกณฑ์ ว9/2564</div>
+      </div>
+    `;
+    bannerEl.classList.remove('hidden');
+  }
+
+  if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
+    DriveSync.showToast('🔍 AI กำลังค้นหาไฟล์เอกสารข้อตกลง PA และเล่มวิจัยใน Google Drive...', 'info', 3000);
   }
 
   // ซิงก์ข้อมูลล่าสุดจาก Google Drive หากตั้งค่าไว้
@@ -2198,6 +2411,9 @@ async function autoSynthesizeChallengeFromDrive(inEditor = false) {
       synced = res.data;
     }
   }
+
+  // Smooth authentic delay for UI
+  await new Promise(r => setTimeout(r, 600));
 
   // เรียกใช้ Generative AI วิเคราะห์และสังเคราะห์เอกสารจาก Drive
   const result = AIAssistant.synthesizeChallengeFromDrive(synced, currentAcademicYear, teacher);
@@ -2214,12 +2430,12 @@ async function autoSynthesizeChallengeFromDrive(inEditor = false) {
     document.getElementById('edit-challenge-target').value = `${result.targetGroup} / ${result.subject}`;
   }
 
+  const fileListHtml = (result.sourceFiles && result.sourceFiles.length > 0)
+    ? result.sourceFiles.map(f => `<span class="inline-block px-2 py-0.5 rounded bg-teal-900/90 text-teal-300 border border-teal-500/30 text-[10px] mr-1 mb-1">📄 ${f}</span>`).join('')
+    : '<span class="inline-block px-2 py-0.5 rounded bg-teal-900/90 text-teal-300 text-[10px]">📄 01_แบบข้อตกลงในการพัฒนางาน (PA 1-ส)</span>';
+
   // แสดงผลการวิเคราะห์ไฟล์ในหน้าต่าง Editor
   if (statusEl) {
-    const fileListHtml = (result.sourceFiles && result.sourceFiles.length > 0)
-      ? result.sourceFiles.map(f => `<span class="inline-block px-2 py-0.5 rounded bg-teal-900/90 text-teal-300 border border-teal-500/30 text-[10px] mr-1 mb-1">📄 ${f}</span>`).join('')
-      : '<span class="inline-block px-2 py-0.5 rounded bg-teal-900/90 text-teal-300 text-[10px]">📄 01_แบบข้อตกลงในการพัฒนางาน (PA 1-ส)</span>';
-
     statusEl.className = 'mb-3 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-[11px] text-emerald-200 space-y-1.5';
     statusEl.innerHTML = `
       <div class="font-bold flex items-center gap-1.5 text-emerald-300">
@@ -2234,8 +2450,45 @@ async function autoSynthesizeChallengeFromDrive(inEditor = false) {
     statusEl.classList.remove('hidden');
   }
 
+  // อัปเดต Live Banner บนหน้าเว็บหลัก
+  if (bannerEl) {
+    bannerEl.className = 'mb-4 p-3.5 rounded-2xl bg-emerald-950/90 border border-emerald-500/50 text-xs text-emerald-200 transition-all duration-300 shadow-lg';
+    bannerEl.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <i class="fa-solid fa-circle-check text-base"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-emerald-300 flex items-center justify-between">
+            <span>AI สังเคราะห์ประเด็นท้าทาย (วิจัย 5 บท) สำเร็จแล้ว!</span>
+            <span class="text-[10px] bg-emerald-900/80 px-2 py-0.5 rounded text-emerald-300 font-semibold border border-emerald-500/30">Google Drive Live</span>
+          </div>
+          <div class="text-[11px] text-slate-300 mt-1">เอกสารที่นำมาประมวลผล: ${fileListHtml}</div>
+          <div class="text-[10px] text-emerald-400/90 mt-1">ระบบได้อัปเดตโมเดล ${result.modelType || 'PREM Model'} และขั้นตอนการดำเนินงาน 5 บทลงในหน้าเว็บทันที</div>
+        </div>
+      </div>
+    `;
+    bannerEl.classList.remove('hidden');
+  }
+
   // อัปเดตส่วนแสดงผลบนหน้าเว็บหลัก
   renderChallengeSection(teacher, yearData);
+
+  // Flash highlight on topic
+  const topicEl = document.getElementById('challenge-topic-text');
+  if (topicEl) {
+    topicEl.classList.add('text-amber-300', 'transition-all', 'duration-500');
+    setTimeout(() => topicEl.classList.remove('text-amber-300'), 2500);
+  }
+
+  // Restore button
+  if (btnChallenge) {
+    btnChallenge.disabled = false;
+    btnChallenge.classList.remove('opacity-80', 'cursor-not-allowed');
+  }
+  if (btnText) {
+    btnText.innerText = 'ให้ AI ค้นหาและสังเคราะห์จากไฟล์ในไดรฟ์';
+  }
 
   if (typeof DriveSync !== 'undefined' && DriveSync.showToast) {
     DriveSync.showToast('✅ AI สังเคราะห์ประเด็นท้าทายและโมเดลวิจัย 5 บทจากเอกสารในไดรฟ์เรียบร้อยแล้ว!', 'success', 4500);
