@@ -28,7 +28,7 @@ const BASE_INDICATOR_TEMPLATES = [
 
 document.addEventListener('DOMContentLoaded', () => {
   // ✨ Cache-Busting & Auto-Migration: ล้างแคชเก่าที่ค้างอยู่ในเครื่องอื่น และตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ
-  const CURRENT_APP_VERSION = '2569.4.0';
+  const CURRENT_APP_VERSION = '2569.4.1';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
     localStorage.removeItem('pafolio_custom_teachers');
@@ -1879,6 +1879,43 @@ function setupEventListeners() {
 
   // Floating Home Button & Scroll Tracker
   const floatingHomeContainer = document.getElementById('floating-home-container');
+  const floatingHomeBtn = document.getElementById('floating-home-btn');
+  let floatingMenuHoverTimer = null;
+
+  if (floatingHomeContainer && floatingHomeBtn) {
+    // 1. แสดงเมนูย่อยทันทีเมื่อเม้าส์อยู่เหนือ (Hover)
+    floatingHomeContainer.addEventListener('mouseenter', () => {
+      if (floatingMenuHoverTimer) {
+        clearTimeout(floatingMenuHoverTimer);
+        floatingMenuHoverTimer = null;
+      }
+      toggleFloatingMenu(true);
+    });
+
+    // 2. ซ่อนเมนูย่อยเมื่อเม้าส์เลื่อนออก (หน่วงเวลา 300ms เพื่อให้เลื่อนเข้าเมนูย่อยได้สะดวก)
+    floatingHomeContainer.addEventListener('mouseleave', () => {
+      if (floatingMenuHoverTimer) clearTimeout(floatingMenuHoverTimer);
+      floatingMenuHoverTimer = setTimeout(() => {
+        toggleFloatingMenu(false);
+      }, 300);
+    });
+
+    // 3. แสดงเมนูย่อยทันทีเมื่อคลิก หรือหากเปิดอยู่แล้วคลิกซ้ำจะเลื่อนกลับสู่หน้าแรกสุด
+    floatingHomeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (floatingMenuHoverTimer) {
+        clearTimeout(floatingMenuHoverTimer);
+        floatingMenuHoverTimer = null;
+      }
+      if (!isFloatingMenuOpen) {
+        toggleFloatingMenu(true);
+      } else {
+        scrollToHomePage();
+        toggleFloatingMenu(false);
+      }
+    });
+  }
+
   const updateFloatingHomeVisibility = () => {
     if (!floatingHomeContainer) return;
     if (window.scrollY > 180) {
@@ -1911,9 +1948,7 @@ let isFloatingMenuOpen = false;
 function toggleFloatingMenu(forceState) {
   const menu = document.getElementById('floating-indicators-menu');
   const icon = document.getElementById('floating-btn-icon');
-  const title = document.getElementById('floating-btn-title');
-  const subtitle = document.getElementById('floating-btn-subtitle');
-  const chevron = document.getElementById('floating-btn-chevron');
+  const btn = document.getElementById('floating-home-btn');
   if (!menu) return;
 
   isFloatingMenuOpen = (typeof forceState === 'boolean') ? forceState : !isFloatingMenuOpen;
@@ -1927,11 +1962,11 @@ function toggleFloatingMenu(forceState) {
       menu.classList.add('scale-100', 'opacity-100');
     });
     if (icon) {
-      icon.className = 'fa-solid fa-xmark text-rose-300';
+      icon.className = 'fa-solid fa-xmark text-lg sm:text-xl text-rose-200 group-hover:rotate-90 transition-transform duration-200';
     }
-    if (title) title.textContent = 'ปิดเมนูลัด';
-    if (subtitle) subtitle.textContent = 'คลิกเพื่อซ่อน';
-    if (chevron) chevron.className = 'fa-solid fa-chevron-down text-xs text-rose-300';
+    if (btn) {
+      btn.title = 'คลิกเพื่อเลื่อนกลับหน้าแรกสุด หรือปิดเมนูลัด';
+    }
   } else {
     menu.classList.remove('scale-100', 'opacity-100');
     menu.classList.add('scale-95', 'opacity-0');
@@ -1939,11 +1974,11 @@ function toggleFloatingMenu(forceState) {
       if (!isFloatingMenuOpen) menu.classList.add('hidden');
     }, 200);
     if (icon) {
-      icon.className = 'fa-solid fa-layer-group';
+      icon.className = 'fa-solid fa-house text-lg sm:text-xl group-hover:scale-110 transition-transform duration-200';
     }
-    if (title) title.textContent = '15 ตัวชี้วัด & หน้าแรก';
-    if (subtitle) subtitle.textContent = 'คลิกเพื่อเลือกตัวชี้วัด';
-    if (chevron) chevron.className = 'fa-solid fa-chevron-up text-xs text-teal-200';
+    if (btn) {
+      btn.title = 'หน้าแรก & ทางลัด 15 ตัวชี้วัด PA (วางเม้าส์หรือคลิกเพื่อดูเมนู)';
+    }
   }
 }
 

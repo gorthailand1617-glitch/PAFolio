@@ -60,7 +60,7 @@
   </script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=2569.4.0">
+  <link rel="stylesheet" href="css/styles.css?v=2569.4.1">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
 
@@ -2023,20 +2023,17 @@
 
     </div>
 
-    <!-- Main Floating Trigger Button -->
+    <!-- Main Floating Trigger Button (Compact Home Icon) -->
     <button id="floating-home-btn" 
-            onclick="toggleFloatingMenu()" 
-            title="คลิกเพื่อแตกเป็น 15 ตัวชี้วัด หรือเลื่อนกลับหน้าแรก"
-            aria-label="เมนูทางลัด 15 ตัวชี้วัดและหน้าแรก"
-            class="group flex items-center gap-2.5 px-4 py-3 sm:px-5 sm:py-3.5 bg-gradient-to-r from-teal-600 via-primary-700 to-indigo-700 hover:from-teal-500 hover:via-primary-600 hover:to-indigo-600 text-white rounded-full shadow-[0_10px_30px_rgba(15,23,42,0.45)] hover:shadow-[0_15px_35px_rgba(13,148,136,0.6)] border border-white/25 backdrop-blur-xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer">
-      <div id="floating-btn-icon-box" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs sm:text-sm shadow-inner group-hover:rotate-12 transition-transform duration-300">
-        <i id="floating-btn-icon" class="fa-solid fa-layer-group"></i>
-      </div>
-      <div class="flex flex-col text-left">
-        <span id="floating-btn-title" class="text-[11px] sm:text-xs font-bold font-heading tracking-wide uppercase leading-tight text-white group-hover:text-teal-200 transition-colors">15 ตัวชี้วัด & หน้าแรก</span>
-        <span id="floating-btn-subtitle" class="hidden sm:inline text-[10px] text-teal-200/90 leading-none">คลิกเพื่อเลือกตัวชี้วัด</span>
-      </div>
-      <i id="floating-btn-chevron" class="fa-solid fa-chevron-up text-xs text-teal-200 group-hover:text-white transition-transform duration-300 ml-0.5"></i>
+            title="หน้าแรก & ทางลัด 15 ตัวชี้วัด PA"
+            aria-label="หน้าแรก และทางลัด 15 ตัวชี้วัด PA"
+            class="group relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-tr from-teal-600 via-primary-600 to-indigo-600 hover:from-teal-500 hover:via-primary-500 hover:to-indigo-500 text-white rounded-full shadow-[0_10px_25px_rgba(15,23,42,0.45)] hover:shadow-[0_15px_35px_rgba(13,148,136,0.6)] border border-white/30 backdrop-blur-xl transition-all duration-300 transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer">
+      <i id="floating-btn-icon" class="fa-solid fa-house text-lg sm:text-xl group-hover:scale-110 transition-transform duration-200"></i>
+      <!-- Badge แสดงจำนวน 15 ตัวชี้วัด -->
+      <span class="absolute -top-1 -right-1 flex h-4 w-4">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-4 w-4 bg-teal-500 border border-white text-[9px] text-white font-bold items-center justify-center shadow-sm">15</span>
+      </span>
     </button>
   </aside>
 
@@ -2045,17 +2042,17 @@
   <!-- PptxGenJS (PowerPoint Generator) -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
-  <!-- JavaScript Modules (Cache-Busted v2569.4.0) -->
-  <script src="js/data.js?v=2569.4.0"></script>
-  <script src="js/themes.js?v=2569.4.0"></script>
-  <script src="js/certificate-vault.js?v=2569.4.0"></script>
-  <script src="js/export-engine.js?v=2569.4.0"></script>
-  <script src="js/drive-sync.js?v=2569.4.0"></script>
-  <script src="js/ai-assistant.js?v=2569.4.0"></script>
-  <script src="js/presentation.js?v=2569.4.0"></script>
-  <script src="js/video-engine.js?v=2569.4.0"></script>
-  <script src="js/video-studio-ui.js?v=2569.4.0"></script>
-  <script src="js/chart-config.js?v=2569.4.0"></script>
-  <script src="js/app.js?v=2569.4.0"></script>
+  <!-- JavaScript Modules (Cache-Busted v2569.4.1) -->
+  <script src="js/data.js?v=2569.4.1"></script>
+  <script src="js/themes.js?v=2569.4.1"></script>
+  <script src="js/certificate-vault.js?v=2569.4.1"></script>
+  <script src="js/export-engine.js?v=2569.4.1"></script>
+  <script src="js/drive-sync.js?v=2569.4.1"></script>
+  <script src="js/ai-assistant.js?v=2569.4.1"></script>
+  <script src="js/presentation.js?v=2569.4.1"></script>
+  <script src="js/video-engine.js?v=2569.4.1"></script>
+  <script src="js/video-studio-ui.js?v=2569.4.1"></script>
+  <script src="js/chart-config.js?v=2569.4.1"></script>
+  <script src="js/app.js?v=2569.4.1"></script>
 </body>
 </html>
