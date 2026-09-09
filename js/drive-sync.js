@@ -242,35 +242,34 @@ const DriveSync = {
           if (data.liveProfile.academicStanding) teacher.academicStanding = data.liveProfile.academicStanding;
           if (data.liveProfile.avatarUrl) {
             teacher.avatarUrl = data.liveProfile.avatarUrl;
+            teacher._hasCustomProfile = true;
             document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = data.liveProfile.avatarUrl);
           }
           if (data.liveProfile.coverUrl) {
             teacher.coverUrl = data.liveProfile.coverUrl;
+            teacher._hasCustomProfile = true;
             document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = data.liveProfile.coverUrl);
           }
           if (typeof updateHeaderAndProfile === 'function') updateHeaderAndProfile();
         }
       }
 
-      // อัปเดตรูปโปรไฟล์, ภาพปก และโลโก้จาก Google Drive (ถ้ามี)
+      // อัปเดตรูปโปรไฟล์, ภาพปก และโลโก้จาก Google Drive (เฉพาะกรณีที่ยังไม่ได้เลือกรูปเอง ป้องกันรูปเด้งกลับ)
       if (data.assets) {
         const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
         let updatedAsset = false;
 
-        if (data.assets.profileUrl) {
+        // ไม่ให้ assets เขียนทับรูปที่ครูเลือกปรับแต่งเองเด็ดขาด
+        if (data.assets.profileUrl && teacher && !teacher._hasCustomProfile && (!teacher.avatarUrl || teacher.avatarUrl.includes('unsplash'))) {
           document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = data.assets.profileUrl);
-          if (teacher) {
-            teacher.avatarUrl = data.assets.profileUrl;
-            updatedAsset = true;
-          }
+          teacher.avatarUrl = data.assets.profileUrl;
+          updatedAsset = true;
         }
 
-        if (data.assets.coverUrl) {
+        if (data.assets.coverUrl && teacher && !teacher._hasCustomProfile && (!teacher.coverUrl || teacher.coverUrl.includes('unsplash'))) {
           document.querySelectorAll('.hero-cover-img, #hero-cover-img').forEach(el => el.src = data.assets.coverUrl);
-          if (teacher) {
-            teacher.coverUrl = data.assets.coverUrl;
-            updatedAsset = true;
-          }
+          teacher.coverUrl = data.assets.coverUrl;
+          updatedAsset = true;
         }
 
         if (updatedAsset && typeof saveStoredTeachers === 'function') {
@@ -597,10 +596,12 @@ const DriveSync = {
   async saveProfileToCloud(profile) {
     if (!this.config.appsScriptUrl) {
       console.log('[DriveSync] No Apps Script URL configured. Saved locally.');
+      this.showToast('💾 บันทึกรูปและโปรไฟล์ในเครื่องเรียบร้อยแล้ว!\n(💡 เพื่อให้บันทึกบน Google Drive โดยตรงและเปิดเครื่องไหนก็ตรงกัน กรุณาใส่ URL เว็บแอปที่เมนู "ตั้งค่า Google Drive")', 'info', 6000);
       return { status: 'offline', message: 'ยังไม่ได้เชื่อมต่อ Apps Script URL เพื่อซิงก์ข้ามเครื่อง' };
     }
 
     try {
+      this.showToast('☁️ กำลังเชื่อมต่อและบันทึกไฟล์โปรไฟล์บน Google Drive...', 'info', 2000);
       const payload = {
         action: 'saveProfile',
         folderId: this.config.folderId || '1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K',
@@ -616,11 +617,14 @@ const DriveSync = {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json.status === 'success') {
-        this.showToast('☁️ ซิงก์โปรไฟล์ขึ้น Google Drive คลาวด์สำเร็จ! (ทุกเครื่องจะอัปเดตตรงกันทันที)', 'success', 3500);
+        this.showToast('☁️ บันทึกโปรไฟล์ขึ้น Google Drive คลาวด์สำเร็จ! (ทุกเครื่องจะอัปเดตตรงกันทันที)', 'success', 3500);
+      } else {
+        this.showToast(`⚠️ Google Drive ตอบกลับ: ${json.message || 'บันทึกไม่สำเร็จ'}`, 'warning', 4000);
       }
       return json;
     } catch (err) {
       console.warn('[DriveSync] Error syncing profile to cloud:', err);
+      this.showToast('⚠️ บันทึกในเครื่องแล้ว แต่ยังส่งไป Google Drive ไม่สำเร็จ กรุณาตรวจสอบสิทธิ์ Apps Script Web App', 'warning', 4500);
       return { status: 'error', message: err.toString() };
     }
   },

@@ -22,8 +22,8 @@ const PAFOLIO_DATABASE = {
     school: "โรงเรียนเปรมติณสูลานนท์",
     affiliation: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น",
     learningArea: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
-    avatarUrl: "https://drive.google.com/thumbnail?id=1hQk-lMCZVHPmZ_3uj9jiwWf58EaRKdEE&sz=w800",
-    coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
+    avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
+    coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
     driveFolderId: "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
     appsScriptUrl: "",
     selectedYear: "2569",
@@ -31,8 +31,8 @@ const PAFOLIO_DATABASE = {
       "2570": {
         year: "2570",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2570 (แผนพัฒนาต่อเนื่อง)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1hQk-lMCZVHPmZ_3uj9jiwWf58EaRKdEE&sz=w800",
-        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "ประธานคณะกรรมการขับเคลื่อนนวัตกรรมการเรียนรู้ AI & Green Education",
@@ -173,8 +173,8 @@ const PAFOLIO_DATABASE = {
       "2569": {
         year: "2569",
         status: "รอบการประเมิน ว.PA ปีการศึกษา 2569 (รอบการประเมินปัจจุบัน)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1hQk-lMCZVHPmZ_3uj9jiwWf58EaRKdEE&sz=w800",
-        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "หัวหน้างานขับเคลื่อนนวัตกรรมการเรียนรู้และเทคโนโลยีดิจิทัล",
@@ -316,8 +316,8 @@ const PAFOLIO_DATABASE = {
       "2568": {
         year: "2568",
         status: "รอบการประเมินปัจจุบัน (2567-2568)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
-        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "ผู้ดูแลระบบ Students Support System (SSS)",
@@ -459,8 +459,8 @@ const PAFOLIO_DATABASE = {
       "2567": {
         year: "2567",
         status: "รอบการประเมิน 2566-2567 (ผ่านเกณฑ์ดีเยี่ยม 95.5 คะแนน)",
-        avatarUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w800",
-        coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
+        avatarUrl: "https://drive.google.com/thumbnail?id=1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3&sz=w800",
+        coverUrl: "https://drive.google.com/thumbnail?id=1W2DFjluaxIzvEj9pgVGTzRaftYzbJN0M&sz=w1920",
         roles: [
           "หัวหน้างานพัฒนาหลักสูตรสถานศึกษา",
           "กรรมการประเมินวิชาการและงานประกันคุณภาพ",

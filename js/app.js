@@ -27,12 +27,10 @@ const BASE_INDICATOR_TEMPLATES = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ✨ Cache-Busting & Auto-Migration: ล้างแคชเก่าที่ค้างอยู่ในเครื่องอื่น และตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ
-  const CURRENT_APP_VERSION = '2569.4.2';
+  // ✨ Cache-Busting & Smart Version Migration: ตั้งค่าปีเริ่มต้นเป็น 2569 อัตโนมัติ และรักษาโปรไฟล์ของครูไว้
+  const CURRENT_APP_VERSION = '2569.4.3';
   const localVersion = localStorage.getItem('pafolio_app_version');
   if (localVersion !== CURRENT_APP_VERSION) {
-    localStorage.removeItem('pafolio_custom_teachers');
-    localStorage.removeItem('pafolio_user_profile');
     localStorage.setItem('pafolio_active_year', '2569');
     localStorage.setItem('pafolio_app_version', CURRENT_APP_VERSION);
     currentAcademicYear = '2569';
@@ -2426,12 +2424,20 @@ function handleSaveProfileEditor() {
   if (avatar) {
     const convertedAvatar = convertToGoogleDriveThumbnailUrl(avatar, 'w800');
     teacher.avatarUrl = convertedAvatar;
-    if (yearData) yearData.avatarUrl = convertedAvatar;
+    teacher._hasCustomProfile = true;
+    if (yearData) {
+      yearData.avatarUrl = convertedAvatar;
+      yearData._hasCustomProfile = true;
+    }
   }
   if (cover) {
     const convertedCover = convertToGoogleDriveThumbnailUrl(cover, 'w1920');
     teacher.coverUrl = convertedCover;
-    if (yearData) yearData.coverUrl = convertedCover;
+    teacher._hasCustomProfile = true;
+    if (yearData) {
+      yearData.coverUrl = convertedCover;
+      yearData._hasCustomProfile = true;
+    }
   }
 
   if (topic) {
