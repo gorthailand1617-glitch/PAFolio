@@ -318,25 +318,32 @@ const DriveSync = {
           modified = true;
         }
 
-        // 3.3 ซิงก์รายการคลิปวิดีโอ YouTube ว.PA จาก Google Drive Cloud State
-        if (cloudState.youtubeVideos && Array.isArray(cloudState.youtubeVideos) && cloudState.youtubeVideos.length > 0) {
-          try {
-            const localStored = localStorage.getItem('pafolio_youtube_videos');
-            const localVideos = localStored ? JSON.parse(localStored) : [];
-            const hasLocalCustom = Array.isArray(localVideos) && localVideos.some(v => v.isCustom);
-            const cloudHasCustom = cloudState.youtubeVideos.some(v => v.isCustom);
+        // 3.3 ซิงก์รายการคลิปวิดีโอ YouTube ว.PA ระหว่างเบราว์เซอร์กับ Google Drive Cloud State แบบสองทิศทาง (Bidirectional)
+        try {
+          const localStored = localStorage.getItem('pafolio_youtube_videos');
+          const localVideos = localStored ? JSON.parse(localStored) : [];
+          const hasLocalCustom = Array.isArray(localVideos) && localVideos.some(v => v.isCustom);
+          const cloudVideos = (cloudState && Array.isArray(cloudState.youtubeVideos)) ? cloudState.youtubeVideos : null;
+          const cloudHasCustom = cloudVideos && cloudVideos.some(v => v.isCustom);
 
-            // หากบน Google Drive มีคลิปที่คุณครูเพิ่มเอง หรือในเครื่องนี้ยังไม่มีคลิปที่เพิ่มเอง ให้นำคลิปจาก Cloud มาใช้
-            if (cloudHasCustom || !hasLocalCustom) {
-              localStorage.setItem('pafolio_youtube_videos', JSON.stringify(cloudState.youtubeVideos));
-              if (typeof YouTubeShowcase !== 'undefined' && typeof YouTubeShowcase.renderShowcaseUI === 'function') {
-                YouTubeShowcase.renderShowcaseUI();
-              }
-              console.log('[DriveSync] Synced YouTube videos from Google Drive Cloud State successfully:', cloudState.youtubeVideos.length);
+          if (cloudHasCustom && (!hasLocalCustom || cloudVideos.length >= localVideos.length)) {
+            // กรณีเปิดในเบราว์เซอร์ใหม่ (เช่น Microsoft Edge): ดึงคลิปจาก Google Drive มาแสดงผลทันที
+            localStorage.setItem('pafolio_youtube_videos', JSON.stringify(cloudVideos));
+            if (typeof YouTubeShowcase !== 'undefined' && typeof YouTubeShowcase.renderShowcaseUI === 'function') {
+              YouTubeShowcase.renderShowcaseUI();
             }
-          } catch(err) {
-            console.warn('[DriveSync] Failed to sync youtubeVideos from cloudState:', err);
+            console.log('[DriveSync] Synced YouTube videos from Google Drive to local successfully:', cloudVideos.length);
+          } else if (hasLocalCustom && (!cloudHasCustom || localVideos.length > (cloudVideos ? cloudVideos.length : 0))) {
+            // กรณีเปิดในเบราว์เซอร์ที่บันทึกคลิปไว้ (เช่น Google Chrome): ส่งคลิปขึ้น Google Drive ทันทีเพื่อให้ Edge และเครื่องอื่นเห็นตรงกัน
+            console.log('[DriveSync] Detected local custom YouTube videos, pushing to Google Drive Cloud State...', localVideos.length);
+            this.saveCloudState({ youtubeVideos: localVideos }).then(ok => {
+              if (ok && !silent && typeof this.showToast === 'function') {
+                this.showToast(`☁️ ซิงก์ ${localVideos.length} คลิปวิดีโอขึ้น Google Drive เรียบร้อยแล้ว`, 'success', 3500);
+              }
+            });
           }
+        } catch(err) {
+          console.warn('[DriveSync] Failed to sync youtubeVideos in applyCloudState:', err);
         }
       }
     }

@@ -615,29 +615,41 @@ const YouTubeShowcase = {
     }
   },
 
-  // ☁️ บังคับซิงก์ข้อมูลคลิปวิดีโอล่าสุดจาก Google Drive ศูนย์กลางทันที
+  // ☁️ บังคับซิงก์ข้อมูลคลิปวิดีโอกับ Google Drive ศูนย์กลางทันที (สองทิศทาง อัจฉริยะ)
   async syncWithGoogleDrive() {
     if (typeof DriveSync === 'undefined' || !DriveSync.config || !DriveSync.config.appsScriptUrl) {
-      alert('ยังไม่ได้ระบุ Google Apps Script URL ในระบบ ไม่สามารถดึงข้อมูลจาก Cloud ได้');
+      alert('ยังไม่ได้ระบุ Google Apps Script URL ในระบบ ไม่สามารถเชื่อมต่อ Google Drive ได้');
       return;
     }
 
     if (typeof DriveSync.showToast === 'function') {
-      DriveSync.showToast('⏳ กำลังดึงรายการคลิปวิดีโอจาก Google Drive...', 'info', 2000);
+      DriveSync.showToast('⏳ กำลังตรวจสอบและซิงก์คลิปวิดีโอกับ Google Drive...', 'info', 2000);
     }
 
     try {
+      const localVideos = this.getAllVideos();
+      const hasLocalCustom = localVideos.some(v => v.isCustom);
       const res = await DriveSync.fetchCloudState();
-      if (res && res.cloudState && Array.isArray(res.cloudState.youtubeVideos) && res.cloudState.youtubeVideos.length > 0) {
-        localStorage.setItem(this.storageKey, JSON.stringify(res.cloudState.youtubeVideos));
-        this.activeVideoId = res.cloudState.youtubeVideos[0].id;
+      const cloudVideos = (res && res.cloudState && Array.isArray(res.cloudState.youtubeVideos)) ? res.cloudState.youtubeVideos : null;
+      const cloudHasCustom = cloudVideos && cloudVideos.some(v => v.isCustom);
+
+      if (cloudHasCustom && (!hasLocalCustom || cloudVideos.length >= localVideos.length)) {
+        // ดึงจาก Cloud ลงมาใส่เบราว์เซอร์นี้ (เช่น เมื่อเปิดใน Microsoft Edge)
+        localStorage.setItem(this.storageKey, JSON.stringify(cloudVideos));
+        this.activeVideoId = cloudVideos[0].id;
         this.renderShowcaseUI();
         if (typeof DriveSync.showToast === 'function') {
-          DriveSync.showToast(`✅ ซิงก์คลิปวิดีโอสำเร็จ! พบ ${res.cloudState.youtubeVideos.length} คลิปจาก Google Drive`, 'success', 4000);
+          DriveSync.showToast(`✅ ซิงก์สำเร็จ! ดึงข้อมูล ${cloudVideos.length} คลิปจาก Google Drive เรียบร้อยแล้ว`, 'success', 4000);
+        }
+      } else if (hasLocalCustom) {
+        // ส่งจากเบราว์เซอร์นี้ขึ้น Cloud (เช่น จาก Google Chrome ที่มี 11 คลิป)
+        await DriveSync.saveCloudState({ youtubeVideos: localVideos });
+        if (typeof DriveSync.showToast === 'function') {
+          DriveSync.showToast(`✅ อัปโหลด ${localVideos.length} คลิปจากเครื่องนี้ขึ้น Google Drive สำเร็จ! ทุกอุปกรณ์จะเห็นตรงกันทันที`, 'success', 4500);
         }
       } else {
         if (typeof DriveSync.showToast === 'function') {
-          DriveSync.showToast('ℹ️ ไม่พบข้อมูลคลิปสำรองบน Google Drive (หรือยังไม่เคยมีการซิงก์)', 'info', 3500);
+          DriveSync.showToast('ℹ️ ข้อมูลคลิปวิดีโอบนเบราว์เซอร์นี้และ Google Drive เป็นเวอร์ชันล่าสุดแล้ว', 'info', 3000);
         }
       }
     } catch(err) {
