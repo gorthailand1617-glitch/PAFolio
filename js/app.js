@@ -249,9 +249,18 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
 
   // อัปเดตรูปโปรไฟล์ครู (ดึงภาพเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้รูปหลัก)
   let activeAvatar = (yearData && yearData.avatarUrl) ? yearData.avatarUrl : teacher.avatarUrl;
-  const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', '1Dyu3SQW'];
-  if (!activeAvatar || badFolderIds.some(badId => activeAvatar.includes(badId))) {
-    activeAvatar = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+  const badFolderIds = ['1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K', '19mPdGDZ0QUD7Eem3w-f8WV6xaCRZUYVZ', '1Dyu3SQW', '1IskORBSlrkKBkFaxD5eCqRTLh3kBaqL3'];
+  const designated2569Avatar = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+
+  // ปี 2569 ใช้รูปโปรไฟล์ชุดสูทขาวนี้ตลอดตามคำสั่งของผู้ใช้ เว้นแต่ผู้ใช้จะกดเปลี่ยนเองจากหน้าเพจ
+  if (currentAcademicYear === '2569' && (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ')))) {
+    if (!yearData?._hasManualUserAvatar) {
+      activeAvatar = designated2569Avatar;
+      if (yearData) yearData.avatarUrl = designated2569Avatar;
+      if (teacher) teacher.avatarUrl = designated2569Avatar;
+    }
+  } else if (!activeAvatar || badFolderIds.some(badId => activeAvatar.includes(badId))) {
+    activeAvatar = designated2569Avatar;
     if (yearData) yearData.avatarUrl = activeAvatar;
     if (teacher) teacher.avatarUrl = activeAvatar;
   }

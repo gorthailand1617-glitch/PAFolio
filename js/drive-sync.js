@@ -267,9 +267,13 @@ const DriveSync = {
               modified = true;
             } else {
               if (yrSrc.avatarUrl && teacher.years[y].avatarUrl !== yrSrc.avatarUrl) {
-                teacher.years[y].avatarUrl = yrSrc.avatarUrl;
-                teacher.years[y]._hasCustomProfile = true;
-                modified = true;
+                if (y === '2569' && (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ'))) && !yrSrc.avatarUrl.includes('1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP')) {
+                  teacher.years['2569'].avatarUrl = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+                } else {
+                  teacher.years[y].avatarUrl = yrSrc.avatarUrl;
+                  teacher.years[y]._hasCustomProfile = true;
+                  modified = true;
+                }
               }
               if (yrSrc.coverUrl && teacher.years[y].coverUrl !== yrSrc.coverUrl) {
                 teacher.years[y].coverUrl = yrSrc.coverUrl;
@@ -706,8 +710,15 @@ const DriveSync = {
         // 1. บันทึกรูปโปรไฟล์และภาพปกประจำปีการศึกษาลงในฐานข้อมูล
         if (teacher && teacher.years && teacher.years[year]) {
           if (data.assets.profileUrl) {
-            teacher.years[year].avatarUrl = data.assets.profileUrl;
-            updatedAsset = true;
+            // สำหรับปี 2569 ของครูกรกฎ ล็อกรูปชุดสูทขาวถาวร ห้ามถูกไฟล์สแกนในโฟลเดอร์ทับ (เว้นแต่ครูเปลี่ยนเองในหน้าเว็บ)
+            if (year === '2569' && (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ')))) {
+              const whiteSuitAvatar = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+              teacher.years['2569'].avatarUrl = whiteSuitAvatar;
+              teacher.avatarUrl = whiteSuitAvatar;
+            } else {
+              teacher.years[year].avatarUrl = data.assets.profileUrl;
+              updatedAsset = true;
+            }
           }
           if (data.assets.coverUrl) {
             teacher.years[year].coverUrl = data.assets.coverUrl;
@@ -718,7 +729,10 @@ const DriveSync = {
         // 2. หากปีที่ซิงก์ตรงกับปีที่กำลังเปิดดูอยู่บนหน้าเว็บ ให้เปลี่ยนรูปที่แสดงบนหน้าจอทันที
         const currentActiveYear = localStorage.getItem('pafolio_active_year') || '2569';
         if (year === currentActiveYear && teacher) {
-          if (data.assets.profileUrl) {
+          if (year === '2569' && (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ')))) {
+            const avatarSrc = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+            document.querySelectorAll('.teacher-avatar-img').forEach(el => el.src = avatarSrc);
+          } else if (data.assets.profileUrl) {
             const avatarSrc = (typeof convertToGoogleDriveThumbnailUrl === 'function') 
               ? convertToGoogleDriveThumbnailUrl(data.assets.profileUrl, 'w800') 
               : data.assets.profileUrl;
