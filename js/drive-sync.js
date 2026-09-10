@@ -808,7 +808,7 @@ const DriveSync = {
     }
 
     const teacher = (typeof getActiveTeacher === 'function' ? getActiveTeacher() : null);
-    const teacherName = teacherNameInput || (teacher ? teacher.name : 'นายกรกฎ รัตนะโชติ');
+    const teacherName = teacherNameInput || (teacher ? teacher.name : 'นายกรกฎ รัตนะโช');
     const year = yearInput || (typeof currentAcademicYear !== 'undefined' ? currentAcademicYear : '2568');
     const shortYear = (year.length === 4) ? year.substring(2) : year;
 

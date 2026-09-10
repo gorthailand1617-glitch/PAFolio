@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const parsed = JSON.parse(cached);
           if (parsed && parsed['teacher-korakot']) {
+            parsed['teacher-korakot'].name = 'นายกรกฎ รัตนะโช';
             parsed['teacher-korakot'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
             if (parsed['teacher-korakot'].years && parsed['teacher-korakot'].years['2569']) {
               parsed['teacher-korakot'].years['2569'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
@@ -1952,7 +1953,7 @@ function aiAutoConfigureDrive() {
         <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i> AI ตั้งค่าโฟลเดอร์ ว.PA ให้สำเร็จ 100%!
       </div>
       <div class="text-[11px] text-emerald-800 leading-relaxed">
-        กำหนดโฟลเดอร์หลัก: <b>🟢 วPAครูกรกฎ รัตนะโชติ โรงเรียนเปรมติณสูลานนท์</b><br>
+        กำหนดโฟลเดอร์หลัก: <b>🟢 วPAครูกรกฎ รัตนะโช โรงเรียนเปรมติณสูลานนท์</b><br>
         (Folder ID: <code class="font-mono bg-emerald-100 px-1 rounded font-bold">${trueFolderId}</code>)
       </div>
     `;
@@ -1977,7 +1978,7 @@ function openFolderTemplateModal() {
   const nameInput = document.getElementById('template-teacher-name-input');
   const yearInput = document.getElementById('template-year-input');
 
-  if (nameInput) nameInput.value = teacher ? teacher.name : 'นายกรกฎ รัตนะโชติ';
+  if (nameInput) nameInput.value = teacher ? teacher.name : 'นายกรกฎ รัตนะโช';
   if (yearInput) yearInput.value = currentAcademicYear || '2568';
 
   modal.classList.remove('hidden');
@@ -2194,6 +2195,7 @@ function loadStoredTeachers() {
         }
 
         if (key === 'teacher-korakot') {
+          stored.name = 'นายกรกฎ รัตนะโช';
           stored.avatarUrl = newWhiteSuitAvatar;
         }
 

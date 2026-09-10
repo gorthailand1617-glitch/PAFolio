@@ -61,7 +61,7 @@ const VideoEngine = {
   // สร้าง 10 ฉากมาตรฐานร้อยเรียงตามข้อมูลจริงของครู
   buildScenes() {
     const teacher = (typeof getActiveTeacher === 'function') ? getActiveTeacher() : {
-      name: "นายกรกฎ รัตนะโชติ",
+      name: "นายกรกฎ รัตนะโช",
       position: "ครู",
       academicStanding: "ชำนาญการพิเศษ",
       school: "โรงเรียนเปรมติณสูลานนท์",

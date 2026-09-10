@@ -22,7 +22,7 @@
 const ROOT_FOLDER_ID = "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K";
 
 // 2. ข้อมูลคุณครูสำหรับใช้ตั้งชื่อโครงสร้างโฟลเดอร์อัตโนมัติ
-const TEACHER_NAME = "นายกรกฎ รัตนะโชติ";
+const TEACHER_NAME = "นายกรกฎ รัตนะโช";
 const ACADEMIC_YEARS = ["2570", "2569", "2568", "2567", "2566"]; // ปีการศึกษาที่ต้องการสร้างโฟลเดอร์
 
 

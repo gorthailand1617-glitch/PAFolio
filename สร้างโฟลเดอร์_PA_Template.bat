@@ -7,8 +7,8 @@ echo =======================================================================
 echo.
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$teacher = Read-Host 'ระบุชื่อคุณครู (เช่น นายกรกฎ รัตนะโชติ) [Enter = นายกรกฎ รัตนะโชติ]';" ^
-  "if ([string]::IsNullOrWhiteSpace($teacher)) { $teacher = 'นายกรกฎ รัตนะโชติ' };" ^
+  "$teacher = Read-Host 'ระบุชื่อคุณครู (เช่น นายกรกฎ รัตนะโช) [Enter = นายกรกฎ รัตนะโช]';" ^
+  "if ([string]::IsNullOrWhiteSpace($teacher)) { $teacher = 'นายกรกฎ รัตนะโช' };" ^
   "$year = Read-Host 'ระบุปีการศึกษา (พ.ศ. 4 หลัก เช่น 2568) [Enter = 2568]';" ^
   "if ([string]::IsNullOrWhiteSpace($year)) { $year = '2568' };" ^
   "$shortYear = if ($year.Length -eq 4) { $year.Substring(2) } else { $year };" ^

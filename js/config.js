@@ -18,7 +18,7 @@ const PAFOLIO_CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycby7k7vKoFG6uugmoqGenVCdWPVXVAfkcWuw7mKcPm8qJSaUmwtOFW_yaEmVAwUlma_Miw/exec",
 
   // 🔖 เลขเวอร์ชันระบบสำหรับจัดการ Cache สากล
-  APP_VERSION: "2569.9.7",
+  APP_VERSION: "2569.9.8",
 
   // 📄 ชื่อไฟล์จัดเก็บสถานะระบบศูนย์กลางบน Google Drive
   CLOUD_STATE_FILE: "pafolio_cloud_state.json",
