@@ -125,7 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function getActiveTeacher() {
-  return PAFOLIO_DATABASE[currentTeacherId] || PAFOLIO_DATABASE['teacher-korakot'];
+  const teacher = PAFOLIO_DATABASE[currentTeacherId] || PAFOLIO_DATABASE['teacher-korakot'];
+  if (teacher) {
+    if (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ'))) {
+      teacher.name = 'นายกรกฎ รัตนะโช';
+      teacher.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
+    } else if (teacher.name) {
+      teacher.name = teacher.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+    }
+  }
+  return teacher;
 }
 
 function getActiveYearData() {
@@ -218,6 +227,12 @@ function convertToGoogleDriveThumbnailUrl(url, size = 'w1000') {
 function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   teacher = teacher || (typeof getActiveTeacher === 'function' ? getActiveTeacher() : null);
   if (!teacher) return;
+  if (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ'))) {
+    teacher.name = 'นายกรกฎ รัตนะโช';
+    teacher.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
+  } else if (teacher.name) {
+    teacher.name = teacher.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+  }
   yearData = yearData || (typeof getActiveYearData === 'function' ? getActiveYearData() : (teacher.years ? teacher.years[currentAcademicYear] : {}));
   expectedLevel = expectedLevel || (typeof getExpectedLevel === 'function' ? getExpectedLevel(teacher.academicStanding) : "ริเริ่ม พัฒนา");
 

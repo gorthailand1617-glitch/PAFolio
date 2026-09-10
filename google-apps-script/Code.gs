@@ -174,12 +174,16 @@ function doGet(e) {
         const stateFiles = rootFolder.getFilesByName("pafolio_cloud_state.json");
         if (stateFiles.hasNext()) {
           cloudState = JSON.parse(stateFiles.next().getBlob().getDataAsString());
+          if (cloudState && cloudState.name) cloudState.name = cloudState.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+          if (cloudState && cloudState.affiliation) cloudState.affiliation = cloudState.affiliation.replace(/สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น|สพม\.ขอนแก่น|สพม\.\/สพป\./g, 'องค์การบริหารส่วนจังหวัดขอนแก่น');
         }
       } catch(err) {}
       try {
         const profileFiles = rootFolder.getFilesByName("pafolio_profile_live.json");
         if (profileFiles.hasNext()) {
           liveProfile = JSON.parse(profileFiles.next().getBlob().getDataAsString());
+          if (liveProfile && liveProfile.name) liveProfile.name = liveProfile.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+          if (liveProfile && liveProfile.affiliation) liveProfile.affiliation = liveProfile.affiliation.replace(/สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น|สพม\.ขอนแก่น|สพม\.\/สพป\./g, 'องค์การบริหารส่วนจังหวัดขอนแก่น');
         }
       } catch(err) {}
       return ContentService.createTextOutput(JSON.stringify({
@@ -431,6 +435,8 @@ function scanDriveRecursively(rootFolderId, filterYear) {
       const pFile = profileFiles.next();
       const pContent = pFile.getBlob().getDataAsString();
       result.liveProfile = JSON.parse(pContent);
+      if (result.liveProfile && result.liveProfile.name) result.liveProfile.name = result.liveProfile.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+      if (result.liveProfile && result.liveProfile.affiliation) result.liveProfile.affiliation = result.liveProfile.affiliation.replace(/สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น|สพม\.ขอนแก่น|สพม\.\/สพป\./g, 'องค์การบริหารส่วนจังหวัดขอนแก่น');
     }
   } catch(err) {}
 
@@ -443,6 +449,8 @@ function scanDriveRecursively(rootFolderId, filterYear) {
     if (stateFiles.hasNext()) {
       const sFile = stateFiles.next();
       result.cloudState = JSON.parse(sFile.getBlob().getDataAsString());
+      if (result.cloudState && result.cloudState.name) result.cloudState.name = result.cloudState.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+      if (result.cloudState && result.cloudState.affiliation) result.cloudState.affiliation = result.cloudState.affiliation.replace(/สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น|สพม\.ขอนแก่น|สพม\.\/สพป\./g, 'องค์การบริหารส่วนจังหวัดขอนแก่น');
     }
   } catch(err) {}
 

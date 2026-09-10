@@ -177,16 +177,44 @@ const DriveSync = {
       }
     }
 
+    let hadOutdatedCloudData = false;
+    const sanitizeProfile = (p) => {
+      if (!p || typeof p !== 'object') return p;
+      if (typeof p.name === 'string') {
+        if (p.name.includes('รัตนะโชติ')) hadOutdatedCloudData = true;
+        p.name = p.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+      }
+      if (p.id === 'teacher-korakot' || (p.name && p.name.includes('กรกฎ'))) {
+        p.name = 'นายกรกฎ รัตนะโช';
+        p.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
+      }
+      if (typeof p.affiliation === 'string') {
+        if (p.affiliation.includes('สพม.') || p.affiliation.includes('สำนักงานเขต')) hadOutdatedCloudData = true;
+        p.affiliation = p.affiliation
+          .replace(/สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น/g, 'องค์การบริหารส่วนจังหวัดขอนแก่น')
+          .replace(/สพม\.ขอนแก่น/g, 'องค์การบริหารส่วนจังหวัดขอนแก่น')
+          .replace(/สพม\.\/สพป\./g, 'องค์การบริหารส่วนจังหวัดขอนแก่น');
+      }
+      return p;
+    };
+
+    if (liveProfile) sanitizeProfile(liveProfile);
+    if (cloudState) sanitizeProfile(cloudState);
+
     // 3. ซิงก์โปรไฟล์ครู ข้อมูลวิทยฐานะ โรงเรียน ประเด็นท้าทาย และรูปภาพ
     const teacher = (typeof getActiveTeacher === 'function') 
       ? getActiveTeacher() 
       : (window.PAFOLIO_DATABASE && window.PAFOLIO_DATABASE['teacher-korakot']);
 
     if (teacher) {
+      if (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ'))) {
+        teacher.name = 'นายกรกฎ รัตนะโช';
+        teacher.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
+      }
       // 3.1 ข้อมูลจาก liveProfile (แฟ้มข้อมูลสดเต็มรูปแบบ)
       if (liveProfile && typeof liveProfile === 'object') {
         if (liveProfile.name && teacher.name !== liveProfile.name) {
-          teacher.name = liveProfile.name;
+          teacher.name = (teacher.id === 'teacher-korakot' || liveProfile.name.includes('กรกฎ')) ? 'นายกรกฎ รัตนะโช' : liveProfile.name;
           modified = true;
         }
         if (liveProfile.position && teacher.position !== liveProfile.position) {
@@ -300,6 +328,11 @@ const DriveSync = {
       if (!silent && typeof this.showToast === 'function') {
         this.showToast('☁️ ซิงก์และปรับใช้ค่าเริ่มต้นล่าสุดจาก Google Drive สำเร็จ', 'success', 3500);
       }
+    }
+    if (hadOutdatedCloudData) {
+      setTimeout(() => {
+        this.saveCloudState({ name: 'นายกรกฎ รัตนะโช', affiliation: 'องค์การบริหารส่วนจังหวัดขอนแก่น' });
+      }, 1200);
     }
     return true;
   },
@@ -590,11 +623,34 @@ const DriveSync = {
 
       // อัปเดตข้อมูลโปรไฟล์ครูสดจาก Cloud (liveProfile)
       if (data.liveProfile) {
+        if (typeof data.liveProfile.name === 'string') {
+          if (data.liveProfile.name.includes('รัตนะโชติ')) {
+            this.saveCloudState({ name: 'นายกรกฎ รัตนะโช', affiliation: 'องค์การบริหารส่วนจังหวัดขอนแก่น' });
+          }
+          data.liveProfile.name = data.liveProfile.name.replace(/รัตนะโชติ/g, 'รัตนะโช');
+        }
+        if (data.liveProfile.id === 'teacher-korakot' || (data.liveProfile.name && data.liveProfile.name.includes('กรกฎ'))) {
+          data.liveProfile.name = 'นายกรกฎ รัตนะโช';
+          data.liveProfile.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
+        }
+        if (typeof data.liveProfile.affiliation === 'string') {
+          data.liveProfile.affiliation = data.liveProfile.affiliation
+            .replace(/สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น/g, 'องค์การบริหารส่วนจังหวัดขอนแก่น')
+            .replace(/สพม\.ขอนแก่น/g, 'องค์การบริหารส่วนจังหวัดขอนแก่น')
+            .replace(/สพม\.\/สพป\./g, 'องค์การบริหารส่วนจังหวัดขอนแก่น');
+        }
         const teacher = typeof getActiveTeacher === 'function' ? getActiveTeacher() : null;
         if (teacher) {
-          if (data.liveProfile.name) teacher.name = data.liveProfile.name;
+          if (data.liveProfile.name) {
+            teacher.name = (teacher.id === 'teacher-korakot' || data.liveProfile.name.includes('กรกฎ')) ? 'นายกรกฎ รัตนะโช' : data.liveProfile.name;
+          }
           if (data.liveProfile.position) teacher.position = data.liveProfile.position;
           if (data.liveProfile.academicStanding) teacher.academicStanding = data.liveProfile.academicStanding;
+          if (data.liveProfile.affiliation) teacher.affiliation = data.liveProfile.affiliation;
+          if (teacher.id === 'teacher-korakot' || (teacher.name && teacher.name.includes('กรกฎ'))) {
+            teacher.name = 'นายกรกฎ รัตนะโช';
+            teacher.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
+          }
           if (data.liveProfile.avatarUrl) {
             teacher.avatarUrl = data.liveProfile.avatarUrl;
             teacher._hasCustomProfile = true;
