@@ -51,8 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       const cached = localStorage.getItem('pafolio_custom_teachers');
-      if (cached && cached.includes('1Dyu3SQW')) {
-        localStorage.removeItem('pafolio_custom_teachers');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed['teacher-korakot']) {
+            parsed['teacher-korakot'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+            if (parsed['teacher-korakot'].years && parsed['teacher-korakot'].years['2569']) {
+              parsed['teacher-korakot'].years['2569'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+            }
+            localStorage.setItem('pafolio_custom_teachers', JSON.stringify(parsed));
+          }
+        } catch (err) {
+          localStorage.removeItem('pafolio_custom_teachers');
+        }
       }
     } catch (e) {}
   }
@@ -2182,6 +2193,10 @@ function loadStoredTeachers() {
           stored.coverUrl = baseline?.coverUrl || (typeof PAFOLIO_CONFIG !== 'undefined' ? PAFOLIO_CONFIG.DEFAULT_COVER_URL : '');
         }
 
+        if (key === 'teacher-korakot') {
+          stored.avatarUrl = newWhiteSuitAvatar;
+        }
+
         if (baseline && baseline.years) {
           if (!stored.years) stored.years = {};
           for (const y in baseline.years) {
@@ -2200,9 +2215,11 @@ function loadStoredTeachers() {
               if (!stored.years[y].gallery && baseline.years[y].gallery) {
                 stored.years[y].gallery = baseline.years[y].gallery;
               }
-              if (y === '2569' && (!stored.years[y]._hasCustomProfile || (stored.years[y].avatarUrl && stored.years[y].avatarUrl.includes(oldBrownPhotoId)))) {
-                stored.years[y].avatarUrl = baseline.years[y].avatarUrl;
-                stored.years[y].coverUrl = baseline.years[y].coverUrl;
+              if (y === '2569') {
+                stored.years[y].avatarUrl = newWhiteSuitAvatar;
+                if (!stored.years[y].coverUrl) {
+                  stored.years[y].coverUrl = baseline.years[y].coverUrl;
+                }
               } else {
                 if (!stored.years[y].avatarUrl && baseline.years[y].avatarUrl) {
                   stored.years[y].avatarUrl = baseline.years[y].avatarUrl;
