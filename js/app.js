@@ -2303,7 +2303,28 @@ function setupEventListeners() {
     });
   }
 
-  // Floating Home Button & Scroll Tracker
+  // Global Dropdown Handler for Tools & Export in Navbar
+  window.toggleNavToolsDropdown = function(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('nav-tools-dropdown-menu');
+    if (menu) menu.classList.toggle('hidden');
+  };
+
+  window.closeNavToolsDropdown = function() {
+    const menu = document.getElementById('nav-tools-dropdown-menu');
+    if (menu && !menu.classList.contains('hidden')) {
+      menu.classList.add('hidden');
+    }
+  };
+
+  document.addEventListener('click', (e) => {
+    const container = document.getElementById('nav-tools-dropdown-container');
+    if (container && !container.contains(e.target)) {
+      if (typeof window.closeNavToolsDropdown === 'function') {
+        window.closeNavToolsDropdown();
+      }
+    }
+  });
   const floatingHomeContainer = document.getElementById('floating-home-container');
   const floatingHomeBtn = document.getElementById('floating-home-btn');
   let floatingMenuHoverTimer = null;

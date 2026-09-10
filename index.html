@@ -105,85 +105,109 @@
     </div>
   </div>
 
-  <!-- ================= MAIN NAVBAR ================= -->
+  <!-- ================= MAIN NAVBAR (Compact & Slim Design) ================= -->
   <nav class="glass-nav sticky top-0 left-0 right-0 z-40 border-b border-slate-200/80 transition-all duration-300 shadow-sm">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center min-h-[4.5rem] py-2 gap-2 sm:gap-4">
+      <div class="flex justify-between items-center h-14 sm:h-16 py-1 gap-2 sm:gap-4">
         
-        <!-- Logo & Teacher Info -->
-        <a href="#hero" class="flex items-center gap-2.5 sm:gap-3.5 group flex-shrink-0">
-          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-primary-800 via-primary-700 to-teal-500 flex items-center justify-center text-white font-heading font-bold text-lg sm:text-xl shadow-md group-hover:scale-105 transition flex-shrink-0">
+        <!-- Logo & Teacher Info (Compact) -->
+        <a href="#hero" class="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900 text-amber-400 border border-amber-500/30 flex items-center justify-center font-heading font-bold text-sm shadow-sm group-hover:scale-105 transition flex-shrink-0">
             PA
           </div>
-          <div class="max-w-[150px] sm:max-w-[200px] md:max-w-xs truncate">
-            <div class="font-heading font-bold text-slate-900 leading-tight group-hover:text-primary-700 transition teacher-name-label text-sm sm:text-base truncate">
-              นายกรกฎ รัตนะโช
+          <div class="max-w-[130px] sm:max-w-[170px] md:max-w-xs truncate">
+            <div class="font-heading font-bold text-slate-900 leading-tight group-hover:text-amber-700 transition teacher-name-label text-xs sm:text-sm truncate">
+              นายกรกฎ รัตนะโชติ
             </div>
-            <div class="text-[11px] sm:text-xs text-primary-700 font-medium flex items-center gap-1.5 truncate">
-              <span class="teacher-standing-label">ครูชำนาญการพิเศษ</span>
+            <div class="text-[10px] text-slate-500 font-medium hidden sm:flex items-center gap-1 truncate mt-0.5">
+              <span class="teacher-standing-label truncate">ครูชำนาญการพิเศษ</span>
               <span class="w-1 h-1 rounded-full bg-slate-300 flex-shrink-0"></span>
               <span class="teacher-school-label truncate">รร.เปรมติณสูลานนท์</span>
             </div>
           </div>
         </a>
 
-        <!-- Desktop Menu Links (Large screens only) -->
-        <div class="hidden xl:flex items-center gap-1 text-sm font-medium text-slate-600">
-          <a href="#profile" class="px-2.5 py-1.5 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">ข้อมูลทั่วไป</a>
-          <a href="#competency-overview" class="px-2.5 py-1.5 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">สมรรถนะ</a>
-          <a href="#pa-indicators" class="px-2.5 py-1.5 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">15 ตัวชี้วัด PA</a>
-          <a href="#challenge" class="px-2.5 py-1.5 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">ประเด็นท้าทาย</a>
-          <a href="#gallery" class="px-2.5 py-1.5 rounded-lg hover:text-primary-700 hover:bg-slate-100/80 transition">ภาพกิจกรรม</a>
-          <a href="#certificate-vault" class="px-2.5 py-1.5 rounded-lg hover:text-amber-700 hover:bg-amber-50/80 text-amber-800 font-semibold transition flex items-center gap-1">
+        <!-- Desktop Menu Links (Clean Section Anchors) -->
+        <div class="hidden xl:flex items-center gap-0.5 lg:gap-1 text-xs sm:text-sm font-medium text-slate-600">
+          <a href="#profile" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">ข้อมูลทั่วไป</a>
+          <a href="#competency-overview" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">สมรรถนะ</a>
+          <a href="#pa-indicators" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">15 ตัวชี้วัด PA</a>
+          <a href="#challenge" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">ประเด็นท้าทาย</a>
+          <a href="#gallery" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">ภาพกิจกรรม</a>
+          <a href="#certificate-vault" class="px-2.5 py-1 rounded-lg hover:text-amber-700 hover:bg-amber-50/80 text-amber-800 font-semibold transition flex items-center gap-1">
             <i class="fa-solid fa-award text-amber-500"></i> คลังเกียรติบัตร
           </a>
         </div>
 
-        <!-- Actions Group (Responsive for Tablet and Desktop) -->
+        <!-- Actions Group (Themed & Unified) -->
         <div class="flex items-center gap-1.5 sm:gap-2">
           
-          <!-- Presentation Mode (Highlight Button - Available on Tablet & Desktop) -->
+          <!-- Presentation Mode Button (Sleek Theme Tone) -->
           <button id="btn-presentation-mode" onclick="PresentationDeck.open()" 
-                  class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-300 border border-amber-400/40 text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-md hover:scale-[1.02] flex-shrink-0"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 hover:border-amber-400 text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-sm hover:scale-[1.02] flex-shrink-0"
                   title="เปิดโหมดนำเสนอสไลด์ ว.PA แบบเต็มจอสำหรับคณะกรรมการ">
-            <i class="fa-solid fa-tv text-amber-400"></i> <span class="inline">โหมดนำเสนอ</span>
+            <i class="fa-solid fa-tv text-amber-400"></i> <span class="hidden sm:inline">โหมดนำเสนอ</span>
           </button>
 
-          <!-- AI Assistant Trigger -->
+          <!-- AI Assistant Trigger (Themed) -->
           <button onclick="openAIAssistant()" 
-                  class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-teal-600 via-indigo-600 to-amber-500 hover:opacity-95 text-white text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-md hover:scale-[1.02] flex-shrink-0">
-            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> <span class="hidden sm:inline">AI ว.PA</span>
+                  class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-100 hover:text-amber-300 border border-slate-700 hover:border-amber-500/40 text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-sm hover:scale-[1.02] flex-shrink-0"
+                  title="ผู้ช่วย AI อัจฉริยะ ว.PA">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> <span class="hidden sm:inline">AI ว.PA</span>
           </button>
 
-          <!-- Desktop Only Tools -->
-          <div class="hidden 2xl:flex items-center gap-1.5">
-            <button id="btn-video-studio" onclick="VideoStudioUI.open()" 
-                    class="px-2.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 hover:opacity-95 text-white text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-md hover:scale-[1.02]" title="สร้างวิดีโอนำเสนอผลงาน ว.PA อัตโนมัติ 8-10 นาที">
-              <i class="fa-solid fa-video text-amber-200"></i> สตูดิโอวิดีโอ
+          <!-- Consolidated Tools & Export Dropdown (Replaces scattered buttons) -->
+          <div class="relative hidden sm:block" id="nav-tools-dropdown-container">
+            <button id="nav-tools-dropdown-btn" onclick="toggleNavToolsDropdown(event)" 
+                    class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-amber-300 border border-slate-700 hover:border-amber-500/40 text-xs font-semibold font-heading transition flex items-center gap-1.5 shadow-sm flex-shrink-0"
+                    title="เครื่องมือส่งออกเอกสารและสื่อนำเสนอ">
+              <i class="fa-solid fa-arrow-up-from-bracket text-amber-400"></i>
+              <span class="hidden md:inline">ส่งออก</span>
+              <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 ml-0.5"></i>
             </button>
             
-            <div class="flex items-center gap-1">
-              <button onclick="ExportEngine.exportToExcel()" class="px-2 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold font-heading transition flex items-center gap-1" title="ส่งออกตารางสรุปเป็น Excel">
-                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <!-- Floating Dropdown Menu -->
+            <div id="nav-tools-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-slate-950/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-1.5 z-50 text-xs">
+              <div class="px-2.5 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80 mb-1">
+                ส่งออกรายงาน ว.PA
+              </div>
+              <button onclick="ExportEngine.exportToExcel(); closeNavToolsDropdown();" class="w-full px-2.5 py-2 rounded-xl hover:bg-slate-800/80 text-left text-slate-200 hover:text-emerald-300 transition flex items-center gap-2.5">
+                <i class="fa-solid fa-file-excel text-emerald-400 w-4 text-center"></i>
+                <div>
+                  <div class="font-semibold text-xs">ส่งออกตาราง Excel</div>
+                  <div class="text-[10px] text-slate-400">สรุปคะแนนและ 15 ตัวชี้วัด</div>
+                </div>
               </button>
-              <button onclick="ExportEngine.exportToWord()" class="px-2 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-semibold font-heading transition flex items-center gap-1" title="ส่งออกเล่มรายงานเป็น Word">
-                <i class="fa-solid fa-file-word text-blue-600"></i>
+              <button onclick="ExportEngine.exportToWord(); closeNavToolsDropdown();" class="w-full px-2.5 py-2 rounded-xl hover:bg-slate-800/80 text-left text-slate-200 hover:text-blue-300 transition flex items-center gap-2.5">
+                <i class="fa-solid fa-file-word text-blue-400 w-4 text-center"></i>
+                <div>
+                  <div class="font-semibold text-xs">ส่งออกเล่มรายงาน Word</div>
+                  <div class="text-[10px] text-slate-400">แบบ ว.PA 1-3 สมบูรณ์</div>
+                </div>
               </button>
-              <button onclick="PresentationDeck.downloadPPTX()" class="px-2 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold font-heading transition flex items-center gap-1" title="ดาวน์โหลดสไลด์เป็น PowerPoint (.PPTX)">
-                <i class="fa-solid fa-file-powerpoint text-amber-600"></i>
+              <button onclick="PresentationDeck.downloadPPTX(); closeNavToolsDropdown();" class="w-full px-2.5 py-2 rounded-xl hover:bg-slate-800/80 text-left text-slate-200 hover:text-amber-300 transition flex items-center gap-2.5">
+                <i class="fa-solid fa-file-powerpoint text-amber-400 w-4 text-center"></i>
+                <div>
+                  <div class="font-semibold text-xs">ดาวน์โหลดสไลด์ PPTX</div>
+                  <div class="text-[10px] text-slate-400">สไลด์นำเสนอ PowerPoint</div>
+                </div>
+              </button>
+              
+              <div class="my-1 border-t border-slate-800/80"></div>
+              
+              <button id="btn-video-studio" onclick="VideoStudioUI.open(); closeNavToolsDropdown();" class="w-full px-2.5 py-2 rounded-xl hover:bg-slate-800/80 text-left text-slate-200 hover:text-amber-300 transition flex items-center gap-2.5">
+                <i class="fa-solid fa-video text-amber-400 w-4 text-center"></i>
+                <div>
+                  <div class="font-semibold text-xs">สตูดิโอวิดีโอนำเสนอ</div>
+                  <div class="text-[10px] text-slate-400">สร้างคลิปนำเสนอ 8-10 นาที</div>
+                </div>
               </button>
             </div>
           </div>
 
-          <!-- Current Year Pill -->
-          <span class="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 flex-shrink-0">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="current-year-label">ปี 2569</span>
-          </span>
-
           <!-- Tablet/Mobile Menu Button -->
-          <button id="mobile-menu-btn" class="xl:hidden p-2 sm:p-2.5 rounded-xl bg-slate-100 text-slate-700 hover:text-primary-700 focus:outline-none flex-shrink-0 transition">
-            <i class="fa-solid fa-bars-staggered text-base sm:text-lg"></i>
+          <button id="mobile-menu-btn" class="xl:hidden p-1.5 sm:p-2 rounded-xl bg-slate-900 text-slate-200 hover:text-amber-300 border border-slate-700 focus:outline-none flex-shrink-0 transition">
+            <i class="fa-solid fa-bars-staggered text-sm sm:text-base"></i>
           </button>
         </div>
 
@@ -191,29 +215,29 @@
     </div>
 
     <!-- Mobile/Tablet Dropdown Drawer -->
-    <div id="mobile-menu" class="hidden xl:hidden bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 pt-3 pb-6 space-y-2 text-sm font-medium shadow-xl">
+    <div id="mobile-menu" class="hidden xl:hidden bg-slate-950/95 backdrop-blur-xl border-b border-slate-800 px-4 pt-3 pb-6 space-y-2 text-sm font-medium shadow-2xl text-white">
       <div class="grid grid-cols-2 gap-2 mb-3">
-        <a href="#profile" class="block px-3 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-semibold"><i class="fa-solid fa-id-card-clip text-teal-600 mr-1.5"></i> ข้อมูลทั่วไป</a>
-        <a href="#competency-overview" class="block px-3 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-semibold"><i class="fa-solid fa-chart-radar text-teal-600 mr-1.5"></i> สมรรถนะ</a>
-        <a href="#pa-indicators" class="block px-3 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-semibold"><i class="fa-solid fa-list-check text-teal-600 mr-1.5"></i> 15 ตัวชี้วัด PA</a>
-        <a href="#challenge" class="block px-3 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-semibold"><i class="fa-solid fa-lightbulb text-amber-500 mr-1.5"></i> ประเด็นท้าทาย</a>
-        <a href="#gallery" class="block px-3 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-semibold"><i class="fa-solid fa-images text-indigo-500 mr-1.5"></i> ภาพกิจกรรม</a>
-        <a href="#certificate-vault" class="block px-3 py-2 rounded-xl bg-amber-50 text-amber-900 text-xs font-semibold"><i class="fa-solid fa-award text-amber-500 mr-1.5"></i> คลังเกียรติบัตร</a>
+        <a href="#profile" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-id-card-clip text-amber-400 mr-1.5"></i> ข้อมูลทั่วไป</a>
+        <a href="#competency-overview" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-chart-radar text-amber-400 mr-1.5"></i> สมรรถนะ</a>
+        <a href="#pa-indicators" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-list-check text-amber-400 mr-1.5"></i> 15 ตัวชี้วัด PA</a>
+        <a href="#challenge" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-lightbulb text-amber-400 mr-1.5"></i> ประเด็นท้าทาย</a>
+        <a href="#gallery" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-images text-amber-400 mr-1.5"></i> ภาพกิจกรรม</a>
+        <a href="#certificate-vault" class="block px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold"><i class="fa-solid fa-award text-amber-400 mr-1.5"></i> คลังเกียรติบัตร</a>
       </div>
       
-      <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
-        <button onclick="VideoStudioUI.open()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md">
-          <i class="fa-solid fa-video"></i> สตูดิโอสร้างวิดีโอนำเสนอ (8-10 นาที)
+      <div class="pt-3 border-t border-slate-800 flex flex-col gap-2">
+        <button onclick="VideoStudioUI.open()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-md">
+          <i class="fa-solid fa-video text-amber-400"></i> สตูดิโอสร้างวิดีโอนำเสนอ (8-10 นาที)
         </button>
         <div class="grid grid-cols-3 gap-2">
-          <button onclick="ExportEngine.exportToExcel()" class="py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-file-excel text-emerald-600"></i> Excel
+          <button onclick="ExportEngine.exportToExcel()" class="py-2 rounded-xl bg-slate-900 text-slate-200 hover:text-emerald-300 border border-slate-800 text-xs font-semibold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i> Excel
           </button>
-          <button onclick="ExportEngine.exportToWord()" class="py-2 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-file-word text-blue-600"></i> Word
+          <button onclick="ExportEngine.exportToWord()" class="py-2 rounded-xl bg-slate-900 text-slate-200 hover:text-blue-300 border border-slate-800 text-xs font-semibold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-file-word text-blue-400"></i> Word
           </button>
-          <button onclick="PresentationDeck.downloadPPTX()" class="py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-file-powerpoint text-amber-600"></i> PPTX
+          <button onclick="PresentationDeck.downloadPPTX()" class="py-2 rounded-xl bg-slate-900 text-slate-200 hover:text-amber-300 border border-slate-800 text-xs font-semibold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-file-powerpoint text-amber-400"></i> PPTX
           </button>
         </div>
       </div>
@@ -2116,18 +2140,18 @@
   <!-- PptxGenJS (PowerPoint Generator) -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
-  <!-- JavaScript Modules (Cache-Busted v2569.9.5) -->
-  <script src="js/config.js?v=2569.9.5"></script>
-  <script src="js/data.js?v=2569.9.5"></script>
-  <script src="js/themes.js?v=2569.9.5"></script>
-  <script src="js/certificate-vault.js?v=2569.9.5"></script>
-  <script src="js/export-engine.js?v=2569.9.5"></script>
-  <script src="js/drive-sync.js?v=2569.9.5"></script>
-  <script src="js/ai-assistant.js?v=2569.9.5"></script>
-  <script src="js/presentation.js?v=2569.9.5"></script>
-  <script src="js/video-engine.js?v=2569.9.5"></script>
-  <script src="js/video-studio-ui.js?v=2569.9.5"></script>
-  <script src="js/chart-config.js?v=2569.9.5"></script>
-  <script src="js/app.js?v=2569.9.5"></script>
+  <!-- JavaScript Modules (Cache-Busted v2569.9.6) -->
+  <script src="js/config.js?v=2569.9.6"></script>
+  <script src="js/data.js?v=2569.9.6"></script>
+  <script src="js/themes.js?v=2569.9.6"></script>
+  <script src="js/certificate-vault.js?v=2569.9.6"></script>
+  <script src="js/export-engine.js?v=2569.9.6"></script>
+  <script src="js/drive-sync.js?v=2569.9.6"></script>
+  <script src="js/ai-assistant.js?v=2569.9.6"></script>
+  <script src="js/presentation.js?v=2569.9.6"></script>
+  <script src="js/video-engine.js?v=2569.9.6"></script>
+  <script src="js/video-studio-ui.js?v=2569.9.6"></script>
+  <script src="js/chart-config.js?v=2569.9.6"></script>
+  <script src="js/app.js?v=2569.9.6"></script>
 </body>
 </html>
