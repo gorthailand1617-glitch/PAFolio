@@ -228,7 +228,7 @@ input[type="range"] {
 }
 
 .pres-carousel-slide {
-  transition: opacity 0.75s cubic-bezier(0.4, 0, 0.2, 1), transform 5s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: opacity, transform;
 }
 
@@ -256,6 +256,19 @@ input[type="range"] {
 
 .pres-carousel-dot {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* YouTube Video Showcase Enhancements */
+.yt-filter-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.yt-filter-btn:hover:not(.active) {
+  transform: translateY(-1px);
+}
+
+#yt-active-iframe {
+  transition: opacity 0.3s ease;
 }
 
 /* Print Optimization (ว.PA One-Page Executive Report) */

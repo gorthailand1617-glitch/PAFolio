@@ -41,6 +41,9 @@ const PresentationDeck = {
     list.push({ id: 'res-results', title: 'ประเด็นท้าทาย 7: ผลการวิเคราะห์ข้อมูลและผลสัมฤทธิ์ทางการเรียน', type: 'res-results' });
     list.push({ id: 'res-discussion', title: 'ประเด็นท้าทาย 8: การอภิปรายผล ประโยชน์ และการขยายผล PLC', type: 'res-discussion' });
 
+    // คลิปวิดีโอนำเสนอการจัดการเรียนรู้และสภาพปัญหา (YouTube / DPA)
+    list.push({ id: 'pres-youtube', title: 'วิดีโอนำเสนอการสอนและสภาพปัญหา (YouTube ว.PA)', type: 'video-showcase' });
+
     // สรุปผลคะแนน
     list.push({ id: 'summary', title: 'สรุปผลคะแนนและการประเมินตนเอง ว.PA', type: 'summary' });
 
@@ -53,7 +56,7 @@ const PresentationDeck = {
     currentIndex: 0,
     images: [],
     isPaused: false,
-    intervalMs: 4000 // สลับภาพอัตโนมัติทุก 4 วินาที
+    intervalMs: 800 // สลับภาพอัตโนมัติทุก 800 ms (0.8 วินาที)
   },
 
   stopCarousel() {
@@ -1065,6 +1068,121 @@ const PresentationDeck = {
           <div class="p-4 sm:p-5 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-xs sm:text-sm lg:text-base text-emerald-200 flex items-center justify-between">
             <span><i class="fa-solid fa-check-double mr-2"></i> สรุปผล: บรรลุตามข้อตกลงในการพัฒนางานที่เป็นประเด็นท้าทายครบถ้วนทุกประการ</span>
             <span class="font-bold text-white">ว9/2564 สมบูรณ์</span>
+          </div>
+        </div>
+      `;
+    } else if (activeSlide.type === 'video-showcase') {
+      // สไลด์นำเสนอคลิปวิดีโอการจัดการเรียนรู้และสภาพปัญหา (YouTube Showcase)
+      const allVideos = (typeof YouTubeShowcase !== 'undefined' && YouTubeShowcase.getAllVideos) 
+        ? YouTubeShowcase.getAllVideos() 
+        : [];
+      const currentVideo = (typeof YouTubeShowcase !== 'undefined' && YouTubeShowcase.getActiveVideo)
+        ? YouTubeShowcase.getActiveVideo()
+        : allVideos[0] || null;
+
+      html = `
+        <div class="h-full flex flex-col justify-between p-3 sm:p-6 lg:p-8 max-w-6xl lg:max-w-7xl xl:max-w-[1600px] w-full mx-auto animate-fade-in text-white">
+          <!-- Slide Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-500/20 text-red-400 text-xs sm:text-sm font-bold border border-red-500/30">
+                <i class="fa-brands fa-youtube text-red-500"></i> สื่อวิดีโอหลักฐานเชิงประจักษ์ ว.PA (DPA Video Portfolio)
+              </div>
+              <h2 class="text-xl sm:text-3xl lg:text-4xl font-bold font-heading text-white mt-1">
+                คลิปการจัดการเรียนรู้และสภาพปัญหา (เกณฑ์ ว9/2564)
+              </h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="PresentationDeck.close(); if (typeof YouTubeShowcase !== 'undefined') YouTubeShowcase.openAddModal();" 
+                      class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold font-heading transition flex items-center gap-1.5 shadow-md">
+                <i class="fa-solid fa-plus"></i> เพิ่ม/แก้ไขลิงก์คลิป
+              </button>
+            </div>
+          </div>
+
+          <!-- Video Stage & Playlist -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 flex-1 min-h-0 items-center">
+            
+            <!-- Video Player (8 Cols) -->
+            <div class="lg:col-span-8 flex flex-col justify-center">
+              ${currentVideo ? `
+                <div class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10 ring-1 ring-white/10">
+                  <iframe 
+                    class="w-full h-full"
+                    src="https://www.youtube-nocookie.com/embed/${currentVideo.videoId}?rel=0&modestbranding=1" 
+                    title="${currentVideo.title}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                  </iframe>
+                </div>
+                <div class="mt-2.5 flex items-center justify-between text-xs text-slate-300">
+                  <div class="flex items-center gap-2 truncate">
+                    <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 text-[11px]">
+                      ${currentVideo.categoryThai}
+                    </span>
+                    <span class="truncate font-semibold text-white">${currentVideo.title}</span>
+                  </div>
+                  <span class="font-mono text-slate-400 flex-shrink-0"><i class="fa-regular fa-clock mr-1"></i>${currentVideo.duration || 'วิดีโอ'}</span>
+                </div>
+              ` : `
+                <div class="aspect-video rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
+                  <i class="fa-brands fa-youtube text-4xl text-red-500 mb-2"></i>
+                  <p class="text-sm font-semibold text-white">ยังไม่มีคลิปวิดีโอ</p>
+                  <p class="text-xs text-slate-400 mt-1">กดปุ่มเพิ่มลิงก์คลิปเพื่อแสดงผล</p>
+                </div>
+              `}
+            </div>
+
+            <!-- Playlist Selector (4 Cols) -->
+            <div class="lg:col-span-4 flex flex-col max-h-[380px] lg:max-h-[460px] overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-3 backdrop-blur-md">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10 text-xs font-bold text-teal-300 font-heading">
+                <span><i class="fa-solid fa-list-play mr-1.5"></i> รายการคลิปวิดีโอ (${allVideos.length})</span>
+                <span class="text-[10px] text-slate-400">คลิกเพื่อเลือกรับชม</span>
+              </div>
+              
+              <div class="overflow-y-auto space-y-2 flex-1 pr-1">
+                ${allVideos.map((v, vIdx) => {
+                  const isCur = currentVideo && currentVideo.id === v.id;
+                  return `
+                    <div onclick="if (typeof YouTubeShowcase !== 'undefined') { YouTubeShowcase.selectVideo('${v.id}'); PresentationDeck.renderSlideContent(); }" 
+                         class="flex items-center gap-2.5 p-2 rounded-xl transition cursor-pointer ${
+                           isCur ? 'bg-red-600/30 border border-red-500/60 text-white' : 'bg-white/5 hover:bg-white/10 border border-white/5 text-slate-300'
+                         }">
+                      <div class="relative w-20 aspect-video rounded-lg overflow-hidden bg-black flex-shrink-0">
+                        <img src="https://img.youtube.com/vi/${v.videoId}/mqdefault.jpg" alt="${v.title}" class="w-full h-full object-cover">
+                        ${isCur ? `
+                          <div class="absolute inset-0 bg-red-600/40 flex items-center justify-center">
+                            <i class="fa-solid fa-play text-white text-xs"></i>
+                          </div>
+                        ` : ''}
+                      </div>
+                      <div class="min-w-0 flex-1 text-left">
+                        <div class="text-[10px] font-bold text-rose-300 truncate">${v.categoryThai}</div>
+                        <div class="text-xs font-semibold text-white line-clamp-1 leading-tight">${v.title}</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-2">
+                          <span>${v.duration || 'วิดีโอ'}</span>
+                          ${v.indicator ? `<span>• ${v.indicator}</span>` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <div class="pt-2 mt-2 border-t border-white/10 text-center">
+                <a href="#video-showcase" onclick="PresentationDeck.close()" class="text-[11px] text-teal-300 hover:underline">
+                  <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> ดูรายละเอียดคลิปทั้งหมดในหน้าเว็บ
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Slide Footer Note -->
+          <div class="mt-3 p-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-300 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+            <span><i class="fa-solid fa-circle-check text-emerald-400 mr-1.5"></i> คลิปวิดีโอสอดคล้องตามระเบียบ ก.ค.ศ. ว9/2564 สำหรับการประเมินผ่านระบบ DPA</span>
+            <span class="text-slate-400 text-[11px] font-mono">YouTube Hosted HD</span>
           </div>
         </div>
       `;

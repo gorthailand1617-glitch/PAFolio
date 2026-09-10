@@ -190,6 +190,11 @@ function renderApp() {
     CertificateVault.renderVaultUI();
   }
 
+  // 9.1 Render YouTube Video Showcase
+  if (typeof YouTubeShowcase !== 'undefined') {
+    YouTubeShowcase.renderShowcaseUI();
+  }
+
   // 10. Update Theme UI
   if (typeof ThemeEngine !== 'undefined') {
     ThemeEngine.updateThemeUI();
@@ -2325,6 +2330,7 @@ function setupEventListeners() {
       if (typeof closeThemeModal === 'function') closeThemeModal();
       if (typeof VideoStudioUI !== 'undefined' && VideoStudioUI.close) VideoStudioUI.close();
       if (typeof CertificateVault !== 'undefined' && CertificateVault.close) CertificateVault.close();
+      if (typeof YouTubeShowcase !== 'undefined' && YouTubeShowcase.closeAddModal) YouTubeShowcase.closeAddModal();
       if (typeof PresentationDeck !== 'undefined' && PresentationDeck.isOpen) {
         PresentationDeck.close();
       }

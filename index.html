@@ -60,7 +60,7 @@
   </script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=2569.6.5">
+  <link rel="stylesheet" href="css/styles.css?v=2569.8.0">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
 
@@ -134,6 +134,9 @@
           <a href="#pa-indicators" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">15 ตัวชี้วัด PA</a>
           <a href="#challenge" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">ประเด็นท้าทาย</a>
           <a href="#gallery" class="px-2.5 py-1 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition">ภาพกิจกรรม</a>
+          <a href="#video-showcase" class="px-2.5 py-1 rounded-lg hover:text-rose-700 hover:bg-rose-50/80 text-rose-700 font-semibold transition flex items-center gap-1">
+            <i class="fa-brands fa-youtube text-red-600"></i> คลิปวิดีโอ ว.PA
+          </a>
           <a href="#certificate-vault" class="px-2.5 py-1 rounded-lg hover:text-amber-700 hover:bg-amber-50/80 text-amber-800 font-semibold transition flex items-center gap-1">
             <i class="fa-solid fa-award text-amber-500"></i> คลังเกียรติบัตร
           </a>
@@ -223,6 +226,7 @@
         <a href="#challenge" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-lightbulb text-amber-400 mr-1.5"></i> ประเด็นท้าทาย</a>
         <a href="#gallery" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-images text-amber-400 mr-1.5"></i> ภาพกิจกรรม</a>
         <a href="#certificate-vault" class="block px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold"><i class="fa-solid fa-award text-amber-400 mr-1.5"></i> คลังเกียรติบัตร</a>
+        <a href="#video-showcase" class="block px-3 py-2 rounded-xl bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-xs font-semibold col-span-2"><i class="fa-brands fa-youtube text-red-500 mr-1.5"></i> คลิปวิดีโอนำเสนอ ว.PA (YouTube Showcase)</a>
       </div>
       
       <div class="pt-3 border-t border-slate-800 flex flex-col gap-2">
@@ -711,6 +715,84 @@
     <!-- Gallery Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-container"></div>
 
+  </section>
+
+  <!-- ================= SECTION 4.5: YOUTUBE VIDEO SHOWCASE & DPA EVIDENCE ================= -->
+  <section id="video-showcase" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/80">
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <span class="text-xs font-bold text-rose-700 uppercase tracking-widest bg-rose-100 px-3 py-1 rounded-full border border-rose-300 inline-flex items-center gap-1.5 shadow-sm">
+        <i class="fa-brands fa-youtube text-red-600"></i> DPA Video & YouTube Showcase
+      </span>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-900 font-heading">
+        คลิปวิดีโอการจัดการเรียนรู้และสภาพปัญหา (ว.PA)
+      </h2>
+      <p class="mt-2 text-sm text-slate-600">
+        หลักฐานเชิงประจักษ์คลิปวิดีโอตามเกณฑ์ ว9/2564 สำหรับคณะกรรมการประเมิน (คลิปสอน 60 นาที, คลิปสภาพปัญหา 10 นาที, ผลลัพธ์ผู้เรียน)
+      </p>
+
+      <!-- Action Buttons Row -->
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <button onclick="YouTubeShowcase.openAddModal()" 
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs sm:text-sm font-bold font-heading transition shadow-lg shadow-rose-600/25 hover:scale-105"
+                title="เพิ่มลิงก์คลิปวิดีโอ YouTube ของคุณเอง">
+          <i class="fa-solid fa-plus-circle text-base"></i>
+          <span>เพิ่มคลิปวิดีโอ YouTube</span>
+        </button>
+        <button onclick="PresentationDeck.open('pres-youtube')" 
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-400/40 text-xs sm:text-sm font-semibold font-heading transition shadow-sm"
+                title="ชมคลิปวิดีโอในโหมดนำเสนอสไลด์เต็มจอ">
+          <i class="fa-solid fa-tv text-amber-400"></i>
+          <span>เปิดในโหมดนำเสนอ</span>
+        </button>
+        <button onclick="YouTubeShowcase.resetToDefaults()" 
+                class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition"
+                title="คืนค่าคลิปตัวอย่างมาตรฐาน ว.PA">
+          <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+          <span class="hidden sm:inline">คืนค่าตัวอย่าง</span>
+        </button>
+      </div>
+
+      <div class="w-16 h-1 bg-rose-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <!-- Container for dynamic render -->
+    <div id="video-showcase-container" class="space-y-8">
+      <!-- 1. Executive Theater / Active Screen -->
+      <div id="yt-theater-screen"></div>
+
+      <!-- 2. Filter Tabs & Search Controls -->
+      <div class="pt-4 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+        <!-- Category Tabs -->
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <button onclick="YouTubeShowcase.setCategory('all', this)" class="yt-filter-btn active px-3.5 py-2 rounded-xl text-xs font-heading font-semibold bg-rose-600 text-white shadow-md transition">
+            ทั้งหมด (<span id="yt-filter-count">4 รายการ</span>)
+          </button>
+          <button onclick="YouTubeShowcase.setCategory('teaching', this)" class="yt-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            🎥 คลิปสอนจริง 60 นาที
+          </button>
+          <button onclick="YouTubeShowcase.setCategory('inspiration', this)" class="yt-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            💡 คลิปสภาพปัญหา 10 นาที
+          </button>
+          <button onclick="YouTubeShowcase.setCategory('outcome', this)" class="yt-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            📈 ผลลัพธ์ผู้เรียน
+          </button>
+          <button onclick="YouTubeShowcase.setCategory('innovation', this)" class="yt-filter-btn px-3.5 py-2 rounded-xl text-xs font-heading font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            🧩 สื่อนวัตกรรม
+          </button>
+        </div>
+
+        <!-- Live Search -->
+        <div class="relative w-full md:w-72">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="yt-search-input" oninput="YouTubeShowcase.setSearch(this.value)" 
+                 placeholder="ค้นหาชื่อคลิป หรือตัวชี้วัด..." 
+                 class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 shadow-sm">
+        </div>
+      </div>
+
+      <!-- 3. Cards Grid -->
+      <div id="yt-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+    </div>
   </section>
 
   <!-- ================= SECTION 5: E-CERTIFICATE & AWARDS VAULT ================= -->
@@ -1694,6 +1776,129 @@
     </div>
   </div>
 
+  <!-- ================= MODAL: ADD YOUTUBE VIDEO LINK ================= -->
+  <div id="youtube-add-modal" class="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
+      
+      <!-- Modal Header -->
+      <div class="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-red-500/20 text-red-500 border border-red-500/30 flex items-center justify-center text-xl shadow-inner">
+            <i class="fa-brands fa-youtube"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-white text-base sm:text-lg">เพิ่มคลิปวิดีโอ YouTube (ว.PA / DPA)</h3>
+            <p class="text-xs text-slate-400">วางลิงก์ YouTube เพื่อนำเสนอคลิปสอน 60 นาที หรือคลิปสภาพปัญหา 10 นาที</p>
+          </div>
+        </div>
+        <button onclick="YouTubeShowcase.closeAddModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Form Body (Scrollable) -->
+      <form id="youtube-add-form" onsubmit="return YouTubeShowcase.saveNewVideo(event)" class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4 text-xs text-slate-200">
+        
+        <!-- URL Input & Live Preview -->
+        <div class="space-y-2">
+          <label class="block text-slate-300 font-semibold">
+            ลิงก์คลิปวิดีโอ YouTube * <span class="text-slate-500 font-normal">(รองรับ youtube.com, youtu.be, shorts)</span>
+          </label>
+          <div class="relative">
+            <i class="fa-brands fa-youtube absolute left-3.5 top-1/2 -translate-y-1/2 text-red-500 text-base"></i>
+            <input type="text" id="youtube-input-url" required
+                   oninput="YouTubeShowcase.onUrlInput(this.value)"
+                   placeholder="เช่น https://www.youtube.com/watch?v=... หรือ https://youtu.be/..." 
+                   class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 text-xs sm:text-sm font-mono transition">
+          </div>
+          <p id="yt-url-error" class="hidden text-[11px] text-rose-400 mt-1"></p>
+
+          <!-- Live Thumbnail Preview Box -->
+          <div id="yt-preview-box" class="hidden transition-all duration-300"></div>
+        </div>
+
+        <!-- Video Title -->
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">
+            ชื่อคลิปวิดีโอ / หัวข้อการนำเสนอ *
+          </label>
+          <input type="text" id="youtube-input-title" required
+                 placeholder="เช่น คลิปการจัดกิจกรรมการเรียนรู้ เรื่อง การคิดเชิงนวัตกรรม รายวิชาการงานอาชีพ" 
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none text-xs sm:text-sm">
+        </div>
+
+        <!-- Category & Duration Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">
+              ประเภทคลิปตามเกณฑ์ ว.PA *
+            </label>
+            <select id="youtube-input-category" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:border-teal-500 focus:outline-none text-xs">
+              <option value="teaching">🎥 คลิปจัดการเรียนรู้ (ไม่เกิน 60 นาที)</option>
+              <option value="inspiration">💡 คลิปสภาพปัญหา/แรงบันดาลใจ (ไม่เกิน 10 นาที)</option>
+              <option value="outcome">📈 คลิปผลลัพธ์การเรียนรู้ของผู้เรียน</option>
+              <option value="innovation">🧩 คลิปสาธิตสื่อ/นวัตกรรมการเรียนรู้</option>
+              <option value="other">🎬 คลิปนำเสนอผลงาน ว.PA ทั่วไป</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">
+              ความยาวคลิป (นาที)
+            </label>
+            <input type="text" id="youtube-input-duration" 
+                   placeholder="เช่น 58:20 นาที หรือ 09:45 นาที" 
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none text-xs">
+          </div>
+        </div>
+
+        <!-- Indicator & Semester Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">
+              ตัวชี้วัดหรือส่วนที่เกี่ยวข้อง
+            </label>
+            <input type="text" id="youtube-input-indicator" 
+                   placeholder="เช่น ตัวชี้วัด 1.1 - 1.8 หรือ ประเด็นท้าทาย" 
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none text-xs">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">
+              รอบปีการศึกษา / ภาคเรียน
+            </label>
+            <input type="text" id="youtube-input-date" 
+                   placeholder="เช่น ภาคเรียนที่ 1 ปีการศึกษา 2568" 
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none text-xs">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">
+            รายละเอียดเนื้อหา / คำอธิบายเพิ่มเติม
+          </label>
+          <textarea id="youtube-input-desc" rows="3" 
+                    placeholder="ระบุแผนการสอน หน่วยการเรียนรู้ กิจกรรมหลัก หรือประเด็นสำคัญที่ต้องการเน้นให้คณะกรรมการเห็น..." 
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none text-xs resize-none"></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="YouTubeShowcase.closeAddModal()" 
+                  class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" 
+                  class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold font-heading shadow-md shadow-rose-600/30 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>บันทึกคลิปวิดีโอ</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
   <!-- ================= MODAL: NO-CODE PROFILE & CONTENT EDITOR ================= -->
   <div id="profile-editor-modal" class="fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -2113,9 +2318,11 @@
         <div class="flex items-center gap-2 text-[11px]">
           <a href="#challenge" onclick="toggleFloatingMenu(false)" class="text-amber-300 hover:underline">ประเด็นท้าทาย</a>
           <span class="text-slate-600">•</span>
-          <a href="#certificate-vault" onclick="toggleFloatingMenu(false)" class="text-amber-300 hover:underline">เกียรติบัตร</a>
-          <span class="text-slate-600">•</span>
           <a href="#gallery" onclick="toggleFloatingMenu(false)" class="text-teal-300 hover:underline">ภาพกิจกรรม</a>
+          <span class="text-slate-600">•</span>
+          <a href="#video-showcase" onclick="toggleFloatingMenu(false)" class="text-rose-400 hover:underline">คลิปวิดีโอ</a>
+          <span class="text-slate-600">•</span>
+          <a href="#certificate-vault" onclick="toggleFloatingMenu(false)" class="text-amber-300 hover:underline">เกียรติบัตร</a>
         </div>
       </div>
 
@@ -2140,18 +2347,19 @@
   <!-- PptxGenJS (PowerPoint Generator) -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
-  <!-- JavaScript Modules (Cache-Busted v2569.9.11) -->
-  <script src="js/config.js?v=2569.9.11"></script>
-  <script src="js/data.js?v=2569.9.11"></script>
-  <script src="js/themes.js?v=2569.9.11"></script>
-  <script src="js/certificate-vault.js?v=2569.9.11"></script>
-  <script src="js/export-engine.js?v=2569.9.11"></script>
-  <script src="js/drive-sync.js?v=2569.9.11"></script>
-  <script src="js/ai-assistant.js?v=2569.9.11"></script>
-  <script src="js/presentation.js?v=2569.9.11"></script>
-  <script src="js/video-engine.js?v=2569.9.11"></script>
-  <script src="js/video-studio-ui.js?v=2569.9.11"></script>
-  <script src="js/chart-config.js?v=2569.9.11"></script>
-  <script src="js/app.js?v=2569.9.11"></script>
+  <!-- JavaScript Modules (Cache-Busted v2569.9.12) -->
+  <script src="js/config.js?v=2569.9.12"></script>
+  <script src="js/data.js?v=2569.9.12"></script>
+  <script src="js/themes.js?v=2569.9.12"></script>
+  <script src="js/certificate-vault.js?v=2569.9.12"></script>
+  <script src="js/youtube-showcase.js?v=2569.9.12"></script>
+  <script src="js/export-engine.js?v=2569.9.12"></script>
+  <script src="js/drive-sync.js?v=2569.9.12"></script>
+  <script src="js/ai-assistant.js?v=2569.9.12"></script>
+  <script src="js/presentation.js?v=2569.9.12"></script>
+  <script src="js/video-engine.js?v=2569.9.12"></script>
+  <script src="js/video-studio-ui.js?v=2569.9.12"></script>
+  <script src="js/chart-config.js?v=2569.9.12"></script>
+  <script src="js/app.js?v=2569.9.12"></script>
 </body>
 </html>
