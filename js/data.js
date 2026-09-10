@@ -738,61 +738,6 @@ const PAFOLIO_DATABASE = {
         }
       }
     }
-  },
-
-  // ครูท่านที่ 2 (ตัวอย่างสำหรับเพื่อนครูนำไปโคลน/สลับดู)
-  "teacher-piyaporn": {
-    id: "teacher-piyaporn",
-    name: "นางสาวปิยะพร วงศ์สุวรรณ",
-    position: "ครู",
-    academicStanding: "ครูชำนาญการ",
-    school: "โรงเรียนเปรมติณสูลานนท์",
-    affiliation: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาขอนแก่น",
-    learningArea: "กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี",
-    avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80",
-    coverUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1920&auto=format&fit=crop&q=80",
-    driveFolderId: "",
-    appsScriptUrl: "",
-    selectedYear: "2568",
-    years: {
-      "2568": {
-        year: "2568",
-        status: "รอบการประเมิน 2567-2568",
-        roles: [
-          "หัวหน้างานห้องปฏิบัติการวิทยาศาสตร์",
-          "ครูผู้สอนสะเต็มศึกษา (STEM Education)",
-          "ครูที่ปรึกษาระดับชั้นมัธยมศึกษาปีที่ 3"
-        ],
-        teachingLoad: [
-          { subject: "วิทยาศาสตร์กายภาพ (ว31101)", grade: "ม.4", hours: "6 คาบ/สัปดาห์", type: "วิชาพื้นฐาน" },
-          { subject: "โครงงานสะเต็มศึกษา (ว23201)", grade: "ม.3", hours: "4 คาบ/สัปดาห์", type: "วิชาเพิ่มเติม" },
-          { subject: "กิจกรรมพัฒนาผู้เรียน", grade: "ม.3-4", hours: "3 คาบ/สัปดาห์", type: "กิจกรรมพัฒนาผู้เรียน" },
-          { subject: "งานสนับสนุนและ PLC", grade: "ทุกระดับ", hours: "5 คาบ/สัปดาห์", type: "งานสนับสนุน" }
-        ],
-        totalHours: "20 คาบ/สัปดาห์",
-        challengeIssue: {
-          topic: "การจัดการเรียนรู้แบบ STEM 5E ร่วมกับบอร์ดจำลองสมองกล Micro:bit",
-          subject: "รายวิชาวิทยาการคำนวณและสะเต็ม ม.3",
-          targetGroup: "นักเรียนชั้นมัธยมศึกษาปีที่ 3 โรงเรียนเปรมติณสูลานนท์",
-          coreObjective: "เพื่อพัฒนาทักษะการคิดเชิงคำนวณและการแก้ปัญหาเชิงวิทยาศาสตร์",
-          steps: [
-            { letter: "E1", title: "Engagement", nameThai: "กระตุ้นความสนใจด้วยสิ่งประดิษฐ์ IoT", color: "teal", description: "สาธิตการทำงานของ Smart Farm และระบบเซ็นเซอร์" },
-            { letter: "E2", title: "Exploration", nameThai: "สำรวจและทดลองเขียนโค้ด", color: "cyan", description: "ทดลองเชื่อมต่อบอร์ด Micro:bit กับเซ็นเซอร์วัดความชื้น" },
-            { letter: "E3", title: "Explanation", nameThai: "อธิบายหลักการทางฟิสิกส์และตรรกะ", color: "amber", description: "เชื่อมโยงความรู้เรื่องวงจรไฟฟ้าและคำสั่ง Loop/Condition" },
-            { letter: "E4", title: "Elaboration", nameThai: "ต่อยอดสร้างสรรค์โครงงานต้นแบบ", color: "emerald", description: "สร้างโครงงานรดน้ำต้นไม้อัตโนมัติในโรงเรียน" }
-          ],
-          metrics: {
-            quantitative: { target: "ร้อยละ 80", actual: "ร้อยละ 88.0", details: "ผู้เรียนร้อยละ 88 มีทักษะการเขียนโค้ดและผ่านเกณฑ์การประเมินสะเต็ม" },
-            qualitative: { target: "ระดับดี", actual: "ระดับดีเยี่ยม (93.5%)", details: "นักเรียนสามารถอธิบายตรรกะและประยุกต์ใช้อุปกรณ์ได้อย่างชำนาญ" }
-          },
-          sdlComparison: {
-            labels: ["การคิดเชิงคำนวณ", "การต่อวงจร", "การเขียนโปรแกรม", "การทำงานกลุ่ม", "ความคิดสร้างสรรค์"],
-            preTest: [50, 45, 40, 60, 55],
-            postTest: [86, 90, 85, 92, 89]
-          }
-        },
-        scores: { domain1: 36, domain2: 19, domain3: 19, challenge: 19, total: 93 }
-      }
-    }
   }
 };
+

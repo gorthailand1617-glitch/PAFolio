@@ -54,17 +54,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (parsed && parsed['teacher-korakot']) {
-            parsed['teacher-korakot'].name = 'นายกรกฎ รัตนะโช';
-            parsed['teacher-korakot'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
-            if (parsed['teacher-korakot'].years && parsed['teacher-korakot'].years['2569']) {
-              parsed['teacher-korakot'].years['2569'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+          if (parsed) {
+            delete parsed['teacher-piyaporn'];
+            if (parsed['teacher-korakot']) {
+              parsed['teacher-korakot'].name = 'นายกรกฎ รัตนะโช';
+              parsed['teacher-korakot'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+              if (parsed['teacher-korakot'].years && parsed['teacher-korakot'].years['2569']) {
+                parsed['teacher-korakot'].years['2569'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
+              }
             }
             localStorage.setItem('pafolio_custom_teachers', JSON.stringify(parsed));
           }
         } catch (err) {
           localStorage.removeItem('pafolio_custom_teachers');
         }
+      }
+      if (localStorage.getItem('pafolio_active_teacher') === 'teacher-piyaporn') {
+        localStorage.setItem('pafolio_active_teacher', 'teacher-korakot');
+        currentTeacherId = 'teacher-korakot';
+      }
+      if (typeof PAFOLIO_DATABASE !== 'undefined' && PAFOLIO_DATABASE['teacher-piyaporn']) {
+        delete PAFOLIO_DATABASE['teacher-piyaporn'];
       }
     } catch (e) {}
   }
@@ -325,7 +335,8 @@ function renderTeacherSelector() {
   const container = document.getElementById('teacher-switcher-container');
   if (!container) return;
 
-  const teachers = Object.values(PAFOLIO_DATABASE);
+  delete PAFOLIO_DATABASE['teacher-piyaporn'];
+  const teachers = Object.values(PAFOLIO_DATABASE).filter(t => t && t.id !== 'teacher-piyaporn' && !t.name?.includes('ปิยะพร'));
   container.innerHTML = `
     <div class="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200 text-xs font-heading">
       <i class="fa-solid fa-user-tie text-teal-700"></i>
@@ -2176,6 +2187,10 @@ function loadStoredTeachers() {
       const parsed = JSON.parse(data);
       // ตรวจสอบและผสานข้อมูลอย่างปลอดภัย ป้องกันไม่ให้แคชเก่าลบปี 2567, 2566 หรือ indicatorSyntheses
       for (const key in parsed) {
+        if (key === 'teacher-piyaporn' || parsed[key]?.name?.includes('ปิยะพร')) {
+          delete parsed[key];
+          continue;
+        }
         const stored = parsed[key];
         const baseline = PAFOLIO_DATABASE[key];
 
