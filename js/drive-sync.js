@@ -94,7 +94,7 @@ const DriveSync = {
         year: currentYear,
         teacherId: currentTeacher,
         avatarUrl: (teacherObj && teacherObj.avatarUrl) || (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800',
-        coverUrl: (teacherObj && teacherObj.coverUrl) || (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920',
+        coverUrl: (teacherObj && teacherObj.coverUrl) || (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920',
         name: (teacherObj && teacherObj.name) || '',
         position: (teacherObj && teacherObj.position) || '',
         academicStanding: (teacherObj && teacherObj.academicStanding) || '',

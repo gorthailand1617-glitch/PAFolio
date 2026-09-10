@@ -263,7 +263,7 @@ function updateHeaderAndProfile(teacher, yearData, expectedLevel) {
   // อัปเดตภาพปกแบนเนอร์ Hero (ดึงภาพปกเฉพาะของปีการศึกษาที่เลือกก่อน หากไม่มีค่อยใช้ภาพหลัก)
   let activeCover = (yearData && yearData.coverUrl) ? yearData.coverUrl : teacher.coverUrl;
   if (!activeCover || badFolderIds.some(badId => activeCover.includes(badId))) {
-    activeCover = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920';
+    activeCover = (window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920';
     if (yearData) yearData.coverUrl = activeCover;
     if (teacher) teacher.coverUrl = activeCover;
   }
@@ -2217,12 +2217,12 @@ function loadStoredTeachers() {
 
         const oldBrownPhotoId = '1Dyu3SQW';
         const newWhiteSuitAvatar = (typeof PAFOLIO_CONFIG !== 'undefined' && PAFOLIO_CONFIG.DEFAULT_AVATAR_URL) || 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
-        const newGoldCover = (typeof PAFOLIO_CONFIG !== 'undefined' && PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920';
+        const newGoldCover = (typeof PAFOLIO_CONFIG !== 'undefined' && PAFOLIO_CONFIG.DEFAULT_COVER_URL) || 'https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920';
 
         if (stored.avatarUrl && (stored.avatarUrl.includes(oldBrownPhotoId) || stored.avatarUrl.includes('/drive/folders/'))) {
           stored.avatarUrl = newWhiteSuitAvatar;
         }
-        if (stored.coverUrl && (stored.coverUrl.includes(oldBrownPhotoId) || stored.coverUrl.includes('/drive/folders/'))) {
+        if (stored.coverUrl && (stored.coverUrl.includes(oldBrownPhotoId) || stored.coverUrl.includes('1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I') || stored.coverUrl.includes('/drive/folders/'))) {
           stored.coverUrl = newGoldCover;
         }
         if (!stored._hasCustomProfile) {
@@ -2245,8 +2245,8 @@ function loadStoredTeachers() {
               if (stored.years[y].avatarUrl && stored.years[y].avatarUrl.includes(oldBrownPhotoId)) {
                 stored.years[y].avatarUrl = newWhiteSuitAvatar;
               }
-              if (stored.years[y].coverUrl && stored.years[y].coverUrl.includes(oldBrownPhotoId)) {
-                stored.years[y].coverUrl = newGoldCover;
+              if (stored.years[y].coverUrl && (stored.years[y].coverUrl.includes(oldBrownPhotoId) || stored.years[y].coverUrl.includes('1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I'))) {
+                stored.years[y].coverUrl = (y === '2569') ? newGoldCover : (baseline?.years[y]?.coverUrl || newGoldCover);
               }
               if (!stored.years[y].indicatorSyntheses && baseline.years[y].indicatorSyntheses) {
                 stored.years[y].indicatorSyntheses = baseline.years[y].indicatorSyntheses;
@@ -2256,7 +2256,7 @@ function loadStoredTeachers() {
               }
               if (y === '2569') {
                 stored.years[y].avatarUrl = newWhiteSuitAvatar;
-                if (!stored.years[y].coverUrl) {
+                if (!stored.years[y].coverUrl || stored.years[y].coverUrl.includes('1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I')) {
                   stored.years[y].coverUrl = baseline.years[y].coverUrl;
                 }
               } else {

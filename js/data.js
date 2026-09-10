@@ -23,7 +23,7 @@ const PAFOLIO_DATABASE = {
     affiliation: "องค์การบริหารส่วนจังหวัดขอนแก่น",
     learningArea: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
     avatarUrl: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
-    coverUrl: "https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920",
+    coverUrl: "https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920",
     driveFolderId: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.ROOT_FOLDER_ID) || "1Ic26pDmmPCzzCW7sijRSqx8CjKTt987K",
     appsScriptUrl: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.APPS_SCRIPT_URL) || "https://script.google.com/macros/s/AKfycby7k7vKoFG6uugmoqGenVCdWPVXVAfkcWuw7mKcPm8qJSaUmwtOFW_yaEmVAwUlma_Miw/exec",
     selectedYear: (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && window.PAFOLIO_CONFIG.DEFAULT_YEAR) || "2569",
@@ -174,7 +174,7 @@ const PAFOLIO_DATABASE = {
         year: "2569",
         status: "รอบการประเมิน ว.PA ปีงบประมาณ 2569 (รอบการประเมินปัจจุบัน)",
         avatarUrl: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
-        coverUrl: "https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920",
+        coverUrl: "https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920",
         roles: [
           "หัวหน้าฝ่ายบริหารงานวิชาการ",
           "หัวหน้างานขับเคลื่อนนวัตกรรมการเรียนรู้และเทคโนโลยีดิจิทัล",

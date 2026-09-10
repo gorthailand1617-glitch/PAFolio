@@ -18,14 +18,14 @@ const PAFOLIO_CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycby7k7vKoFG6uugmoqGenVCdWPVXVAfkcWuw7mKcPm8qJSaUmwtOFW_yaEmVAwUlma_Miw/exec",
 
   // 🔖 เลขเวอร์ชันระบบสำหรับจัดการ Cache สากล
-  APP_VERSION: "2569.9.11",
+  APP_VERSION: "2569.9.13",
 
   // 📄 ชื่อไฟล์จัดเก็บสถานะระบบศูนย์กลางบน Google Drive
   CLOUD_STATE_FILE: "pafolio_cloud_state.json",
 
   // 🖼️ ภาพประจำตัวชุดสูทขาวและภาพปกมาตรฐานสากล
   DEFAULT_AVATAR_URL: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
-  DEFAULT_COVER_URL: "https://drive.google.com/thumbnail?id=1noPkaJIRiMIyg0InLRPMnEu4Bi8DNb8I&sz=w1920"
+  DEFAULT_COVER_URL: "https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920"
 };
 
 // Export เข้า Window object สำหรับเบราว์เซอร์
