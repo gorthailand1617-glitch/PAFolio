@@ -102,6 +102,11 @@ const DriveSync = {
         department: (teacherObj && (teacherObj.department || teacherObj.learningArea)) || '',
         lastUpdated: new Date().toISOString(),
         deviceOrigin: navigator.userAgent || 'Desktop',
+        youtubeVideos: (customPayload && customPayload.youtubeVideos) 
+          ? customPayload.youtubeVideos 
+          : ((typeof YouTubeShowcase !== 'undefined' && typeof YouTubeShowcase.getAllVideos === 'function') 
+              ? YouTubeShowcase.getAllVideos() 
+              : JSON.parse(localStorage.getItem('pafolio_youtube_videos') || '[]')),
         ...customPayload
       };
 
@@ -311,6 +316,27 @@ const DriveSync = {
         if (cloudState.name && teacher.name !== cloudState.name) {
           teacher.name = cloudState.name;
           modified = true;
+        }
+
+        // 3.3 ซิงก์รายการคลิปวิดีโอ YouTube ว.PA จาก Google Drive Cloud State
+        if (cloudState.youtubeVideos && Array.isArray(cloudState.youtubeVideos) && cloudState.youtubeVideos.length > 0) {
+          try {
+            const localStored = localStorage.getItem('pafolio_youtube_videos');
+            const localVideos = localStored ? JSON.parse(localStored) : [];
+            const hasLocalCustom = Array.isArray(localVideos) && localVideos.some(v => v.isCustom);
+            const cloudHasCustom = cloudState.youtubeVideos.some(v => v.isCustom);
+
+            // หากบน Google Drive มีคลิปที่คุณครูเพิ่มเอง หรือในเครื่องนี้ยังไม่มีคลิปที่เพิ่มเอง ให้นำคลิปจาก Cloud มาใช้
+            if (cloudHasCustom || !hasLocalCustom) {
+              localStorage.setItem('pafolio_youtube_videos', JSON.stringify(cloudState.youtubeVideos));
+              if (typeof YouTubeShowcase !== 'undefined' && typeof YouTubeShowcase.renderShowcaseUI === 'function') {
+                YouTubeShowcase.renderShowcaseUI();
+              }
+              console.log('[DriveSync] Synced YouTube videos from Google Drive Cloud State successfully:', cloudState.youtubeVideos.length);
+            }
+          } catch(err) {
+            console.warn('[DriveSync] Failed to sync youtubeVideos from cloudState:', err);
+          }
         }
       }
     }

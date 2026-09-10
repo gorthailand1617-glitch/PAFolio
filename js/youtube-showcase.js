@@ -84,8 +84,13 @@ const YouTubeShowcase = {
     return match ? match[1] : null;
   },
 
-  // ดึงรายการวิดีโอทั้งหมดจาก localStorage หรือ fallback เป็น default
+  // ดึงรายการวิดีโอทั้งหมดจาก localStorage หรือ config หรือ fallback เป็น default
   getAllVideos() {
+    // 1. ตรวจสอบว่าใน window.PAFOLIO_CONFIG มี DEFAULT_YOUTUBE_VIDEOS กำหนดไว้หรือไม่
+    const configVideos = (typeof window !== 'undefined' && window.PAFOLIO_CONFIG && Array.isArray(window.PAFOLIO_CONFIG.DEFAULT_YOUTUBE_VIDEOS))
+      ? window.PAFOLIO_CONFIG.DEFAULT_YOUTUBE_VIDEOS
+      : null;
+
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
@@ -97,15 +102,24 @@ const YouTubeShowcase = {
     } catch (e) {
       console.warn('[YouTubeShowcase] Error reading localStorage:', e);
     }
-    return [...this.defaultVideos];
+    return (configVideos && configVideos.length > 0) ? configVideos : [...this.defaultVideos];
   },
 
-  // บันทึกลง localStorage
-  saveVideos(videos) {
+  // บันทึกลง localStorage พร้อมซิงก์ขึ้น Google Drive ทันที
+  saveVideos(videos, syncToCloud = true) {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(videos));
     } catch (e) {
       console.error('[YouTubeShowcase] Failed to save to localStorage:', e);
+    }
+
+    // ซิงก์ขึ้น Google Drive ทันทีเพื่อให้ทุกอุปกรณ์เห็นคลิปตรงกัน 100%
+    if (syncToCloud && typeof DriveSync !== 'undefined' && typeof DriveSync.saveCloudState === 'function') {
+      DriveSync.saveCloudState({ youtubeVideos: videos }).then(res => {
+        if (res) console.log('[YouTubeShowcase] Auto-synced videos to Google Drive Cloud State successfully');
+      }).catch(err => {
+        console.warn('[YouTubeShowcase] Cloud sync background warning:', err);
+      });
     }
   },
 
@@ -538,16 +552,16 @@ const YouTubeShowcase = {
     const currentVideos = this.getAllVideos();
     // เพิ่มไว้ที่ลำดับแรกสุด
     currentVideos.unshift(newVideo);
-    this.saveVideos(currentVideos);
+    this.saveVideos(currentVideos, true);
 
     // สลับไปเล่นคลิปใหม่ทันที
     this.activeVideoId = newVideo.id;
     this.closeAddModal();
     this.renderShowcaseUI();
 
-    // แสดงการแจ้งเตือนความสำเร็จ
+    // แสดงการแจ้งเตือนความสำเร็จพร้อมยืนยันการซิงก์ Cloud
     if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
-      DriveSync.showToast(`เพิ่มคลิปวิดีโอ YouTube: "${title}" เรียบร้อยแล้ว!`, 'success', 4000);
+      DriveSync.showToast(`✅ บันทึกคลิป "${title}" และซิงก์ขึ้น Google Drive แล้ว! (ทุกอุปกรณ์จะเห็นตรงกัน)`, 'success', 4500);
     } else {
       alert(`บันทึกคลิปวิดีโอ YouTube "${title}" สำเร็จ!`);
     }
@@ -572,7 +586,7 @@ const YouTubeShowcase = {
     }
 
     const updated = allVideos.filter(v => v.id !== id);
-    this.saveVideos(updated);
+    this.saveVideos(updated, true);
 
     if (this.activeVideoId === id) {
       this.activeVideoId = updated.length > 0 ? updated[0].id : null;
@@ -581,7 +595,7 @@ const YouTubeShowcase = {
     this.renderShowcaseUI();
 
     if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
-      DriveSync.showToast('ลบคลิปวิดีโอเรียบร้อยแล้ว', 'info', 3000);
+      DriveSync.showToast('ลบคลิปวิดีโอและซิงก์สถานะล่าสุดแล้ว', 'info', 3000);
     }
   },
 
@@ -591,11 +605,89 @@ const YouTubeShowcase = {
       return;
     }
     localStorage.removeItem(this.storageKey);
-    this.activeVideoId = this.defaultVideos[0].id;
+    const defaults = [...this.defaultVideos];
+    this.saveVideos(defaults, true);
+    this.activeVideoId = defaults[0].id;
     this.renderShowcaseUI();
 
     if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
       DriveSync.showToast('คืนค่าคลิปตัวอย่างมาตรฐานเรียบร้อยแล้ว', 'success', 3000);
     }
+  },
+
+  // ☁️ บังคับซิงก์ข้อมูลคลิปวิดีโอล่าสุดจาก Google Drive ศูนย์กลางทันที
+  async syncWithGoogleDrive() {
+    if (typeof DriveSync === 'undefined' || !DriveSync.config || !DriveSync.config.appsScriptUrl) {
+      alert('ยังไม่ได้ระบุ Google Apps Script URL ในระบบ ไม่สามารถดึงข้อมูลจาก Cloud ได้');
+      return;
+    }
+
+    if (typeof DriveSync.showToast === 'function') {
+      DriveSync.showToast('⏳ กำลังดึงรายการคลิปวิดีโอจาก Google Drive...', 'info', 2000);
+    }
+
+    try {
+      const res = await DriveSync.fetchCloudState();
+      if (res && res.cloudState && Array.isArray(res.cloudState.youtubeVideos) && res.cloudState.youtubeVideos.length > 0) {
+        localStorage.setItem(this.storageKey, JSON.stringify(res.cloudState.youtubeVideos));
+        this.activeVideoId = res.cloudState.youtubeVideos[0].id;
+        this.renderShowcaseUI();
+        if (typeof DriveSync.showToast === 'function') {
+          DriveSync.showToast(`✅ ซิงก์คลิปวิดีโอสำเร็จ! พบ ${res.cloudState.youtubeVideos.length} คลิปจาก Google Drive`, 'success', 4000);
+        }
+      } else {
+        if (typeof DriveSync.showToast === 'function') {
+          DriveSync.showToast('ℹ️ ไม่พบข้อมูลคลิปสำรองบน Google Drive (หรือยังไม่เคยมีการซิงก์)', 'info', 3500);
+        }
+      }
+    } catch(err) {
+      console.error('syncWithGoogleDrive error:', err);
+      if (typeof DriveSync.showToast === 'function') {
+        DriveSync.showToast('⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อ Google Drive', 'error', 3500);
+      }
+    }
+  },
+
+  // 📥 ดาวน์โหลดไฟล์สำรองรายการคลิปเป็น JSON
+  exportVideosJson() {
+    const videos = this.getAllVideos();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(videos, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `pafolio_youtube_videos_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+
+    if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
+      DriveSync.showToast('📥 ดาวน์โหลดไฟล์สำรองรายการคลิปวิดีโอเรียบร้อยแล้ว', 'success', 3000);
+    }
+  },
+
+  // 📤 นำเข้ารายการคลิปจากไฟล์ JSON
+  importVideosJson(event) {
+    const file = event && event.target && event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.saveVideos(parsed, true);
+          this.activeVideoId = parsed[0].id;
+          this.renderShowcaseUI();
+          if (typeof DriveSync !== 'undefined' && typeof DriveSync.showToast === 'function') {
+            DriveSync.showToast(`✅ นำเข้ารายการคลิปสำเร็จ (${parsed.length} คลิป) พร้อมซิงก์ขึ้น Google Drive แล้ว!`, 'success', 4500);
+          }
+        } else {
+          alert('รูปแบบข้อมูลในไฟล์ JSON ไม่ถูกต้อง');
+        }
+      } catch(err) {
+        alert('เกิดข้อผิดพลาดในการอ่านไฟล์ JSON: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
   }
 };

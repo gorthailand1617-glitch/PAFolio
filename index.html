@@ -60,7 +60,7 @@
   </script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=2569.9.13">
+  <link rel="stylesheet" href="css/styles.css?v=2569.9.14">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
 
@@ -743,6 +743,12 @@
                 title="ชมคลิปวิดีโอในโหมดนำเสนอสไลด์เต็มจอ">
           <i class="fa-solid fa-tv text-amber-400"></i>
           <span>เปิดในโหมดนำเสนอ</span>
+        </button>
+        <button onclick="YouTubeShowcase.syncWithGoogleDrive()" 
+                class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold transition"
+                title="ดึงข้อมูลคลิปวิดีโอล่าสุดจาก Google Drive ของคุณ">
+          <i class="fa-solid fa-cloud-arrow-down text-emerald-600"></i>
+          <span>ซิงก์ Google Drive</span>
         </button>
         <button onclick="YouTubeShowcase.resetToDefaults()" 
                 class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition"
@@ -1881,17 +1887,44 @@
                     class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none text-xs resize-none"></textarea>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-2.5">
-          <button type="button" onclick="YouTubeShowcase.closeAddModal()" 
-                  class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
-            ยกเลิก
-          </button>
-          <button type="submit" 
-                  class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold font-heading shadow-md shadow-rose-600/30 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>บันทึกคลิปวิดีโอ</span>
-          </button>
+        <!-- Cloud Sync Info Banner -->
+        <div class="p-3 rounded-xl bg-teal-950/40 border border-teal-800/60 flex items-start gap-2.5 text-[11px] text-teal-200/90 leading-relaxed">
+          <i class="fa-solid fa-cloud-arrow-up text-teal-400 mt-0.5 text-sm flex-shrink-0"></i>
+          <div>
+            <span class="font-bold text-teal-300">ซิงก์ข้ามอุปกรณ์อัตโนมัติ 100%:</span>
+            เมื่อกดบันทึก ระบบจะจัดเก็บคลิปในเบราว์เซอร์เครื่องนี้ พร้อมซิงก์ขึ้น Google Drive ของคุณครูทันที ทำให้อุปกรณ์อื่น (คอมฯ ที่บ้าน, มือถือ, แท็บเล็ตกรรมการ) เห็นคลิปนี้ตรงกันทั้งหมด
+          </div>
+        </div>
+
+        <!-- Action Buttons & Backup/Restore Row -->
+        <div class="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="YouTubeShowcase.exportVideosJson()" 
+                    class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition flex items-center gap-1"
+                    title="ดาวน์โหลดไฟล์ .json สำหรับนำไปใช้เครื่องอื่น">
+              <i class="fa-solid fa-file-export text-slate-400"></i>
+              <span>สำรองข้อมูลคลิป (.json)</span>
+            </button>
+            <button type="button" onclick="document.getElementById('yt-import-file-input').click()" 
+                    class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition flex items-center gap-1"
+                    title="นำเข้าไฟล์รายการคลิปจากเครื่องอื่น">
+              <i class="fa-solid fa-file-import text-slate-400"></i>
+              <span>นำเข้าไฟล์ (.json)</span>
+            </button>
+            <input type="file" id="yt-import-file-input" accept=".json" class="hidden" onchange="YouTubeShowcase.importVideosJson(event)">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="YouTubeShowcase.closeAddModal()" 
+                    class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+              ยกเลิก
+            </button>
+            <button type="submit" 
+                    class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold font-heading shadow-md shadow-rose-600/30 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>บันทึกและซิงก์คลิปวิดีโอ</span>
+            </button>
+          </div>
         </div>
 
       </form>
@@ -2347,19 +2380,19 @@
   <!-- PptxGenJS (PowerPoint Generator) -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
-  <!-- JavaScript Modules (Cache-Busted v2569.9.13) -->
-  <script src="js/config.js?v=2569.9.13"></script>
-  <script src="js/data.js?v=2569.9.13"></script>
-  <script src="js/themes.js?v=2569.9.13"></script>
-  <script src="js/certificate-vault.js?v=2569.9.13"></script>
-  <script src="js/youtube-showcase.js?v=2569.9.13"></script>
-  <script src="js/export-engine.js?v=2569.9.13"></script>
-  <script src="js/drive-sync.js?v=2569.9.13"></script>
-  <script src="js/ai-assistant.js?v=2569.9.13"></script>
-  <script src="js/presentation.js?v=2569.9.13"></script>
-  <script src="js/video-engine.js?v=2569.9.13"></script>
-  <script src="js/video-studio-ui.js?v=2569.9.13"></script>
-  <script src="js/chart-config.js?v=2569.9.13"></script>
-  <script src="js/app.js?v=2569.9.13"></script>
+  <!-- JavaScript Modules (Cache-Busted v2569.9.14) -->
+  <script src="js/config.js?v=2569.9.14"></script>
+  <script src="js/data.js?v=2569.9.14"></script>
+  <script src="js/themes.js?v=2569.9.14"></script>
+  <script src="js/certificate-vault.js?v=2569.9.14"></script>
+  <script src="js/youtube-showcase.js?v=2569.9.14"></script>
+  <script src="js/export-engine.js?v=2569.9.14"></script>
+  <script src="js/drive-sync.js?v=2569.9.14"></script>
+  <script src="js/ai-assistant.js?v=2569.9.14"></script>
+  <script src="js/presentation.js?v=2569.9.14"></script>
+  <script src="js/video-engine.js?v=2569.9.14"></script>
+  <script src="js/video-studio-ui.js?v=2569.9.14"></script>
+  <script src="js/chart-config.js?v=2569.9.14"></script>
+  <script src="js/app.js?v=2569.9.14"></script>
 </body>
 </html>

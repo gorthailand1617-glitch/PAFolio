@@ -18,14 +18,17 @@ const PAFOLIO_CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycby7k7vKoFG6uugmoqGenVCdWPVXVAfkcWuw7mKcPm8qJSaUmwtOFW_yaEmVAwUlma_Miw/exec",
 
   // 🔖 เลขเวอร์ชันระบบสำหรับจัดการ Cache สากล
-  APP_VERSION: "2569.9.13",
+  APP_VERSION: "2569.9.14",
 
   // 📄 ชื่อไฟล์จัดเก็บสถานะระบบศูนย์กลางบน Google Drive
   CLOUD_STATE_FILE: "pafolio_cloud_state.json",
 
   // 🖼️ ภาพประจำตัวชุดสูทขาวและภาพปกมาตรฐานสากล
   DEFAULT_AVATAR_URL: "https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800",
-  DEFAULT_COVER_URL: "https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920"
+  DEFAULT_COVER_URL: "https://drive.google.com/thumbnail?id=1A8UF9r9sP3PpB6KEHidfGon8-UExNGYa&sz=w1920",
+
+  // 🎥 รายการคลิปวิดีโอ ว.PA เริ่มต้น (หากใส่ลิงก์คลิปจริงของครูไว้ ทุกเครื่องทั่วโลกจะเห็นคลิปนี้ทันทีแบบ Zero-Config)
+  DEFAULT_YOUTUBE_VIDEOS: null
 };
 
 // Export เข้า Window object สำหรับเบราว์เซอร์
