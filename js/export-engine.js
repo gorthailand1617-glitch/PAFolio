@@ -31,7 +31,7 @@ const ExportEngine = {
       ['วิทยฐานะ:', teacher.academicStanding || 'ครูชำนาญการพิเศษ'],
       ['กลุ่มสาระการเรียนรู้:', teacher.learningArea || 'การงานอาชีพ'],
       ['สถานศึกษา:', teacher.school || 'โรงเรียนเปรมติณสูลานนท์'],
-      ['สังกัด:', teacher.affiliation || 'สพม.ขอนแก่น'],
+      ['สังกัด:', teacher.affiliation || 'องค์การบริหารส่วนจังหวัดขอนแก่น'],
       ['ภาระงานสอน:', yearData.totalHours || '22 คาบ/สัปดาห์'],
       ['สถานะรอบการประเมิน:', yearData.status || 'สมบูรณ์ครบถ้วน 100%']
     ];

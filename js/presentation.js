@@ -465,7 +465,7 @@ const PresentationDeck = {
                 </div>
               </div>
               <div class="mt-6 pt-5 border-t border-white/10 text-xs sm:text-sm lg:text-base text-slate-300">
-                สังกัด: ${teacher.affiliation || 'สพม.ขอนแก่น'} · ${teacher.school}
+                สังกัด: ${teacher.affiliation || 'องค์การบริหารส่วนจังหวัดขอนแก่น'} · ${teacher.school}
               </div>
             </div>
 
@@ -1233,7 +1233,7 @@ const PresentationDeck = {
       });
 
       const deptName = teacher.learningArea || teacher.department || "กลุ่มสาระการเรียนรู้การงานอาชีพ";
-      slide1.addText("กลุ่มสาระการเรียนรู้: " + deptName + "\nสถานศึกษา: " + (teacher.school || "โรงเรียนเปรมติณสูลานนท์") + " (" + (teacher.affiliation || "สพม.ขอนแก่น") + ")\nรอบการประเมิน: ปีงบประมาณ " + curYear + " (1 ตุลาคม " + prevYear + " - 30 กันยายน " + curYear + ")", {
+      slide1.addText("กลุ่มสาระการเรียนรู้: " + deptName + "\nสถานศึกษา: " + (teacher.school || "โรงเรียนเปรมติณสูลานนท์") + " (" + (teacher.affiliation || "องค์การบริหารส่วนจังหวัดขอนแก่น") + ")\nรอบการประเมิน: ปีงบประมาณ " + curYear + " (1 ตุลาคม " + prevYear + " - 30 กันยายน " + curYear + ")", {
         x: 0.8, y: 2.9, w: 5.8, h: 1.2,
         fontSize: 12, color: TEXT_WHITE, fontFace: FONT_NAME, lineSpacing: 20
       });

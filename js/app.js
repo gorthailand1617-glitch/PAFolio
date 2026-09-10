@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             delete parsed['teacher-piyaporn'];
             if (parsed['teacher-korakot']) {
               parsed['teacher-korakot'].name = 'นายกรกฎ รัตนะโช';
+              parsed['teacher-korakot'].affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
               parsed['teacher-korakot'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
               if (parsed['teacher-korakot'].years && parsed['teacher-korakot'].years['2569']) {
                 parsed['teacher-korakot'].years['2569'].avatarUrl = 'https://drive.google.com/thumbnail?id=1Xr2DlVf1ypx7sH1owj1DwteOW2_JljGP&sz=w800';
@@ -2109,7 +2110,7 @@ function handleCreateNewTeacher() {
     position: "ครู",
     academicStanding: standing,
     school: school,
-    affiliation: "สพม./สพป.",
+    affiliation: "องค์การบริหารส่วนจังหวัดขอนแก่น",
     learningArea: dept || "กลุ่มสาระการเรียนรู้",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80",
     coverUrl: "https://drive.google.com/thumbnail?id=1Dyu3SQW--LpIPxO0x5weLb1C8ZhU5Hjv&sz=w1920",
@@ -2211,6 +2212,7 @@ function loadStoredTeachers() {
 
         if (key === 'teacher-korakot') {
           stored.name = 'นายกรกฎ รัตนะโช';
+          stored.affiliation = 'องค์การบริหารส่วนจังหวัดขอนแก่น';
           stored.avatarUrl = newWhiteSuitAvatar;
         }
 

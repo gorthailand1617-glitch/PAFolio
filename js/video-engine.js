@@ -65,7 +65,7 @@ const VideoEngine = {
       position: "ครู",
       academicStanding: "ชำนาญการพิเศษ",
       school: "โรงเรียนเปรมติณสูลานนท์",
-      affiliation: "สพม.ขอนแก่น",
+      affiliation: "องค์การบริหารส่วนจังหวัดขอนแก่น",
       department: "กลุ่มสาระการเรียนรู้การงานอาชีพ",
       avatarUrl: "images/profile.jpg"
     };
