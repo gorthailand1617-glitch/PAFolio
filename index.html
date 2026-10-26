@@ -2564,22 +2564,28 @@
           </select>
         </div>
 
-        <!-- Styling & Icon Options -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800">
-          <div>
-            <label class="block text-slate-300 font-semibold mb-1">ไอคอน (FontAwesome Class)</label>
-            <input type="text" id="util-edit-icon" value="fa-solid fa-code" placeholder="เช่น fa-solid fa-calculator, fa-solid fa-dice" 
-                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-          </div>
-          <div>
-            <label class="block text-slate-300 font-semibold mb-1">ชุดสีการ์ด</label>
-            <select id="util-edit-color" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-              <option value="from-amber-500 to-rose-500">Amber & Rose (ส้ม-ชมพู)</option>
-              <option value="from-blue-500 to-teal-500">Blue & Teal (ฟ้า-เขียวน้ำทะเล)</option>
-              <option value="from-emerald-500 to-teal-600">Emerald & Mint (เขียวมรกต)</option>
-              <option value="from-indigo-500 to-purple-600">Indigo & Purple (ม่วงคราม)</option>
-              <option value="from-rose-500 to-orange-500">Ruby & Sunset (ทับทิม-ส้ม)</option>
-            </select>
+        <!-- Styling & Icon Options (Visual Picker Integrated) -->
+        <div class="pt-3 border-t border-slate-800">
+          <label class="block text-slate-300 font-semibold mb-2">ปรับแต่งไอคอนและชุดสีการ์ด</label>
+          <div class="flex items-center gap-3.5 bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+            
+            <!-- Live Preview Badge -->
+            <div id="util-edit-preview-badge" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center text-xl shadow-lg flex-shrink-0 transition-transform">
+              <i id="util-edit-preview-icon" class="fa-solid fa-code"></i>
+            </div>
+
+            <!-- Choose Button & Input -->
+            <div class="flex-1">
+              <input type="hidden" id="util-edit-icon" value="fa-solid fa-code">
+              <input type="hidden" id="util-edit-color" value="from-amber-500 to-rose-500">
+              <button type="button" onclick="UtilityHub.openIconPickerForEditor()" 
+                      class="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/30 text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-icons text-xs"></i>
+                <span>คลิกเพื่อเลือกไอคอน & ชุดสีจากคลัง</span>
+              </button>
+              <div id="util-edit-icon-label" class="text-[11px] text-slate-400 mt-1 font-mono">fa-solid fa-code · Amber Sunset</div>
+            </div>
+
           </div>
         </div>
 
@@ -2593,6 +2599,94 @@
         <button type="button" onclick="UtilityHub.saveAppFromEditor()" class="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg transition flex items-center gap-2">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>บันทึกเว็บแอป</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: UTILITY ICON & THEME PICKER ================= -->
+  <div id="utility-icon-picker-modal" class="fixed inset-0 z-[140] bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="if(event.target === this) UtilityHub.closeIconPicker()">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-2xl my-auto text-slate-100 flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800 mb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div id="util-icon-modal-preview" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center text-xl shadow-lg flex-shrink-0 transition-transform">
+            <i id="util-icon-modal-preview-i" class="fa-solid fa-icons"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-base text-white">🎨 ปรับแต่งไอคอนและการ์ด</h3>
+            <p id="util-icon-modal-app-name" class="text-xs text-amber-300 truncate max-w-xs sm:max-w-sm">เลือกไอคอนและชุดสีที่ต้องการ</p>
+          </div>
+        </div>
+        <button onclick="UtilityHub.closeIconPicker()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto pr-1 space-y-4 text-xs">
+        <input type="hidden" id="util-picker-target-app-id">
+        <input type="hidden" id="util-picker-selected-icon">
+        <input type="hidden" id="util-picker-selected-color">
+
+        <!-- 1. Color Gradient Palette -->
+        <div>
+          <label class="block text-slate-300 font-semibold mb-2 flex items-center justify-between">
+            <span>1. เลือกชุดสีพื้นหลังไอคอน & การ์ด:</span>
+            <span id="util-picker-color-name" class="text-[11px] text-amber-300 font-normal">Amber Sunset</span>
+          </label>
+          <div id="util-picker-color-grid" class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- 2. Icon Category Filter Tabs -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-slate-300 font-semibold">2. เลือกไอคอนสัญลักษณ์:</label>
+            <!-- Search Icon Input -->
+            <div class="relative w-40">
+              <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+              <input type="text" id="util-picker-search" oninput="UtilityHub.filterPickerIcons(this.value)" 
+                     placeholder="ค้นหาไอคอน..." 
+                     class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-7 pr-2.5 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 mb-2.5 scrollbar-none" id="util-picker-cat-tabs">
+            <!-- Category Tabs Rendered by JS -->
+          </div>
+
+          <!-- Icons Grid -->
+          <div id="util-picker-icons-grid" class="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-56 overflow-y-auto p-1 bg-slate-950/80 rounded-2xl border border-slate-800">
+            <!-- Icon Buttons Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- 3. Custom Icon Class / FontAwesome Class Input -->
+        <div class="pt-2 border-t border-slate-800">
+          <label class="block text-slate-400 text-[11px] mb-1">หรือระบุ FontAwesome Class / Emoji ด้วยตนเอง:</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="util-picker-custom-input" placeholder="เช่น fa-solid fa-wand-magic-sparkles หรือ 🚀" 
+                   class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <button type="button" onclick="UtilityHub.applyCustomPickerIcon()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition">
+              ทดสอบ
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3.5 border-t border-slate-800 flex items-center justify-end gap-2.5 mt-3 flex-shrink-0">
+        <button type="button" onclick="UtilityHub.closeIconPicker()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+          ยกเลิก
+        </button>
+        <button type="button" onclick="UtilityHub.saveIconPickerChanges()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-check"></i>
+          <span>บันทึกไอคอน</span>
         </button>
       </div>
 
@@ -2682,7 +2776,7 @@
   <script src="js/data.js?v=2569.9.17"></script>
   <script src="js/themes.js?v=2569.9.17"></script>
   <script src="js/certificate-vault.js?v=2569.9.17"></script>
-  <script src="js/utility-hub.js?v=2569.9.19"></script>
+  <script src="js/utility-hub.js?v=2569.9.20"></script>
   <script src="js/youtube-showcase.js?v=2569.9.17"></script>
   <script src="js/export-engine.js?v=2569.9.17"></script>
   <script src="js/drive-sync.js?v=2569.9.17"></script>

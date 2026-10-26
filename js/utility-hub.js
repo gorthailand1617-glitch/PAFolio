@@ -10,11 +10,112 @@
 
 const UtilityHub = {
   storageKey: 'pafolio_custom_utilities',
+  presetOverridesKey: 'pafolio_utility_preset_overrides',
   activeCategory: 'all',
   searchQuery: '',
   activeViewport: 'desktop',
   currentRunningAppId: null,
   inlineExpandedIds: new Set(),
+
+  // Icon & Theme Picker State
+  activePickerCategory: 'all',
+  pickerSearchQuery: '',
+  selectedPickerIcon: 'fa-solid fa-cubes',
+  selectedPickerColor: 'from-amber-500 to-rose-500',
+  pickerTargetAppId: null,
+
+  COLOR_GRADIENTS: [
+    { name: 'Amber Sunset', gradient: 'from-amber-500 to-rose-500' },
+    { name: 'Cyan Ocean', gradient: 'from-cyan-500 to-blue-600' },
+    { name: 'Blue Breeze', gradient: 'from-blue-500 to-teal-500' },
+    { name: 'Emerald Forest', gradient: 'from-emerald-500 to-teal-600' },
+    { name: 'Violet Deep', gradient: 'from-violet-500 to-indigo-600' },
+    { name: 'Purple Glam', gradient: 'from-purple-500 to-pink-500' },
+    { name: 'Rose Passion', gradient: 'from-rose-500 to-red-600' },
+    { name: 'Golden Sun', gradient: 'from-orange-500 to-amber-500' },
+    { name: 'Neon Blossom', gradient: 'from-fuchsia-500 to-rose-500' },
+    { name: 'Cosmic Blue', gradient: 'from-indigo-600 to-sky-400' },
+    { name: 'Mint Fresh', gradient: 'from-teal-400 to-emerald-600' },
+    { name: 'Dark Titanium', gradient: 'from-slate-700 to-slate-900' },
+    { name: 'Peach Glow', gradient: 'from-pink-500 to-amber-500' },
+    { name: 'Lime Energy', gradient: 'from-lime-500 to-emerald-600' },
+    { name: 'Bright Mango', gradient: 'from-yellow-400 to-orange-500' },
+    { name: 'Midnight Navy', gradient: 'from-blue-600 to-indigo-900' }
+  ],
+
+  ICON_CATEGORIES: {
+    all: { label: 'ทั้งหมด', icon: 'fa-solid fa-border-all' },
+    teaching: { label: 'การสอน & วิชาการ', icon: 'fa-solid fa-graduation-cap' },
+    eval: { label: 'วัดผล & สถิติ', icon: 'fa-solid fa-chart-column' },
+    tech: { label: 'AI & เทคโนโลยี', icon: 'fa-solid fa-wand-magic-sparkles' },
+    utility: { label: 'เครื่องมือ & เกม', icon: 'fa-solid fa-shapes' }
+  },
+
+  ICON_LIST: [
+    // นวัตกรรมการสอน & วิชาการ
+    { icon: 'fa-solid fa-graduation-cap', name: 'หมวกปริญญา / การศึกษา', cat: 'teaching' },
+    { icon: 'fa-solid fa-chalkboard-user', name: 'ครูผู้สอน / บรรยาย', cat: 'teaching' },
+    { icon: 'fa-solid fa-book-open-reader', name: 'การอ่าน / สื่อการสอน', cat: 'teaching' },
+    { icon: 'fa-solid fa-shapes', name: 'เรขาคณิต / รูปทรง', cat: 'teaching' },
+    { icon: 'fa-solid fa-atom', name: 'วิทยาศาสตร์ / ฟิสิกส์', cat: 'teaching' },
+    { icon: 'fa-solid fa-dna', name: 'ชีววิทยา / พันธุศาสตร์', cat: 'teaching' },
+    { icon: 'fa-solid fa-flask-vial', name: 'การทดลอง / เคมี', cat: 'teaching' },
+    { icon: 'fa-solid fa-microscope', name: 'กล้องจุลทรรศน์', cat: 'teaching' },
+    { icon: 'fa-solid fa-calculator', name: 'เครื่องคิดเลข / คำนวณ', cat: 'teaching' },
+    { icon: 'fa-solid fa-square-root-variable', name: 'สูตรคณิตศาสตร์', cat: 'teaching' },
+    { icon: 'fa-solid fa-brain', name: 'สมอง / ทักษะการคิด', cat: 'teaching' },
+    { icon: 'fa-solid fa-lightbulb', name: 'หลอดไฟ / ความคิดสร้างสรรค์', cat: 'teaching' },
+    { icon: 'fa-solid fa-compass-drafting', name: 'ออกแบบ / ร่างแผน', cat: 'teaching' },
+    { icon: 'fa-solid fa-palette', name: 'ศิลปะ / ออกแบบ', cat: 'teaching' },
+    { icon: 'fa-solid fa-music', name: 'ดนตรี / กิจกรรมศิลป์', cat: 'teaching' },
+    { icon: 'fa-solid fa-language', name: 'ภาษาศาสตร์ / แปลภาษา', cat: 'teaching' },
+
+    // การวัดประเมินผล & สถิติ
+    { icon: 'fa-solid fa-chart-column', name: 'กราฟแท่งสถิติ', cat: 'eval' },
+    { icon: 'fa-solid fa-chart-line', name: 'กราฟแนวโน้มพัฒนาการ', cat: 'eval' },
+    { icon: 'fa-solid fa-chart-pie', name: 'กราฟวงกลม / สัดส่วน', cat: 'eval' },
+    { icon: 'fa-solid fa-clipboard-check', name: 'แบบประเมิน / ตรวจผล', cat: 'eval' },
+    { icon: 'fa-solid fa-square-poll-vertical', name: 'โพลสำรวจความคิดเห็น', cat: 'eval' },
+    { icon: 'fa-solid fa-star', name: 'ดาวเกียรติยศ / คะแนน', cat: 'eval' },
+    { icon: 'fa-solid fa-award', name: 'เหรียญรางวัล / รางวัล', cat: 'eval' },
+    { icon: 'fa-solid fa-trophy', name: 'ถ้วยรางวัลความสำเร็จ', cat: 'eval' },
+    { icon: 'fa-solid fa-list-check', name: 'เช็กลิสต์ผลงาน / รูบริก', cat: 'eval' },
+    { icon: 'fa-solid fa-stamp', name: 'ตรวจผ่าน / อนุมัติ', cat: 'eval' },
+    { icon: 'fa-solid fa-percent', name: 'ร้อยละ / ตัดเกรด', cat: 'eval' },
+    { icon: 'fa-solid fa-bullseye', name: 'เป้าหมายผลลัพธ์', cat: 'eval' },
+
+    // AI & เทคโนโลยีดิจิทัล
+    { icon: 'fa-solid fa-wand-magic-sparkles', name: 'AI อัจฉริยะ / เมจิก', cat: 'tech' },
+    { icon: 'fa-solid fa-robot', name: 'หุ่นยนต์ AI ผู้ช่วย', cat: 'tech' },
+    { icon: 'fa-solid fa-microchip', name: 'ชิปประมวลผล / ฮาร์ดแวร์', cat: 'tech' },
+    { icon: 'fa-solid fa-code', name: 'โค้ด HTML / JavaScript', cat: 'tech' },
+    { icon: 'fa-solid fa-terminal', name: 'เทอร์มินัล / สคริปต์', cat: 'tech' },
+    { icon: 'fa-solid fa-database', name: 'ฐานข้อมูล / สารสนเทศ', cat: 'tech' },
+    { icon: 'fa-solid fa-server', name: 'คลาวด์เซิร์ฟเวอร์', cat: 'tech' },
+    { icon: 'fa-solid fa-network-wired', name: 'ระบบเครือข่าย', cat: 'tech' },
+    { icon: 'fa-solid fa-laptop-code', name: 'พัฒนาโปรแกรม', cat: 'tech' },
+    { icon: 'fa-solid fa-bolt', name: 'ประมวลผลรวดเร็ว', cat: 'tech' },
+    { icon: 'fa-solid fa-fingerprint', name: 'ความปลอดภัยดิจิทัล', cat: 'tech' },
+    { icon: 'fa-solid fa-vr-cardboard', name: 'VR / โลกเสมือนจริง', cat: 'tech' },
+
+    // เครื่องมือ ยูทิลิตี้ & เกม
+    { icon: 'fa-solid fa-dice', name: 'ลูกเต๋าสุ่ม', cat: 'utility' },
+    { icon: 'fa-solid fa-stopwatch-20', name: 'นาฬิกาจับเวลา', cat: 'utility' },
+    { icon: 'fa-solid fa-hourglass-half', name: 'นาฬิกาทราย', cat: 'utility' },
+    { icon: 'fa-solid fa-bell', name: 'กระดิ่งสัญญาณเตือน', cat: 'utility' },
+    { icon: 'fa-solid fa-bullhorn', name: 'โทรโข่ง / ประชาสัมพันธ์', cat: 'utility' },
+    { icon: 'fa-solid fa-gamepad', name: 'เกมการเรียนรู้', cat: 'utility' },
+    { icon: 'fa-solid fa-puzzle-piece', name: 'จิ๊กซอว์ / ปริศนา', cat: 'utility' },
+    { icon: 'fa-solid fa-cubes', name: 'คลังเครื่องมือ / บล็อก', cat: 'utility' },
+    { icon: 'fa-solid fa-window-restore', name: 'Iframe Embed ฝังหน้า', cat: 'utility' },
+    { icon: 'fa-solid fa-globe', name: 'เว็บแอปบนคลาวด์', cat: 'utility' },
+    { icon: 'fa-solid fa-rocket', name: 'จรวดผลักดันนวัตกรรม', cat: 'utility' },
+    { icon: 'fa-solid fa-gear', name: 'ฟันเฟืองตั้งค่า', cat: 'utility' },
+    { icon: 'fa-solid fa-compass', name: 'เข็มทิศการทำงาน', cat: 'utility' },
+    { icon: 'fa-solid fa-folder-open', name: 'แฟ้มผลงาน', cat: 'utility' },
+    { icon: 'fa-solid fa-cloud-arrow-up', name: 'อัปโหลดคลาวด์', cat: 'utility' },
+    { icon: 'fa-solid fa-qrcode', name: 'คิวอาร์โค้ดสแกน', cat: 'utility' }
+  ],
 
   // คลังแอปพลิเคชันและสื่อนวัตกรรมเริ่มต้น
   presets: [
@@ -578,6 +679,24 @@ const UtilityHub = {
     this.updateStats();
   },
 
+  getPresetOverrides() {
+    try {
+      const saved = localStorage.getItem(this.presetOverridesKey);
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  savePresetOverrides(overrides) {
+    try {
+      localStorage.setItem(this.presetOverridesKey, JSON.stringify(overrides));
+      this.renderGrid();
+    } catch (e) {
+      console.warn('Failed to save preset overrides', e);
+    }
+  },
+
   getAllApps() {
     let customApps = [];
     try {
@@ -588,7 +707,16 @@ const UtilityHub = {
     } catch (e) {
       console.warn('Failed to parse custom utilities from localStorage', e);
     }
-    return [...this.presets, ...customApps];
+
+    const overrides = this.getPresetOverrides();
+    const presetsWithOverrides = this.presets.map(p => {
+      if (overrides && overrides[p.id]) {
+        return { ...p, ...overrides[p.id] };
+      }
+      return p;
+    });
+
+    return [...presetsWithOverrides, ...customApps];
   },
 
   getCustomAppsOnly() {
@@ -734,15 +862,25 @@ const UtilityHub = {
       const isInlineExpanded = this.inlineExpandedIds.has(app.id) || app.openTarget === 'inline';
       const colSpanClass = isInlineExpanded ? 'col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 ring-2 ring-emerald-500/50' : '';
 
+      const iconDisplay = this.isEmoji(app.icon)
+        ? `<span class="text-2xl leading-none select-none">${app.icon}</span>`
+        : `<i class="${app.icon || 'fa-solid fa-cubes'}"></i>`;
+
       return `
         <div class="group relative bg-slate-900/90 hover:bg-slate-850 rounded-3xl p-5 border border-slate-800 hover:border-amber-500/40 shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${colSpanClass}">
           
           <!-- Card Top Accent & Badges -->
           <div>
             <div class="flex items-start justify-between gap-3 mb-4">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${accentGradient} text-white flex items-center justify-center text-xl shadow-lg flex-shrink-0 group-hover:scale-105 transition">
-                <i class="${app.icon || 'fa-solid fa-cubes'}"></i>
-              </div>
+              <!-- Interactive Clickable Icon Badge with Hover Pencil Overlay -->
+              <button type="button" onclick="UtilityHub.openIconPicker('${app.id}')" 
+                      class="group/icon relative w-12 h-12 rounded-2xl bg-gradient-to-br ${accentGradient} text-white flex items-center justify-center text-xl shadow-lg flex-shrink-0 hover:scale-110 hover:ring-2 hover:ring-amber-400/80 transition-all cursor-pointer"
+                      title="คลิกเพื่อแก้ไขไอคอนและชุดสีการ์ดนี้">
+                ${iconDisplay}
+                <div class="absolute inset-0 rounded-2xl bg-black/45 backdrop-blur-[1px] opacity-0 group-hover/icon:opacity-100 flex items-center justify-center text-amber-300 text-xs font-bold transition">
+                  <i class="fa-solid fa-pen text-xs"></i>
+                </div>
+              </button>
               <div class="flex flex-wrap gap-1.5 justify-end">
                 ${typeBadge}
                 <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-medium">
@@ -779,6 +917,13 @@ const UtilityHub = {
               <span class="hidden sm:inline">${isInlineExpanded ? 'ย่อแอป' : 'ฝังดูบนหน้า'}</span>
             </button>
 
+            <!-- Quick Icon & Color Picker Button -->
+            <button onclick="UtilityHub.openIconPicker('${app.id}')" 
+                    class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-300 border border-slate-700 text-xs transition" 
+                    title="ปรับแต่งไอคอน & สีการ์ด">
+              <i class="fa-solid fa-icons"></i>
+            </button>
+
             <!-- External / Blank Launch -->
             ${isUrl ? `
               <a href="${this.escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer" 
@@ -801,7 +946,7 @@ const UtilityHub = {
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             ` : `
-              <span class="text-[10px] text-slate-500 px-1 font-mono" title="แอปมาตรฐานประจำระบบ ว.PA">
+              <span class="text-[10px] text-slate-500 px-1 font-mono" title="แอปมาตรฐานประจำระบบ ว.PA (สามารถเปลี่ยนไอคอนและสีการ์ดได้)">
                 <i class="fa-solid fa-shield-halved text-amber-500/60"></i>
               </span>
             `}
@@ -981,33 +1126,41 @@ const UtilityHub = {
       const app = apps.find(a => a.id === id);
       if (!app) return;
 
+      const appIcon = app.icon || 'fa-solid fa-cubes';
+      const appColor = app.color || 'from-amber-500 to-rose-500';
+
       if (idInput) idInput.value = app.id;
       if (titleInput) titleInput.value = app.title || '';
       if (descInput) descInput.value = app.description || '';
       if (catSelect) catSelect.value = app.category || 'general';
-      if (iconInput) iconInput.value = app.icon || 'fa-solid fa-cubes';
-      if (colorSelect) colorSelect.value = app.color || 'from-amber-500 to-rose-500';
+      if (iconInput) iconInput.value = appIcon;
+      if (colorSelect) colorSelect.value = appColor;
       if (targetSelect) targetSelect.value = app.openTarget || 'modal';
       if (codeTextarea) codeTextarea.value = (app.type === 'code' ? app.content : '') || '';
       if (embedTextarea) embedTextarea.value = app.embedCode || (app.type === 'embed' ? app.content : '') || '';
       if (urlInput) urlInput.value = app.url || '';
       if (headerTitle) headerTitle.textContent = '✏️ แก้ไขเว็บแอป / สื่อดิจิทัล';
 
-      this.switchEditorType(app.type || 'code');
+      this.updateEditorPreview(appIcon, appColor);
+      this.switchEditorType(app.type || 'code', false);
     } else {
+      const defaultIcon = 'fa-solid fa-window-restore';
+      const defaultColor = 'from-emerald-500 to-teal-600';
+
       if (idInput) idInput.value = '';
       if (titleInput) titleInput.value = '';
       if (descInput) descInput.value = '';
       if (catSelect) catSelect.value = 'teaching';
-      if (iconInput) iconInput.value = 'fa-solid fa-code';
-      if (colorSelect) colorSelect.value = 'from-indigo-500 to-purple-600';
+      if (iconInput) iconInput.value = defaultIcon;
+      if (colorSelect) colorSelect.value = defaultColor;
       if (targetSelect) targetSelect.value = 'modal';
       if (codeTextarea) codeTextarea.value = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>My Utility</title>\n  <script src="https://cdn.tailwindcss.com"></script>\n</head>\n<body class="bg-slate-900 text-white p-6 font-sans flex flex-col items-center justify-center min-h-screen">\n  <h1 class="text-2xl font-bold text-amber-400">✨ ยูทิลิตี้ใหม่ของฉัน</h1>\n  <p class="text-slate-400 mt-2 text-sm">เขียนโค้ด HTML/CSS/JS ตามต้องการที่นี่ได้เลย</p>\n</body>\n</html>';
       if (embedTextarea) embedTextarea.value = '';
       if (urlInput) urlInput.value = '';
       if (headerTitle) headerTitle.textContent = '➕ เพิ่มเว็บแอป / สื่อดิจิทัลใหม่';
 
-      this.switchEditorType('embed'); // สลับไปหน้าแท็บฝัง Embed เป็นค่าเริ่มต้นให้ผู้ใช้
+      this.updateEditorPreview(defaultIcon, defaultColor);
+      this.switchEditorType('embed', true); // สลับไปหน้าแท็บฝัง Embed เป็นค่าเริ่มต้นให้ผู้ใช้
     }
 
     modal.classList.remove('hidden');
@@ -1024,7 +1177,7 @@ const UtilityHub = {
     document.body.style.overflow = '';
   },
 
-  switchEditorType(type) {
+  switchEditorType(type, autoUpdateIcon = true) {
     const tabCode = document.getElementById('util-tab-code');
     const tabEmbed = document.getElementById('util-tab-embed');
     const tabUrl = document.getElementById('util-tab-url');
@@ -1033,6 +1186,7 @@ const UtilityHub = {
     const sectionUrl = document.getElementById('util-section-url');
     const typeInput = document.getElementById('util-edit-type');
     const iconInput = document.getElementById('util-edit-icon');
+    const colorSelect = document.getElementById('util-edit-color');
 
     if (typeInput) typeInput.value = type;
 
@@ -1049,21 +1203,21 @@ const UtilityHub = {
     if (type === 'code') {
       if (tabCode) tabCode.className = 'px-2.5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-1.5';
       if (sectionCode) sectionCode.classList.remove('hidden');
-      if (iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-globe' || iconInput.value === 'fa-solid fa-window-restore')) {
-        iconInput.value = 'fa-solid fa-code';
+      if (autoUpdateIcon && iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-globe' || iconInput.value === 'fa-solid fa-window-restore')) {
+        this.updateEditorPreview('fa-solid fa-code', colorSelect?.value || 'from-amber-500 to-rose-500');
       }
     } else if (type === 'embed') {
       if (tabEmbed) tabEmbed.className = 'px-2.5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-1.5';
       if (sectionEmbed) sectionEmbed.classList.remove('hidden');
-      if (iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-globe' || iconInput.value === 'fa-solid fa-code')) {
-        iconInput.value = 'fa-solid fa-window-restore';
+      if (autoUpdateIcon && iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-globe' || iconInput.value === 'fa-solid fa-code')) {
+        this.updateEditorPreview('fa-solid fa-window-restore', colorSelect?.value || 'from-emerald-500 to-teal-600');
       }
     } else {
       // url
       if (tabUrl) tabUrl.className = 'px-2.5 py-2 rounded-xl bg-purple-500 text-white font-bold text-xs shadow transition flex items-center justify-center gap-1.5';
       if (sectionUrl) sectionUrl.classList.remove('hidden');
-      if (iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-code' || iconInput.value === 'fa-solid fa-window-restore')) {
-        iconInput.value = 'fa-solid fa-globe';
+      if (autoUpdateIcon && iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-code' || iconInput.value === 'fa-solid fa-window-restore')) {
+        this.updateEditorPreview('fa-solid fa-globe', colorSelect?.value || 'from-violet-500 to-indigo-600');
       }
     }
   },
@@ -1221,6 +1375,300 @@ const UtilityHub = {
       }
     };
     reader.readAsText(file);
+  },
+
+  // ================= ICON & THEME PICKER METHODS =================
+
+  isEmoji(str) {
+    if (!str) return false;
+    return !str.includes('fa-') && /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(str);
+  },
+
+  openIconPicker(appId) {
+    const apps = this.getAllApps();
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+
+    this.pickerTargetAppId = appId;
+    this.selectedPickerIcon = app.icon || 'fa-solid fa-cubes';
+    this.selectedPickerColor = app.color || 'from-amber-500 to-rose-500';
+    this.pickerSearchQuery = '';
+    this.activePickerCategory = 'all';
+
+    const modal = document.getElementById('utility-icon-picker-modal');
+    const targetInput = document.getElementById('util-picker-target-app-id');
+    const titleEl = document.getElementById('util-icon-modal-app-name');
+    const searchInput = document.getElementById('util-picker-search');
+    const customInput = document.getElementById('util-picker-custom-input');
+
+    if (targetInput) targetInput.value = appId;
+    if (titleEl) titleEl.textContent = `แอป: "${app.title}"`;
+    if (searchInput) searchInput.value = '';
+    if (customInput) customInput.value = this.selectedPickerIcon;
+
+    this.renderPickerColors();
+    this.renderPickerCategories();
+    this.renderPickerIcons();
+    this.updatePickerPreview();
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  },
+
+  openIconPickerForEditor() {
+    this.pickerTargetAppId = '__editor__';
+    const iconInput = document.getElementById('util-edit-icon');
+    const colorInput = document.getElementById('util-edit-color');
+
+    this.selectedPickerIcon = (iconInput?.value || '').trim() || 'fa-solid fa-code';
+    this.selectedPickerColor = (colorInput?.value || '').trim() || 'from-amber-500 to-rose-500';
+    this.pickerSearchQuery = '';
+    this.activePickerCategory = 'all';
+
+    const modal = document.getElementById('utility-icon-picker-modal');
+    const targetInput = document.getElementById('util-picker-target-app-id');
+    const titleEl = document.getElementById('util-icon-modal-app-name');
+    const searchInput = document.getElementById('util-picker-search');
+    const customInput = document.getElementById('util-picker-custom-input');
+
+    if (targetInput) targetInput.value = '__editor__';
+    if (titleEl) titleEl.textContent = 'ปรับแต่งสำหรับเว็บแอปที่กำลังสร้าง/แก้ไข';
+    if (searchInput) searchInput.value = '';
+    if (customInput) customInput.value = this.selectedPickerIcon;
+
+    this.renderPickerColors();
+    this.renderPickerCategories();
+    this.renderPickerIcons();
+    this.updatePickerPreview();
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  },
+
+  closeIconPicker() {
+    const modal = document.getElementById('utility-icon-picker-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    this.pickerTargetAppId = null;
+  },
+
+  updatePickerPreview() {
+    const previewEl = document.getElementById('util-icon-modal-preview');
+    const previewIconEl = document.getElementById('util-icon-modal-preview-i');
+    const colorNameEl = document.getElementById('util-picker-color-name');
+
+    if (previewEl) {
+      previewEl.className = `w-11 h-11 rounded-2xl bg-gradient-to-br ${this.selectedPickerColor} text-white flex items-center justify-center text-xl shadow-lg flex-shrink-0 transition-transform scale-105`;
+      setTimeout(() => previewEl?.classList.remove('scale-105'), 200);
+    }
+
+    if (previewIconEl) {
+      if (this.isEmoji(this.selectedPickerIcon)) {
+        previewIconEl.className = 'not-italic text-2xl leading-none';
+        previewIconEl.textContent = this.selectedPickerIcon;
+      } else {
+        previewIconEl.className = this.selectedPickerIcon;
+        previewIconEl.textContent = '';
+      }
+    }
+
+    if (colorNameEl) {
+      const match = this.COLOR_GRADIENTS.find(c => c.gradient === this.selectedPickerColor);
+      colorNameEl.textContent = match ? match.name : 'Custom Gradient';
+    }
+  },
+
+  renderPickerColors() {
+    const grid = document.getElementById('util-picker-color-grid');
+    if (!grid) return;
+
+    grid.innerHTML = this.COLOR_GRADIENTS.map(item => {
+      const isSelected = item.gradient === this.selectedPickerColor;
+      return `
+        <button type="button" onclick="UtilityHub.selectPickerColor('${item.gradient}')"
+                class="relative h-9 rounded-xl bg-gradient-to-br ${item.gradient} transition-all duration-200 hover:scale-105 flex items-center justify-center ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900 shadow-md scale-105' : 'opacity-85 hover:opacity-100'}"
+                title="${item.name}">
+          ${isSelected ? '<i class="fa-solid fa-check text-white text-xs drop-shadow"></i>' : ''}
+        </button>
+      `;
+    }).join('');
+  },
+
+  selectPickerColor(gradient) {
+    this.selectedPickerColor = gradient;
+    this.renderPickerColors();
+    this.updatePickerPreview();
+  },
+
+  renderPickerCategories() {
+    const container = document.getElementById('util-picker-cat-tabs');
+    if (!container) return;
+
+    container.innerHTML = Object.entries(this.ICON_CATEGORIES).map(([key, cat]) => {
+      const isActive = key === this.activePickerCategory;
+      return `
+        <button type="button" onclick="UtilityHub.setPickerCategory('${key}')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5 flex-shrink-0 ${isActive ? 'bg-amber-500 text-slate-950 shadow-sm font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-750 hover:text-white'}">
+          <i class="${cat.icon} text-[10px]"></i>
+          <span>${cat.label}</span>
+        </button>
+      `;
+    }).join('');
+  },
+
+  setPickerCategory(catKey) {
+    this.activePickerCategory = catKey;
+    this.renderPickerCategories();
+    this.renderPickerIcons();
+  },
+
+  filterPickerIcons(q) {
+    this.pickerSearchQuery = (q || '').trim().toLowerCase();
+    this.renderPickerIcons();
+  },
+
+  renderPickerIcons() {
+    const grid = document.getElementById('util-picker-icons-grid');
+    if (!grid) return;
+
+    let icons = this.ICON_LIST;
+    if (this.activePickerCategory !== 'all') {
+      icons = icons.filter(i => i.cat === this.activePickerCategory);
+    }
+
+    if (this.pickerSearchQuery) {
+      icons = icons.filter(i => 
+        i.name.toLowerCase().includes(this.pickerSearchQuery) ||
+        i.icon.toLowerCase().includes(this.pickerSearchQuery)
+      );
+    }
+
+    if (icons.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full py-8 text-center text-slate-500 text-xs">
+          <i class="fa-solid fa-magnifying-glass text-slate-600 text-base mb-1 block"></i>
+          ไม่พบไอคอนที่ตรงกับคำค้นหา
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = icons.map(item => {
+      const isSelected = item.icon === this.selectedPickerIcon;
+      return `
+        <button type="button" onclick="UtilityHub.selectPickerIcon('${item.icon}')"
+                class="group p-2 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all duration-150 ${isSelected ? 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/40' : 'bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/80'}"
+                title="${item.name}">
+          <i class="${item.icon} text-lg transition group-hover:scale-110"></i>
+          <span class="text-[9px] truncate max-w-full text-center opacity-75">${item.name.split('/')[0].trim()}</span>
+        </button>
+      `;
+    }).join('');
+  },
+
+  selectPickerIcon(iconClass) {
+    this.selectedPickerIcon = iconClass;
+    const customInput = document.getElementById('util-picker-custom-input');
+    if (customInput) customInput.value = iconClass;
+
+    this.renderPickerIcons();
+    this.updatePickerPreview();
+  },
+
+  applyCustomPickerIcon() {
+    const customInput = document.getElementById('util-picker-custom-input');
+    const raw = (customInput?.value || '').trim();
+    if (!raw) return;
+
+    if (this.isEmoji(raw)) {
+      this.selectedPickerIcon = raw;
+    } else {
+      let iconClass = raw;
+      if (!iconClass.startsWith('fa-') && !iconClass.startsWith('fab ') && !iconClass.startsWith('fas ') && !iconClass.startsWith('far ')) {
+        iconClass = 'fa-solid fa-' + iconClass;
+      } else if (!iconClass.includes(' ')) {
+        iconClass = 'fa-solid ' + iconClass;
+      }
+      this.selectedPickerIcon = iconClass;
+    }
+
+    this.renderPickerIcons();
+    this.updatePickerPreview();
+  },
+
+  saveIconPickerChanges() {
+    const targetId = this.pickerTargetAppId;
+    if (!targetId) return;
+
+    if (targetId === '__editor__') {
+      this.updateEditorPreview(this.selectedPickerIcon, this.selectedPickerColor);
+      this.closeIconPicker();
+      this.showToast('🎨 ปรับแต่งไอคอนสำหรับการสร้าง/แก้ไขแอปเรียบร้อย');
+      return;
+    }
+
+    const apps = this.getAllApps();
+    const app = apps.find(a => a.id === targetId);
+    if (!app) return;
+
+    if (app.isPreset) {
+      const overrides = this.getPresetOverrides();
+      overrides[app.id] = {
+        ...(overrides[app.id] || {}),
+        icon: this.selectedPickerIcon,
+        color: this.selectedPickerColor
+      };
+      this.savePresetOverrides(overrides);
+    } else {
+      const customApps = this.getCustomAppsOnly();
+      const idx = customApps.findIndex(a => a.id === targetId);
+      if (idx !== -1) {
+        customApps[idx].icon = this.selectedPickerIcon;
+        customApps[idx].color = this.selectedPickerColor;
+        this.saveCustomApps(customApps);
+      }
+    }
+
+    this.closeIconPicker();
+    this.renderGrid();
+    this.showToast('🎨 บันทึกไอคอนและสีการ์ดเรียบร้อยแล้ว!');
+  },
+
+  updateEditorPreview(icon, color) {
+    const previewBadge = document.getElementById('util-edit-preview-badge');
+    const previewIcon = document.getElementById('util-edit-preview-icon');
+    const iconLabel = document.getElementById('util-edit-icon-label');
+    const iconInput = document.getElementById('util-edit-icon');
+    const colorInput = document.getElementById('util-edit-color');
+
+    if (iconInput) iconInput.value = icon;
+    if (colorInput) colorInput.value = color;
+
+    if (previewBadge) {
+      previewBadge.className = `w-12 h-12 rounded-2xl bg-gradient-to-br ${color} text-white flex items-center justify-center text-xl shadow-lg flex-shrink-0 transition-transform`;
+    }
+
+    if (previewIcon) {
+      if (this.isEmoji(icon)) {
+        previewIcon.className = 'not-italic text-2xl leading-none';
+        previewIcon.textContent = icon;
+      } else {
+        previewIcon.className = icon;
+        previewIcon.textContent = '';
+      }
+    }
+
+    if (iconLabel) {
+      const colMatch = this.COLOR_GRADIENTS.find(c => c.gradient === color);
+      const colName = colMatch ? colMatch.name : 'Custom Gradient';
+      iconLabel.textContent = `${icon} · ${colName}`;
+    }
   },
 
   showToast(message) {
