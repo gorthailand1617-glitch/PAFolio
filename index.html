@@ -2476,15 +2476,19 @@
 
         <!-- Type Selector Tabs -->
         <div>
-          <label class="block text-slate-300 font-semibold mb-2">เลือกประเภทของเว็บแอปพลิเคชัน:</label>
-          <div class="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
-            <button type="button" id="util-tab-code" onclick="UtilityHub.switchEditorType('code')" class="flex-1 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-2">
+          <label class="block text-slate-300 font-semibold mb-2">เลือกรูปแบบการเพิ่มเว็บแอป / สื่อดิจิทัล:</label>
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 rounded-2xl border border-slate-800">
+            <button type="button" id="util-tab-code" onclick="UtilityHub.switchEditorType('code')" class="px-2.5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-1.5">
               <i class="fa-solid fa-code"></i>
-              <span>1. ฝังโค้ด HTML (Single-file)</span>
+              <span>1. โค้ด HTML/JS</span>
             </button>
-            <button type="button" id="util-tab-url" onclick="UtilityHub.switchEditorType('url')" class="flex-1 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2">
-              <i class="fa-solid fa-globe"></i>
-              <span>2. ลิงก์ภายนอก (Vercel / Cloud)</span>
+            <button type="button" id="util-tab-embed" onclick="UtilityHub.switchEditorType('embed')" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-window-restore text-emerald-400"></i>
+              <span>2. โค้ดฝัง (Embed)</span>
+            </button>
+            <button type="button" id="util-tab-url" onclick="UtilityHub.switchEditorType('url')" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-globe text-purple-400"></i>
+              <span>3. ลิงก์เว็บแอป</span>
             </button>
           </div>
         </div>
@@ -2493,7 +2497,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-slate-300 font-semibold mb-1">ชื่อเว็บแอป / ยูทิลิตี้ <span class="text-rose-400">*</span></label>
-            <input type="text" id="util-edit-title" placeholder="เช่น โปรแกรมช่วยสุ่มโจทย์, ตัวคำนวณภาษี..." 
+            <input type="text" id="util-edit-title" placeholder="เช่น โปรแกรมช่วยสุ่มโจทย์, สื่อ Canva, สื่อ GeoGebra..." 
                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
           </div>
           <div>
@@ -2510,7 +2514,7 @@
         <!-- Description -->
         <div>
           <label class="block text-slate-300 font-semibold mb-1">คำอธิบายสั้นๆ</label>
-          <input type="text" id="util-edit-desc" placeholder="เช่น ช่วยให้นักเรียนฝึกคิดเลขเร็ว บันทึกคะแนนลง Excel ได้" 
+          <input type="text" id="util-edit-desc" placeholder="เช่น สื่อการสอนเรขาคณิตสามมิติ หรือ แบบประเมินนักเรียนออนไลน์" 
                  class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
         </div>
 
@@ -2520,9 +2524,23 @@
             <label class="block text-slate-300 font-semibold">โค้ด HTML / CSS / JavaScript (Single-file) <span class="text-rose-400">*</span></label>
             <span class="text-[10px] text-slate-500">รันใน Isolated Sandbox ปลอดภัย ไม่ตีกับสไตล์เว็บหลัก</span>
           </div>
-          <textarea id="util-edit-code" rows="9" 
+          <textarea id="util-edit-code" rows="8" 
                     placeholder="<!DOCTYPE html>&#10;<html>&#10;<head><title>My App</title></head>&#10;<body>&#10;  <h1>Hello World</h1>&#10;</body>&#10;</html>" 
                     class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-emerald-300 focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+        </div>
+
+        <!-- Section: Embed Snippet Mode -->
+        <div id="util-section-embed" class="hidden space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-slate-300 font-semibold">โค้ดฝัง Embed / Iframe Snippet <span class="text-rose-400">*</span></label>
+            <span class="text-[10px] text-emerald-400">Canva, Google, GeoGebra, Scratch, Wordwall ฯลฯ</span>
+          </div>
+          <textarea id="util-edit-embed" rows="7" 
+                    placeholder="วางโค้ด iframe หรือ embed เช่น:&#10;&lt;iframe src=&quot;https://...&quot; width=&quot;100%&quot; height=&quot;500&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;" 
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-cyan-300 focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+          <p class="text-[11px] text-slate-400 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            💡 <strong>วิธีใช้:</strong> คัดลอกโค้ด <code>&lt;iframe...&gt;</code> หรือโค้ด Embed จาก Canva, Google Slides/Forms, GeoGebra, Scratch, Wordwall, Liveworksheets, หรือ Quizizz มาวางได้เลย ระบบจะครอบ Responsive Container ให้พอดีหน้าจออัตโนมัติ
+          </p>
         </div>
 
         <!-- Section: URL Mode -->
@@ -2532,13 +2550,16 @@
             <input type="url" id="util-edit-url" placeholder="https://my-utility.vercel.app หรือ https://github.io/..." 
                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
           </div>
-          <div>
-            <label class="block text-slate-300 font-semibold mb-1">รูปแบบการเปิดใช้งาน</label>
-            <select id="util-edit-target" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-              <option value="modal">ฝังและเปิดในหน้าเว็บนี้ (Embed Modal Frame)</option>
-              <option value="blank">เปิดในแท็บใหม่ของเบราว์เซอร์ (New Tab - แนะนำสำหรับเว็บที่ติด X-Frame-Options)</option>
-            </select>
-          </div>
+        </div>
+
+        <!-- Target Options (Open Target) -->
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">รูปแบบการเปิดใช้งาน</label>
+          <select id="util-edit-target" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="modal">1. เปิดในหน้าต่าง Popup (Modal Runner Studio - แนะนำ)</option>
+            <option value="inline">2. ฝังแสดงบนหน้าเว็บทันที (Inline Embed บนการ์ดหน้านี้)</option>
+            <option value="blank">3. เปิดในแท็บใหม่ของเบราว์เซอร์ (New Tab)</option>
+          </select>
         </div>
 
         <!-- Styling & Icon Options -->
@@ -2659,7 +2680,7 @@
   <script src="js/data.js?v=2569.9.17"></script>
   <script src="js/themes.js?v=2569.9.17"></script>
   <script src="js/certificate-vault.js?v=2569.9.17"></script>
-  <script src="js/utility-hub.js?v=2569.9.17"></script>
+  <script src="js/utility-hub.js?v=2569.9.18"></script>
   <script src="js/youtube-showcase.js?v=2569.9.17"></script>
   <script src="js/export-engine.js?v=2569.9.17"></script>
   <script src="js/drive-sync.js?v=2569.9.17"></script>

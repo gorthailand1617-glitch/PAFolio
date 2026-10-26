@@ -1,7 +1,11 @@
 /**
- * PAFolio - Utility & Innovation Hub Engine v1.0
+ * PAFolio - Utility & Innovation Hub Engine v2.0
  * ศูนย์รวมเครื่องมือ นวัตกรรมการจัดการเรียนรู้ และเว็บแอปพลิเคชันส่วนบุคคล
- * รองรับทั้งแบบ Single-file HTML Embed (Isolated Sandbox) และ Cloud Hosted URLs (Vercel / Render / GitHub Pages)
+ * รองรับ 3 รูปแบบ:
+ * 1. Single-file HTML Embed (Isolated Sandbox)
+ * 2. Iframe / Embed Code Snippet (Canva, Google, GeoGebra, Scratch, Wordwall ฯลฯ)
+ * 3. Cloud Hosted URLs (Vercel, Render, GitHub Pages)
+ * พร้อมระบบรันแบบ Modal Fullscreen Viewport Simulator และ Live Inline Embed บนหน้าเว็บโดยตรง
  */
 
 const UtilityHub = {
@@ -10,8 +14,9 @@ const UtilityHub = {
   searchQuery: '',
   activeViewport: 'desktop',
   currentRunningAppId: null,
+  inlineExpandedIds: new Set(),
 
-  // คลังแอปพลิเคชันเริ่มต้น (พร้อมใช้งานทันที ไม่ต้องต่อเน็ตสำหรับแอปแบบ Code)
+  // คลังแอปพลิเคชันและสื่อนวัตกรรมเริ่มต้น
   presets: [
     {
       id: 'preset_student_picker',
@@ -97,7 +102,6 @@ const UtilityHub = {
   </div>
 
   <script>
-    // Web Audio Sound Synthesizer (No external sound files required)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq = 440, duration = 0.05, type = 'sine') {
       try {
@@ -213,6 +217,20 @@ const UtilityHub = {
   </script>
 </body>
 </html>`
+    },
+    {
+      id: 'preset_geogebra_math',
+      title: '📐 GeoGebra Interactive 3D Math & Geometry',
+      description: 'สื่อการจัดการเรียนรู้เรขาคณิตสามมิติ กราฟฟังก์ชัน และการทดลองทางคณิตศาสตร์แบบอินเทอร์แอคทีฟ (ฝังโค้ด Iframe จาก GeoGebra)',
+      category: 'teaching',
+      type: 'embed',
+      badge: 'Iframe Embed',
+      icon: 'fa-solid fa-shapes',
+      color: 'from-cyan-500 to-blue-600',
+      openTarget: 'modal',
+      createdAt: '2569-10-26',
+      isPreset: true,
+      embedCode: `<iframe src="https://www.geogebra.org/material/iframe/id/c636w8ev/width/800/height/500/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/true/rc/false/ld/false/sdz/false/ctl/false" width="100%" height="480" style="border:0px;" allowfullscreen></iframe>`
     },
     {
       id: 'preset_classroom_timer',
@@ -541,7 +559,7 @@ const UtilityHub = {
     },
     {
       id: 'preset_curriculum_hub',
-      title: '🌐 Interactive Science & Math Simulations',
+      title: '🌐 Interactive Science Simulations',
       description: 'ระบบจำลองสื่อการสอนฟิสิกส์ เคมี ชีวะ และคณิตศาสตร์แบบอินเทอร์แอคทีฟ (PhET Simulations)',
       category: 'teaching',
       type: 'url',
@@ -570,7 +588,6 @@ const UtilityHub = {
     } catch (e) {
       console.warn('Failed to parse custom utilities from localStorage', e);
     }
-    // รวม Presets เข้ากับ Custom Apps
     return [...this.presets, ...customApps];
   },
 
@@ -596,18 +613,12 @@ const UtilityHub = {
   updateStats() {
     const apps = this.getAllApps();
     const totalEl = document.getElementById('util-stat-total');
-    const codeEl = document.getElementById('util-stat-code');
-    const urlEl = document.getElementById('util-stat-url');
-    
     if (totalEl) totalEl.textContent = apps.length;
-    if (codeEl) codeEl.textContent = apps.filter(a => a.type === 'code').length;
-    if (urlEl) urlEl.textContent = apps.filter(a => a.type === 'url').length;
   },
 
   setCategory(category) {
     this.activeCategory = category;
     
-    // Update category pill styles
     document.querySelectorAll('.util-cat-btn').forEach(btn => {
       const cat = btn.getAttribute('data-cat');
       if (cat === category) {
@@ -625,18 +636,52 @@ const UtilityHub = {
     this.renderGrid();
   },
 
+  // ห่อหุ้มโค้ด Embed ให้ Responsive พอดี 100% เสมอ
+  wrapEmbedSnippet(raw) {
+    if (!raw) return '<div style="padding:20px;color:#fff;">ไม่มีโค้ดฝัง</div>';
+    let snippet = String(raw).trim();
+    
+    // หากผู้ใช้นำ URL ธรรมดามาวางในช่อง Embed
+    if (/^https?:\/\/[^\s]+$/i.test(snippet)) {
+      snippet = `<iframe src="${snippet}" width="100%" height="100%" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+    }
+
+    return `<!DOCTYPE html>
+<html lang="th" style="width:100%;height:100%;margin:0;padding:0;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #0b1120; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    iframe, embed, object { width: 100% !important; height: 100% !important; border: 0 !important; border-radius: 0 !important; }
+  </style>
+</head>
+<body>
+  ${snippet}
+</body>
+</html>`;
+  },
+
+  toggleInline(id) {
+    if (this.inlineExpandedIds.has(id)) {
+      this.inlineExpandedIds.delete(id);
+    } else {
+      this.inlineExpandedIds.add(id);
+    }
+    this.renderGrid();
+  },
+
   renderGrid() {
     const container = document.getElementById('utility-hub-grid');
     if (!container) return;
 
     let apps = this.getAllApps();
 
-    // กรองตามหมวดหมู่
     if (this.activeCategory !== 'all') {
       apps = apps.filter(a => a.category === this.activeCategory);
     }
 
-    // กรองตามคำค้นหา
     if (this.searchQuery) {
       apps = apps.filter(a => 
         (a.title && a.title.toLowerCase().includes(this.searchQuery)) ||
@@ -653,7 +698,7 @@ const UtilityHub = {
           </div>
           <h3 class="text-base font-bold text-slate-300">ไม่พบเว็บแอปหรือยูทิลิตี้</h3>
           <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            ${this.searchQuery ? 'ลองค้นหาด้วยคำสำคัญอื่น หรือเปลี่ยนตัวกรองหมวดหมู่' : 'คุณสามารถกดปุ่ม "+ เพิ่มเว็บแอปใหม่" ด้านบนเพื่อเริ่มฝังโค้ด HTML หรือใส่ลิงก์เว็บแอปได้ทันที'}
+            ${this.searchQuery ? 'ลองค้นหาด้วยคำสำคัญอื่น หรือเปลี่ยนตัวกรองหมวดหมู่' : 'คุณสามารถกดปุ่ม "+ เพิ่มเว็บแอปใหม่" ด้านบนเพื่อเริ่มฝังโค้ด HTML, โค้ด Embed Iframe หรือใส่ลิงก์เว็บแอปได้ทันที'}
           </p>
           <button onclick="UtilityHub.openEditor()" class="mt-4 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition inline-flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i> เพิ่มเว็บแอปแรกของคุณ
@@ -665,9 +710,17 @@ const UtilityHub = {
 
     container.innerHTML = apps.map(app => {
       const isCode = app.type === 'code';
-      const typeBadge = isCode
-        ? `<span class="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-code"></i> HTML Embed</span>`
-        : `<span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-globe"></i> Cloud App</span>`;
+      const isEmbed = app.type === 'embed';
+      const isUrl = app.type === 'url';
+
+      let typeBadge = '';
+      if (isCode) {
+        typeBadge = `<span class="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-code"></i> HTML Embed</span>`;
+      } else if (isEmbed) {
+        typeBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-window-restore"></i> Iframe Embed</span>`;
+      } else {
+        typeBadge = `<span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-semibold flex items-center gap-1"><i class="fa-solid fa-globe"></i> Cloud App</span>`;
+      }
 
       const categoryLabels = {
         teaching: 'นวัตกรรมการสอน',
@@ -677,10 +730,12 @@ const UtilityHub = {
       };
       const catLabel = categoryLabels[app.category] || 'ทั่วไป';
 
-      const accentGradient = app.color || (isCode ? 'from-amber-500 to-rose-500' : 'from-violet-500 to-indigo-600');
+      const accentGradient = app.color || (isCode ? 'from-amber-500 to-rose-500' : isEmbed ? 'from-emerald-500 to-teal-600' : 'from-violet-500 to-indigo-600');
+      const isInlineExpanded = this.inlineExpandedIds.has(app.id) || app.openTarget === 'inline';
+      const colSpanClass = isInlineExpanded ? 'col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 ring-2 ring-emerald-500/50' : '';
 
       return `
-        <div class="group relative bg-slate-900/90 hover:bg-slate-850 rounded-3xl p-5 border border-slate-800 hover:border-amber-500/40 shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
+        <div class="group relative bg-slate-900/90 hover:bg-slate-850 rounded-3xl p-5 border border-slate-800 hover:border-amber-500/40 shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${colSpanClass}">
           
           <!-- Card Top Accent & Badges -->
           <div>
@@ -706,17 +761,26 @@ const UtilityHub = {
           </div>
 
           <!-- Bottom Actions -->
-          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
+          <div class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
             
-            <!-- Launch Button (Primary) -->
+            <!-- Launch Button (Primary Modal) -->
             <button onclick="UtilityHub.openRunner('${app.id}')" 
-                    class="flex-1 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/30 hover:border-transparent font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm group/btn">
+                    class="flex-1 min-w-[110px] py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/30 hover:border-transparent font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm group/btn"
+                    title="เปิดรันในหน้าต่างป๊อปอัปเต็มจอ">
               <i class="fa-solid fa-play text-[11px] group-hover/btn:scale-110 transition"></i>
               <span>เปิดใช้งาน</span>
             </button>
 
+            <!-- Toggle Inline Embed Button -->
+            <button onclick="UtilityHub.toggleInline('${app.id}')" 
+                    class="px-2.5 py-2 rounded-xl ${isInlineExpanded ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-emerald-300 border-slate-700'} border text-xs transition flex items-center gap-1.5" 
+                    title="${isInlineExpanded ? 'ซ่อนการฝังแสดงผล' : 'ฝังแสดงบนหน้าเว็บทันที (Inline Embed)'}">
+              <i class="fa-solid ${isInlineExpanded ? 'fa-compress' : 'fa-window-restore'} text-xs"></i>
+              <span class="hidden sm:inline">${isInlineExpanded ? 'ย่อแอป' : 'ฝังดูบนหน้า'}</span>
+            </button>
+
             <!-- External / Blank Launch -->
-            ${!isCode ? `
+            ${isUrl ? `
               <a href="${this.escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer" 
                  class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs transition" 
                  title="เปิดในแท็บใหม่โดยตรง">
@@ -743,18 +807,44 @@ const UtilityHub = {
             `}
 
           </div>
+
+          <!-- Live Inline Embed Viewer Container (If expanded) -->
+          ${isInlineExpanded ? `
+            <div class="mt-5 pt-4 border-t border-slate-800">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-2.5 px-1">
+                <span class="flex items-center gap-2 text-emerald-400 font-semibold">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  กำลังแสดงผลแบบฝังบนหน้าเว็บ (Live Inline Embed)
+                </span>
+                <div class="flex items-center gap-2">
+                  <button onclick="UtilityHub.openRunner('${app.id}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white text-[11px] font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-expand text-[10px]"></i> ขยายเต็มจอ
+                  </button>
+                  <button onclick="UtilityHub.toggleInline('${app.id}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 text-[11px] transition">
+                    <i class="fa-solid fa-xmark"></i> ปิด
+                  </button>
+                </div>
+              </div>
+              <div class="relative w-full h-[520px] bg-slate-950 rounded-2xl overflow-hidden border border-slate-700 shadow-2xl">
+                <iframe ${isCode ? `srcdoc="${this.escapeHtml(app.content)}"` : isEmbed ? `srcdoc="${this.escapeHtml(this.wrapEmbedSnippet(app.embedCode || app.content))}"` : `src="${this.escapeHtml(app.url)}"`} 
+                        sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-same-origin"
+                        class="w-full h-full border-0">
+                </iframe>
+              </div>
+            </div>
+          ` : ''}
+
         </div>
       `;
     }).join('');
   },
 
-  // เปิดใช้งานแอปพลิเคชัน
+  // เปิดใช้งานแอปพลิเคชันใน Modal Runner
   openRunner(id) {
     const apps = this.getAllApps();
     const app = apps.find(a => a.id === id);
     if (!app) return;
 
-    // ถ้าเป็นแอปแบบ URL และตั้งค่าว่าให้เปิดแท็บใหม่เสมอ
     if (app.type === 'url' && app.openTarget === 'blank') {
       window.open(app.url, '_blank');
       return;
@@ -771,13 +861,18 @@ const UtilityHub = {
 
     if (titleEl) titleEl.textContent = app.title;
     if (badgeEl) {
-      badgeEl.textContent = app.type === 'code' ? 'HTML Embed (Sandbox)' : 'Cloud URL';
-      badgeEl.className = app.type === 'code'
-        ? 'px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-semibold'
-        : 'px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-semibold';
+      if (app.type === 'code') {
+        badgeEl.textContent = 'HTML Single-file Sandbox';
+        badgeEl.className = 'px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-semibold';
+      } else if (app.type === 'embed') {
+        badgeEl.textContent = 'Iframe / Embed Sandbox';
+        badgeEl.className = 'px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold';
+      } else {
+        badgeEl.textContent = 'Cloud Web App';
+        badgeEl.className = 'px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-semibold';
+      }
     }
 
-    // จัดการปุ่มเปิดแท็บใหม่
     if (externalBtn) {
       if (app.type === 'url') {
         externalBtn.classList.remove('hidden');
@@ -787,13 +882,14 @@ const UtilityHub = {
       }
     }
 
-    // Reset Viewport to Desktop
     this.setViewport('desktop');
 
-    // Run in Iframe with clean Sandbox isolation
     if (app.type === 'code') {
       iframe.removeAttribute('src');
       iframe.srcdoc = app.content || '<div style="padding:20px;color:#fff;">ไม่มีโค้ด HTML</div>';
+    } else if (app.type === 'embed') {
+      iframe.removeAttribute('src');
+      iframe.srcdoc = this.wrapEmbedSnippet(app.embedCode || app.content);
     } else {
       iframe.removeAttribute('srcdoc');
       iframe.src = app.url;
@@ -812,7 +908,6 @@ const UtilityHub = {
       modal.classList.remove('flex');
     }
     if (iframe) {
-      // Clear iframe to terminate any audio or background script
       iframe.srcdoc = '';
       iframe.src = 'about:blank';
     }
@@ -855,7 +950,6 @@ const UtilityHub = {
         btnTablet.classList.remove('bg-slate-800', 'text-slate-300');
       }
     } else {
-      // Desktop
       frameContainer.style.width = '100%';
       frameContainer.style.maxWidth = '100%';
       if (btnDesktop) {
@@ -877,6 +971,7 @@ const UtilityHub = {
     const colorSelect = document.getElementById('util-edit-color');
     const targetSelect = document.getElementById('util-edit-target');
     const codeTextarea = document.getElementById('util-edit-code');
+    const embedTextarea = document.getElementById('util-edit-embed');
     const urlInput = document.getElementById('util-edit-url');
     const idInput = document.getElementById('util-edit-id');
     const headerTitle = document.getElementById('util-editor-header-title');
@@ -893,13 +988,13 @@ const UtilityHub = {
       if (iconInput) iconInput.value = app.icon || 'fa-solid fa-cubes';
       if (colorSelect) colorSelect.value = app.color || 'from-amber-500 to-rose-500';
       if (targetSelect) targetSelect.value = app.openTarget || 'modal';
-      if (codeTextarea) codeTextarea.value = app.content || '';
+      if (codeTextarea) codeTextarea.value = (app.type === 'code' ? app.content : '') || '';
+      if (embedTextarea) embedTextarea.value = app.embedCode || (app.type === 'embed' ? app.content : '') || '';
       if (urlInput) urlInput.value = app.url || '';
-      if (headerTitle) headerTitle.textContent = '✏️ แก้ไขเว็บแอป / ยูทิลิตี้';
+      if (headerTitle) headerTitle.textContent = '✏️ แก้ไขเว็บแอป / สื่อดิจิทัล';
 
       this.switchEditorType(app.type || 'code');
     } else {
-      // New App
       if (idInput) idInput.value = '';
       if (titleInput) titleInput.value = '';
       if (descInput) descInput.value = '';
@@ -908,10 +1003,11 @@ const UtilityHub = {
       if (colorSelect) colorSelect.value = 'from-indigo-500 to-purple-600';
       if (targetSelect) targetSelect.value = 'modal';
       if (codeTextarea) codeTextarea.value = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>My Utility</title>\n  <script src="https://cdn.tailwindcss.com"></script>\n</head>\n<body class="bg-slate-900 text-white p-6 font-sans flex flex-col items-center justify-center min-h-screen">\n  <h1 class="text-2xl font-bold text-amber-400">✨ ยูทิลิตี้ใหม่ของฉัน</h1>\n  <p class="text-slate-400 mt-2 text-sm">เขียนโค้ด HTML/CSS/JS ตามต้องการที่นี่ได้เลย</p>\n</body>\n</html>';
+      if (embedTextarea) embedTextarea.value = '';
       if (urlInput) urlInput.value = '';
-      if (headerTitle) headerTitle.textContent = '➕ เพิ่มเว็บแอปพลิเคชันใหม่';
+      if (headerTitle) headerTitle.textContent = '➕ เพิ่มเว็บแอป / สื่อดิจิทัลใหม่';
 
-      this.switchEditorType('code');
+      this.switchEditorType('embed'); // สลับไปหน้าแท็บฝัง Embed เป็นค่าเริ่มต้นให้ผู้ใช้
     }
 
     modal.classList.remove('hidden');
@@ -930,31 +1026,45 @@ const UtilityHub = {
 
   switchEditorType(type) {
     const tabCode = document.getElementById('util-tab-code');
+    const tabEmbed = document.getElementById('util-tab-embed');
     const tabUrl = document.getElementById('util-tab-url');
     const sectionCode = document.getElementById('util-section-code');
+    const sectionEmbed = document.getElementById('util-section-embed');
     const sectionUrl = document.getElementById('util-section-url');
     const typeInput = document.getElementById('util-edit-type');
+    const iconInput = document.getElementById('util-edit-icon');
 
     if (typeInput) typeInput.value = type;
 
+    [tabCode, tabEmbed, tabUrl].forEach(tab => {
+      if (tab) {
+        tab.className = 'px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-1.5';
+      }
+    });
+
+    if (sectionCode) sectionCode.classList.add('hidden');
+    if (sectionEmbed) sectionEmbed.classList.add('hidden');
+    if (sectionUrl) sectionUrl.classList.add('hidden');
+
     if (type === 'code') {
-      if (tabCode) {
-        tabCode.className = 'px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition';
-      }
-      if (tabUrl) {
-        tabUrl.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition';
-      }
+      if (tabCode) tabCode.className = 'px-2.5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-1.5';
       if (sectionCode) sectionCode.classList.remove('hidden');
-      if (sectionUrl) sectionUrl.classList.add('hidden');
+      if (iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-globe' || iconInput.value === 'fa-solid fa-window-restore')) {
+        iconInput.value = 'fa-solid fa-code';
+      }
+    } else if (type === 'embed') {
+      if (tabEmbed) tabEmbed.className = 'px-2.5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-1.5';
+      if (sectionEmbed) sectionEmbed.classList.remove('hidden');
+      if (iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-globe' || iconInput.value === 'fa-solid fa-code')) {
+        iconInput.value = 'fa-solid fa-window-restore';
+      }
     } else {
-      if (tabUrl) {
-        tabUrl.className = 'px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition';
-      }
-      if (tabCode) {
-        tabCode.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition';
-      }
+      // url
+      if (tabUrl) tabUrl.className = 'px-2.5 py-2 rounded-xl bg-purple-500 text-white font-bold text-xs shadow transition flex items-center justify-center gap-1.5';
       if (sectionUrl) sectionUrl.classList.remove('hidden');
-      if (sectionCode) sectionCode.classList.add('hidden');
+      if (iconInput && (!iconInput.value || iconInput.value === 'fa-solid fa-code' || iconInput.value === 'fa-solid fa-window-restore')) {
+        iconInput.value = 'fa-solid fa-globe';
+      }
     }
   },
 
@@ -968,17 +1078,19 @@ const UtilityHub = {
     const colorSelect = document.getElementById('util-edit-color');
     const targetSelect = document.getElementById('util-edit-target');
     const codeTextarea = document.getElementById('util-edit-code');
+    const embedTextarea = document.getElementById('util-edit-embed');
     const urlInput = document.getElementById('util-edit-url');
 
     const title = (titleInput?.value || '').trim();
     if (!title) {
-      alert('กรุณากรอกชื่อเว็บแอปพลิเคชัน');
+      alert('กรุณากรอกชื่อเว็บแอปหรือสื่อดิจิทัล');
       titleInput?.focus();
       return;
     }
 
-    const type = typeInput?.value || 'code';
+    const type = typeInput?.value || 'embed';
     let content = '';
+    let embedCode = '';
     let url = '';
 
     if (type === 'code') {
@@ -988,6 +1100,14 @@ const UtilityHub = {
         codeTextarea?.focus();
         return;
       }
+    } else if (type === 'embed') {
+      embedCode = (embedTextarea?.value || '').trim();
+      if (!embedCode) {
+        alert('กรุณากรอกโค้ดฝัง Embed (เช่น <iframe src="..."></iframe> หรือ URL ที่ต้องการฝัง)');
+        embedTextarea?.focus();
+        return;
+      }
+      content = embedCode;
     } else {
       url = (urlInput?.value || '').trim();
       if (!url) {
@@ -1003,17 +1123,24 @@ const UtilityHub = {
     const customApps = this.getCustomAppsOnly();
     const existingId = idInput?.value;
 
+    const badges = {
+      code: 'Single-file HTML',
+      embed: 'Iframe Embed',
+      url: 'Cloud App'
+    };
+
     const appData = {
       id: existingId || ('util_' + Date.now()),
       title: title,
       description: (descInput?.value || '').trim(),
       category: catSelect?.value || 'general',
       type: type,
-      badge: type === 'code' ? 'Single-file HTML' : 'Cloud App',
-      icon: (iconInput?.value || '').trim() || (type === 'code' ? 'fa-solid fa-code' : 'fa-solid fa-globe'),
-      color: colorSelect?.value || 'from-indigo-500 to-purple-600',
+      badge: badges[type] || 'Digital Tool',
+      icon: (iconInput?.value || '').trim() || (type === 'code' ? 'fa-solid fa-code' : type === 'embed' ? 'fa-solid fa-window-restore' : 'fa-solid fa-globe'),
+      color: colorSelect?.value || (type === 'embed' ? 'from-emerald-500 to-teal-600' : 'from-indigo-500 to-purple-600'),
       openTarget: targetSelect?.value || 'modal',
       content: content,
+      embedCode: embedCode,
       url: url,
       createdAt: new Date().toISOString().split('T')[0],
       isPreset: false
@@ -1033,8 +1160,7 @@ const UtilityHub = {
     this.saveCustomApps(customApps);
     this.closeEditor();
 
-    // แสดงแจ้งเตือนสำเร็จ
-    this.showToast('✅ บันทึกเว็บแอปพลิเคชันสำเร็จ!');
+    this.showToast('✅ บันทึกนวัตกรรม & ยูทิลิตี้สำเร็จ!');
   },
 
   deleteApp(id) {
@@ -1080,7 +1206,6 @@ const UtilityHub = {
         }
 
         const existing = this.getCustomAppsOnly();
-        // Merge without duplicate IDs
         const existingMap = new Map(existing.map(a => [a.id, a]));
         imported.forEach(item => {
           if (item && item.id && item.title) {
@@ -1124,7 +1249,6 @@ const UtilityHub = {
   }
 };
 
-// Initialize when DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   UtilityHub.init();
 });
