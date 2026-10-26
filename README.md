@@ -38,6 +38,12 @@
 6. **✏️ ตัวแก้ไขข้อมูลภาพและโปรไฟล์ (No-Code Visual Profile Editor)**:
    - แก้ไขข้อมูลครู วิทยฐานะ สังกัด โรงเรียน รูปโปรไฟล์ และหัวข้อประเด็นท้าทายได้โดยตรงผ่านหน้าเว็บ ไม่ต้องแตะต้องโค้ด
 
+7. **💻 ศูนย์รวมนวัตกรรมดิจิทัล & เว็บแอปพลิเคชัน (Digital Innovation & Utility Hub)**:
+   - ฝังและเรียกใช้งานเว็บแอป Single-file HTML ผ่าน Isolated Sandbox ปลอดภัย ไม่ตีกับสไตล์เว็บหลัก
+   - รองรับการเชื่อมต่อเว็บแอปบนคลาวด์ (Vercel, Render, GitHub Pages) ทั้งแบบ Embed และ New Tab
+   - เครื่องมือจำลองหน้าจอ Responsive Viewport Simulator (Desktop, Tablet, Mobile)
+   - ระบบสำรองและกู้คืนชุดเครื่องมือด้วยไฟล์ JSON (Export/Import Backup)
+
 ---
 
 ## 🚀 วิธีการติดตั้งและเปิดใช้งาน (Getting Started)

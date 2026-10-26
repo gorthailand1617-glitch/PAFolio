@@ -140,6 +140,9 @@
           <a href="#certificate-vault" class="px-2.5 py-1 rounded-lg hover:text-amber-700 hover:bg-amber-50/80 text-amber-800 font-semibold transition flex items-center gap-1">
             <i class="fa-solid fa-award text-amber-500"></i> คลังเกียรติบัตร
           </a>
+          <a href="#utility-hub" class="px-2.5 py-1 rounded-lg hover:text-indigo-700 hover:bg-indigo-50/80 text-indigo-700 font-semibold transition flex items-center gap-1">
+            <i class="fa-solid fa-cubes text-indigo-500"></i> นวัตกรรม & ยูทิลิตี้
+          </a>
         </div>
 
         <!-- Actions Group (Themed & Unified) -->
@@ -226,6 +229,7 @@
         <a href="#challenge" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-lightbulb text-amber-400 mr-1.5"></i> ประเด็นท้าทาย</a>
         <a href="#gallery" class="block px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-semibold"><i class="fa-solid fa-images text-amber-400 mr-1.5"></i> ภาพกิจกรรม</a>
         <a href="#certificate-vault" class="block px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold"><i class="fa-solid fa-award text-amber-400 mr-1.5"></i> คลังเกียรติบัตร</a>
+        <a href="#utility-hub" class="block px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold"><i class="fa-solid fa-cubes text-indigo-400 mr-1.5"></i> นวัตกรรม & ยูทิลิตี้</a>
         <a href="#video-showcase" class="block px-3 py-2 rounded-xl bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-xs font-semibold col-span-2"><i class="fa-brands fa-youtube text-red-500 mr-1.5"></i> คลิปวิดีโอนำเสนอ ว.PA (YouTube Showcase)</a>
       </div>
       
@@ -857,6 +861,85 @@
 
     <!-- Certificate Cards Grid -->
     <div id="certificate-vault-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- ================= SECTION 5.5: UTILITY & INNOVATION HUB ================= -->
+  <section id="utility-hub" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/80">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-700 text-xs font-semibold border border-indigo-500/20 mb-3">
+          <i class="fa-solid fa-laptop-code text-indigo-500"></i> Digital Innovation & Utility Hub
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold font-heading text-slate-900 tracking-tight">
+          นวัตกรรมดิจิทัล & เว็บแอปยูทิลิตี้
+        </h2>
+        <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+          คลังรวบรวมเครื่องมือ สื่อช่วยสอน และเว็บแอปพลิเคชันที่สร้างขึ้นเอง ทั้งแบบฝังโค้ด HTML (Isolated Sandbox) และเว็บแอปบนคลาวด์ (Vercel, Render, GitHub Pages)
+        </p>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- New App Button -->
+        <button onclick="UtilityHub.openEditor()" 
+                class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-sm"></i>
+          <span>เพิ่มเว็บแอปใหม่</span>
+        </button>
+
+        <!-- Export JSON Backup -->
+        <button onclick="UtilityHub.exportJSON()" 
+                class="p-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700 text-xs font-semibold shadow-sm transition" 
+                title="สำรองข้อมูลแอปเป็นไฟล์ JSON">
+          <i class="fa-solid fa-download"></i>
+        </button>
+
+        <!-- Import JSON -->
+        <button onclick="UtilityHub.importJSON()" 
+                class="p-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700 text-xs font-semibold shadow-sm transition" 
+                title="นำเข้าไฟล์สำรองข้อมูล JSON">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <input type="file" id="util-import-file-input" accept=".json" class="hidden" onchange="UtilityHub.handleFileImport(event)">
+      </div>
+    </div>
+
+    <!-- Category Filters & Search Bar -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+      
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
+        <button onclick="UtilityHub.setCategory('all')" data-cat="all" 
+                class="util-cat-btn px-3.5 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-md transition flex items-center gap-1.5">
+          <i class="fa-solid fa-layer-group"></i> ทั้งหมด (<span id="util-stat-total">0</span>)
+        </button>
+        <button onclick="UtilityHub.setCategory('teaching')" data-cat="teaching" 
+                class="util-cat-btn px-3.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-chalkboard-user text-amber-400"></i> นวัตกรรมการสอน
+        </button>
+        <button onclick="UtilityHub.setCategory('eval')" data-cat="eval" 
+                class="util-cat-btn px-3.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-pie text-emerald-400"></i> การวัดประเมินผล
+        </button>
+        <button onclick="UtilityHub.setCategory('general')" data-cat="general" 
+                class="util-cat-btn px-3.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-toolbox text-blue-400"></i> เครื่องมือทั่วไป
+        </button>
+      </div>
+
+      <!-- Live Search -->
+      <div class="relative w-full md:w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" oninput="UtilityHub.setSearch(this.value)" 
+               placeholder="ค้นหาชื่อแอป หรือคำอธิบาย..." 
+               class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm">
+      </div>
+    </div>
+
+    <!-- Apps Cards Grid Container -->
+    <div id="utility-hub-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Rendered by UtilityHub.renderGrid() -->
+    </div>
   </section>
 
   <!-- ================= SECTION 6: COMMITTEE SCORING SIMULATION ================= -->
@@ -2302,6 +2385,195 @@
         กรุณาอย่าเพิ่งปิดหน้าต่างนี้จนกว่าการดาวน์โหลดจะเริ่มต้นครับ
       </p>
     </div>
+  <!-- ================= MODAL: UTILITY RUNNER STUDIO (FULLSCREEN SANDBOX) ================= -->
+  <div id="utility-runner-modal" class="fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-2xl hidden flex-col justify-between p-2 sm:p-4">
+    <!-- Header Control Bar -->
+    <div class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3 shadow-xl mb-2 flex-shrink-0">
+      
+      <!-- Title & App Meta -->
+      <div class="flex items-center gap-3 truncate">
+        <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+          <i class="fa-solid fa-play"></i>
+        </div>
+        <div class="truncate">
+          <h3 id="utility-runner-title" class="text-sm font-bold text-white truncate">กำลังรันเว็บแอป...</h3>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span id="utility-runner-badge" class="px-2 py-0.2 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-300">HTML Embed</span>
+            <span class="text-[11px] text-slate-400 hidden sm:inline">PAFolio Isolated Sandbox</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Viewport Device Switcher -->
+      <div class="hidden md:flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+        <button id="util-vp-desktop" onclick="UtilityHub.setViewport('desktop')" class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold transition flex items-center gap-1.5" title="เดสก์ท็อปเต็มจอ (100%)">
+          <i class="fa-solid fa-desktop"></i> <span class="hidden lg:inline">Desktop</span>
+        </button>
+        <button id="util-vp-tablet" onclick="UtilityHub.setViewport('tablet')" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-1.5" title="แท็บเล็ต iPad (768px)">
+          <i class="fa-solid fa-tablet-screen-button"></i> <span class="hidden lg:inline">Tablet</span>
+        </button>
+        <button id="util-vp-mobile" onclick="UtilityHub.setViewport('mobile')" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition flex items-center gap-1.5" title="สมาร์ตโฟน (390px)">
+          <i class="fa-solid fa-mobile-screen"></i> <span class="hidden lg:inline">Mobile</span>
+        </button>
+      </div>
+
+      <!-- Window Actions -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- External Open Button -->
+        <button id="utility-runner-external-btn" class="hidden p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs transition" title="เปิดในแท็บใหม่ของเบราว์เซอร์">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </button>
+
+        <!-- Reload Button -->
+        <button onclick="UtilityHub.reloadRunner()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs transition" title="รีโหลดหน้านี้ใหม่">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+
+        <!-- Close Window Button -->
+        <button onclick="UtilityHub.closeRunner()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 text-xs font-bold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-xmark"></i>
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Iframe Viewport Container -->
+    <div class="flex-1 w-full flex items-center justify-center overflow-hidden">
+      <div id="utility-runner-viewport-wrapper" class="w-full h-full transition-all duration-300 flex items-center justify-center">
+        <iframe id="utility-runner-frame" 
+                sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-same-origin"
+                class="w-full h-full bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: UTILITY EDITOR (ADD/EDIT APP) ================= -->
+  <div id="utility-editor-modal" class="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl my-auto text-slate-100 flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-5 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-cube"></i>
+          </div>
+          <div>
+            <h3 id="util-editor-header-title" class="font-heading font-bold text-lg text-white">➕ เพิ่มเว็บแอปพลิเคชันใหม่</h3>
+            <p class="text-xs text-slate-400">ฝังโค้ด HTML หรือใส่ลิงก์ Vercel / Render / GitHub Pages</p>
+          </div>
+        </div>
+        <button onclick="UtilityHub.closeEditor()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto pr-1 space-y-4 text-xs">
+        <input type="hidden" id="util-edit-id">
+        <input type="hidden" id="util-edit-type" value="code">
+
+        <!-- Type Selector Tabs -->
+        <div>
+          <label class="block text-slate-300 font-semibold mb-2">เลือกประเภทของเว็บแอปพลิเคชัน:</label>
+          <div class="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800">
+            <button type="button" id="util-tab-code" onclick="UtilityHub.switchEditorType('code')" class="flex-1 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-code"></i>
+              <span>1. ฝังโค้ด HTML (Single-file)</span>
+            </button>
+            <button type="button" id="util-tab-url" onclick="UtilityHub.switchEditorType('url')" class="flex-1 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-globe"></i>
+              <span>2. ลิงก์ภายนอก (Vercel / Cloud)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Title & Category Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">ชื่อเว็บแอป / ยูทิลิตี้ <span class="text-rose-400">*</span></label>
+            <input type="text" id="util-edit-title" placeholder="เช่น โปรแกรมช่วยสุ่มโจทย์, ตัวคำนวณภาษี..." 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">หมวดหมู่สำหรับ ว.PA</label>
+            <select id="util-edit-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="teaching">นวัตกรรมการสอน (Teaching & Learning)</option>
+              <option value="eval">การวัดประเมินผล (Assessment & Grading)</option>
+              <option value="general">เครื่องมือทั่วไป (Personal Utility)</option>
+              <option value="game">กิจกรรม & เกม (Classroom Games)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">คำอธิบายสั้นๆ</label>
+          <input type="text" id="util-edit-desc" placeholder="เช่น ช่วยให้นักเรียนฝึกคิดเลขเร็ว บันทึกคะแนนลง Excel ได้" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <!-- Section: Code Embed Mode -->
+        <div id="util-section-code" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-slate-300 font-semibold">โค้ด HTML / CSS / JavaScript (Single-file) <span class="text-rose-400">*</span></label>
+            <span class="text-[10px] text-slate-500">รันใน Isolated Sandbox ปลอดภัย ไม่ตีกับสไตล์เว็บหลัก</span>
+          </div>
+          <textarea id="util-edit-code" rows="9" 
+                    placeholder="<!DOCTYPE html>&#10;<html>&#10;<head><title>My App</title></head>&#10;<body>&#10;  <h1>Hello World</h1>&#10;</body>&#10;</html>" 
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-emerald-300 focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+        </div>
+
+        <!-- Section: URL Mode -->
+        <div id="util-section-url" class="hidden space-y-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">URL ของเว็บแอปพลิเคชัน <span class="text-rose-400">*</span></label>
+            <input type="url" id="util-edit-url" placeholder="https://my-utility.vercel.app หรือ https://github.io/..." 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">รูปแบบการเปิดใช้งาน</label>
+            <select id="util-edit-target" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="modal">ฝังและเปิดในหน้าเว็บนี้ (Embed Modal Frame)</option>
+              <option value="blank">เปิดในแท็บใหม่ของเบราว์เซอร์ (New Tab - แนะนำสำหรับเว็บที่ติด X-Frame-Options)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Styling & Icon Options -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">ไอคอน (FontAwesome Class)</label>
+            <input type="text" id="util-edit-icon" value="fa-solid fa-code" placeholder="เช่น fa-solid fa-calculator, fa-solid fa-dice" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">ชุดสีการ์ด</label>
+            <select id="util-edit-color" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="from-amber-500 to-rose-500">Amber & Rose (ส้ม-ชมพู)</option>
+              <option value="from-blue-500 to-teal-500">Blue & Teal (ฟ้า-เขียวน้ำทะเล)</option>
+              <option value="from-emerald-500 to-teal-600">Emerald & Mint (เขียวมรกต)</option>
+              <option value="from-indigo-500 to-purple-600">Indigo & Purple (ม่วงคราม)</option>
+              <option value="from-rose-500 to-orange-500">Ruby & Sunset (ทับทิม-ส้ม)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3 mt-4 flex-shrink-0">
+        <button type="button" onclick="UtilityHub.closeEditor()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+          ยกเลิก
+        </button>
+        <button type="button" onclick="UtilityHub.saveAppFromEditor()" class="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>บันทึกเว็บแอป</span>
+        </button>
+      </div>
+
+    </div>
   </div>
 
   <!-- ================= FLOATING ACTION & SPEED-DIAL 15 INDICATORS MENU ================= -->
@@ -2356,6 +2628,8 @@
           <a href="#video-showcase" onclick="toggleFloatingMenu(false)" class="text-rose-400 hover:underline">คลิปวิดีโอ</a>
           <span class="text-slate-600">•</span>
           <a href="#certificate-vault" onclick="toggleFloatingMenu(false)" class="text-amber-300 hover:underline">เกียรติบัตร</a>
+          <span class="text-slate-600">•</span>
+          <a href="#utility-hub" onclick="toggleFloatingMenu(false)" class="text-indigo-400 hover:underline">นวัตกรรม</a>
         </div>
       </div>
 
@@ -2380,19 +2654,20 @@
   <!-- PptxGenJS (PowerPoint Generator) -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
-  <!-- JavaScript Modules (Cache-Busted v2569.9.16) -->
-  <script src="js/config.js?v=2569.9.16"></script>
-  <script src="js/data.js?v=2569.9.16"></script>
-  <script src="js/themes.js?v=2569.9.16"></script>
-  <script src="js/certificate-vault.js?v=2569.9.16"></script>
-  <script src="js/youtube-showcase.js?v=2569.9.16"></script>
-  <script src="js/export-engine.js?v=2569.9.16"></script>
-  <script src="js/drive-sync.js?v=2569.9.16"></script>
-  <script src="js/ai-assistant.js?v=2569.9.16"></script>
-  <script src="js/presentation.js?v=2569.9.16"></script>
-  <script src="js/video-engine.js?v=2569.9.16"></script>
-  <script src="js/video-studio-ui.js?v=2569.9.16"></script>
-  <script src="js/chart-config.js?v=2569.9.16"></script>
-  <script src="js/app.js?v=2569.9.16"></script>
+  <!-- JavaScript Modules (Cache-Busted v2569.9.17) -->
+  <script src="js/config.js?v=2569.9.17"></script>
+  <script src="js/data.js?v=2569.9.17"></script>
+  <script src="js/themes.js?v=2569.9.17"></script>
+  <script src="js/certificate-vault.js?v=2569.9.17"></script>
+  <script src="js/utility-hub.js?v=2569.9.17"></script>
+  <script src="js/youtube-showcase.js?v=2569.9.17"></script>
+  <script src="js/export-engine.js?v=2569.9.17"></script>
+  <script src="js/drive-sync.js?v=2569.9.17"></script>
+  <script src="js/ai-assistant.js?v=2569.9.17"></script>
+  <script src="js/presentation.js?v=2569.9.17"></script>
+  <script src="js/video-engine.js?v=2569.9.17"></script>
+  <script src="js/video-studio-ui.js?v=2569.9.17"></script>
+  <script src="js/chart-config.js?v=2569.9.17"></script>
+  <script src="js/app.js?v=2569.9.17"></script>
 </body>
 </html>
