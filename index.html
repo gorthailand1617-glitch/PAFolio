@@ -2385,6 +2385,8 @@
         กรุณาอย่าเพิ่งปิดหน้าต่างนี้จนกว่าการดาวน์โหลดจะเริ่มต้นครับ
       </p>
     </div>
+  </div>
+
   <!-- ================= MODAL: UTILITY RUNNER STUDIO (FULLSCREEN SANDBOX) ================= -->
   <div id="utility-runner-modal" class="fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-2xl hidden flex-col justify-between p-2 sm:p-4">
     <!-- Header Control Bar -->
@@ -2450,7 +2452,7 @@
   </div>
 
   <!-- ================= MODAL: UTILITY EDITOR (ADD/EDIT APP) ================= -->
-  <div id="utility-editor-modal" class="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div id="utility-editor-modal" class="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="if(event.target === this) UtilityHub.closeEditor()">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl my-auto text-slate-100 flex flex-col max-h-[92vh]">
       
       <!-- Modal Header -->
@@ -2680,7 +2682,7 @@
   <script src="js/data.js?v=2569.9.17"></script>
   <script src="js/themes.js?v=2569.9.17"></script>
   <script src="js/certificate-vault.js?v=2569.9.17"></script>
-  <script src="js/utility-hub.js?v=2569.9.18"></script>
+  <script src="js/utility-hub.js?v=2569.9.19"></script>
   <script src="js/youtube-showcase.js?v=2569.9.17"></script>
   <script src="js/export-engine.js?v=2569.9.17"></script>
   <script src="js/drive-sync.js?v=2569.9.17"></script>
